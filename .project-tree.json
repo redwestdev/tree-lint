@@ -1,0 +1,117 @@
+{
+  "generatedAt": "2026-02-14T15:47:02.433Z",
+  "trees": [
+    {
+      "name": "lint",
+      "path": "/mnt/data/web/B4C/sensei/lint",
+      "type": "directory",
+      "children": [
+        {
+          "name": "docs",
+          "path": "/mnt/data/web/B4C/sensei/lint/docs",
+          "type": "directory",
+          "children": [
+            {
+              "name": "entities.md",
+              "path": "/mnt/data/web/B4C/sensei/lint/docs/entities.md",
+              "type": "file"
+            }
+          ]
+        },
+        {
+          "name": "eslint.config.ts",
+          "path": "/mnt/data/web/B4C/sensei/lint/eslint.config.ts",
+          "type": "file"
+        },
+        {
+          "name": "package.json",
+          "path": "/mnt/data/web/B4C/sensei/lint/package.json",
+          "type": "file"
+        },
+        {
+          "name": "src",
+          "path": "/mnt/data/web/B4C/sensei/lint/src",
+          "type": "directory",
+          "children": [
+            {
+              "name": "cli.ts",
+              "path": "/mnt/data/web/B4C/sensei/lint/src/cli.ts",
+              "type": "file"
+            },
+            {
+              "name": "core",
+              "path": "/mnt/data/web/B4C/sensei/lint/src/core",
+              "type": "directory",
+              "children": [
+                {
+                  "name": "file-system-scaner.ts",
+                  "path": "/mnt/data/web/B4C/sensei/lint/src/core/file-system-scaner.ts",
+                  "type": "file"
+                }
+              ]
+            },
+            {
+              "name": "index.ts",
+              "path": "/mnt/data/web/B4C/sensei/lint/src/index.ts",
+              "type": "file"
+            },
+            {
+              "name": "schemas",
+              "path": "/mnt/data/web/B4C/sensei/lint/src/schemas",
+              "type": "directory",
+              "children": [
+                {
+                  "name": "component.ts",
+                  "path": "/mnt/data/web/B4C/sensei/lint/src/schemas/component.ts",
+                  "type": "file"
+                },
+                {
+                  "name": "layers.ts",
+                  "path": "/mnt/data/web/B4C/sensei/lint/src/schemas/layers.ts",
+                  "type": "file"
+                }
+              ]
+            },
+            {
+              "name": "types",
+              "path": "/mnt/data/web/B4C/sensei/lint/src/types",
+              "type": "directory",
+              "children": [
+                {
+                  "name": "entities.ts",
+                  "path": "/mnt/data/web/B4C/sensei/lint/src/types/entities.ts",
+                  "type": "file"
+                },
+                {
+                  "name": "scan-results.ts",
+                  "path": "/mnt/data/web/B4C/sensei/lint/src/types/scan-results.ts",
+                  "type": "file"
+                },
+                {
+                  "name": "schema.ts",
+                  "path": "/mnt/data/web/B4C/sensei/lint/src/types/schema.ts",
+                  "type": "file"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tsconfig.json",
+          "path": "/mnt/data/web/B4C/sensei/lint/tsconfig.json",
+          "type": "file"
+        },
+        {
+          "name": "vitest.config.ts",
+          "path": "/mnt/data/web/B4C/sensei/lint/vitest.config.ts",
+          "type": "file"
+        },
+        {
+          "name": "yarn.lock",
+          "path": "/mnt/data/web/B4C/sensei/lint/yarn.lock",
+          "type": "file"
+        }
+      ]
+    }
+  ]
+}

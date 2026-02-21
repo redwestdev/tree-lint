@@ -1,0 +1,60 @@
+{
+  "architecture": "custom",
+  "entities": [
+    {
+      "type": "component",
+      "displayName": "Component",
+      "description": "React component",
+      "detection": {
+        "namePatterns": [
+          { "pattern": "^[A-Z]", "type": "regex", "confidence": 0.5 }
+        ],
+        "locationRules": [
+          { "parentDirectory": "components", "confidence": 0.8 }
+        ],
+        "priority": 5
+      },
+      "structure": {
+        "required": [
+          { "pattern": "index.ts", "description": "Root file" },
+          { "pattern": "{entityName}.tsx", "description": "Main file" }
+        ],
+        "optional": [
+          { "pattern": "{entityName}.module.scss", "description": "Styles" },
+          { "pattern": "{entityName}.types.ts", "description": "Types" }
+        ]
+      },
+      "allowedLayers": ["components", "ui"],
+      "allowedChildren": ["component"],
+      "canBeRoot": false
+    }
+  ],
+  "layers": [
+    {
+      "name": "components",
+      "directory": "components",
+      "description": "Reusable components",
+      "allowedEntityTypes": ["component", "ui"],
+      "required": false
+    },
+    {
+      "name": "ui",
+      "directory": "ui",
+      "description": "UI components",
+      "allowedEntityTypes": ["ui"],
+      "required": false
+    }
+  ],
+  "rules": {
+    "entity-structure-valid": "error",
+    "entity-naming-convention": "error",
+    "layer-location-valid": "error",
+    "layer-content-valid": "warning",
+    "max-nesting-depth": {
+      "severity": "warning",
+      "options": { "maxDepth": 5 }
+    }
+  },
+  "patterns": ["src/**/*"],
+  "ignore": ["node_modules/**", "build/**", "dist/**"]
+}
