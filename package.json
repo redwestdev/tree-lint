@@ -1,10 +1,11 @@
 {
-  "name": "structure-lint",
+  "name": "tree-lint",
   "version": "1.0.0",
   "main": "dist/index.js",
   "license": "MIT",
+  "type": "module",
   "bin": {
-    "structure-lint": "./dist/cli.js"
+    "tree-lint": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
@@ -26,6 +27,7 @@
     "cosmiconfig": "^9.0.0",
     "fast-glob": "^3.3.3",
     "filesize": "^11.0.13",
+    "jiti": "^2.6.1",
     "lodash.merge": "^4.6.2",
     "micromatch": "^4.0.8",
     "ora": "^9.3.0",

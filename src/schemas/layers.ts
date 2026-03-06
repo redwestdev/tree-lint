@@ -1,4 +1,4 @@
-import { LayerSchema } from "../types/schema";
+import { LayerSchema } from "../types/schema.js";
 
 // Слой компонентов
 export const componentsLayer: LayerSchema = {

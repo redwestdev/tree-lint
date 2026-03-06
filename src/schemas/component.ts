@@ -1,4 +1,4 @@
-import { EntitySchema } from "../types/schema";
+import { EntitySchema } from "../types/schema.js";
 
 export const componentSchema: EntitySchema = {
   type: "component",

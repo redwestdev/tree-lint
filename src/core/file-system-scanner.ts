@@ -2,11 +2,16 @@ import fs from "fs/promises";
 import path from "path";
 import chalk from "chalk";
 
-interface ProjectNode {
+export interface ProjectNode {
   name: string;
   path: string;
   type: "file" | "directory";
   children?: ProjectNode[];
+}
+
+export interface ProjectTreeResult {
+  generatedAt: string;
+  trees: ProjectNode[];
 }
 
 export class FileSystemScanner {
@@ -73,10 +78,14 @@ export class FileSystemScanner {
   }
 
   async saveTreeToJson(
+    treeResult: ProjectTreeResult,
     outputPath: string = ".project-tree.json",
   ): Promise<void> {
-    const rootsToScan = this.roots.length > 0 ? this.roots : ["."];
+    await fs.writeFile(outputPath, JSON.stringify(treeResult, null, 2), "utf-8");
+  }
 
+  async scan(): Promise<ProjectTreeResult> {
+    const rootsToScan = this.roots.length > 0 ? this.roots : ["."];
     const allTrees: ProjectNode[] = [];
 
     for (const root of rootsToScan) {
@@ -84,12 +93,10 @@ export class FileSystemScanner {
       allTrees.push(tree);
     }
 
-    const jsonData = {
+    return {
       generatedAt: new Date().toISOString(),
       trees: allTrees,
     };
-
-    await fs.writeFile(outputPath, JSON.stringify(jsonData, null, 2), "utf-8");
   }
 
   logScanPlan() {
