@@ -7,10 +7,16 @@ import path from "path";
 import { createJiti } from "jiti";
 
 import { FileSystemScanner } from "./core/file-system-scanner.js";
+import { LayerParser } from "./core/layer-parser.js";
+import { EntitiesParser } from "./core/entities-parser.js";
+import { saveToJson } from "./utils/file-utils.js";
 
-type TreeLintConfig = {
+export type TreeLintConfig = {
   roots: string[];
   ignore: string[];
+  entities: Record<any, any>;
+  layers: Record<any, any>;
+  rules: Record<any, any>;
 };
 
 const jiti = createJiti(import.meta.url);
@@ -21,15 +27,20 @@ const program = new Command();
 program
   .name("tree-lint")
   .description("Project tree linter for React")
-  .version("0.1.0")
-  .option("-o, --output <file>", "Save the project tree to a JSON file");
+  .version("0.1.0");
 
 program
   .command("scan [path]")
   .description("Scan the project and save structure to file")
-  .action(async (projectPath = ".") => {
-    const options = program.opts();
-
+  .option(
+    "-o, --output [file]",
+    "Optionally save the project tree to a JSON file",
+  )
+  .option(
+    "-e, --entities-output [file]",
+    "Optionally save the project tree enriched with layers and entities to a JSON file",
+  )
+  .action(async (projectPath = ".", options) => {
     const resolvedPath = path.resolve(projectPath);
 
     const spinner = ora("Scanning...").start();
@@ -41,9 +52,7 @@ program
         default: TreeLintConfig;
       };
 
-      const config = configModule.default ?? {};
-
-      console.log(config);
+      const config = configModule.default;
 
       const rootsToScan = config.roots?.length
         ? config.roots.map((r: string) => path.join(resolvedPath, r))
@@ -52,11 +61,18 @@ program
       const fsScanner = new FileSystemScanner({
         roots: rootsToScan,
         ignore: config.ignore,
+        cwd: resolvedPath,
       });
 
       fsScanner.logScanPlan();
 
       const tree = await fsScanner.scan();
+
+      const layerParser = new LayerParser(config, tree);
+      const layeredTree = layerParser.parse();
+
+      const entitiesParser = new EntitiesParser(config, layeredTree);
+      const outputTree = entitiesParser.parse();
 
       if (options.output !== undefined) {
         const outputPath =
@@ -64,11 +80,19 @@ program
             ? path.resolve(resolvedPath, options.output)
             : path.join(resolvedPath, ".project-tree.json");
 
-        await fsScanner.saveTreeToJson(tree, outputPath);
+        await saveToJson(tree, outputPath);
+      }
+
+      if (options.entitiesOutput !== undefined) {
+        const entitiesOutputPath =
+          typeof options.entitiesOutput === "string"
+            ? path.resolve(resolvedPath, options.entitiesOutput)
+            : path.join(resolvedPath, ".entities-tree.json");
+
+        await saveToJson(outputTree, entitiesOutputPath);
       }
 
       const duration = Date.now() - startParseTime;
-
       spinner.succeed(`Structure parsed successfully (${duration}ms)`);
 
       process.exit(0);

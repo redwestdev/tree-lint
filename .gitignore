@@ -47,4 +47,6 @@ Thumbs.db
 # Optional npm cache directory
 .npm
 
-tree.json
+*.project-tree.json
+*.entities-tree.json
+notes

@@ -17,13 +17,16 @@ export interface ProjectTreeResult {
 export class FileSystemScanner {
   protected ignore: string[];
   protected roots: string[];
+  protected cwd: string;
 
   constructor({
     roots = [],
     ignore = [],
-  }: { roots?: string[]; ignore?: string[] } = {}) {
+    cwd = process.cwd(),
+  }: { roots?: string[]; ignore?: string[]; cwd?: string } = {}) {
     this.roots = roots;
     this.ignore = ignore;
+    this.cwd = cwd;
   }
 
   private shouldIgnore(entryName: string): boolean {
@@ -52,11 +55,13 @@ export class FileSystemScanner {
   async buildTree(dirPath: string): Promise<ProjectNode> {
     const stats = await fs.stat(dirPath);
     const name = path.basename(dirPath);
+    const relativePath =
+      "/" + path.relative(this.cwd, dirPath).split(path.sep).join("/");
 
     if (!stats.isDirectory()) {
       return {
         name,
-        path: dirPath,
+        path: relativePath,
         type: "file",
       };
     }
@@ -71,17 +76,10 @@ export class FileSystemScanner {
 
     return {
       name,
-      path: dirPath,
+      path: relativePath,
       type: "directory",
       children: children.length > 0 ? children : undefined,
     };
-  }
-
-  async saveTreeToJson(
-    treeResult: ProjectTreeResult,
-    outputPath: string = ".project-tree.json",
-  ): Promise<void> {
-    await fs.writeFile(outputPath, JSON.stringify(treeResult, null, 2), "utf-8");
   }
 
   async scan(): Promise<ProjectTreeResult> {
