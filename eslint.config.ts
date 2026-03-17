@@ -1,20 +1,25 @@
 import js from "@eslint/js";
-import globals from "globals";
 import tseslint from "typescript-eslint";
-import { defineConfig } from "eslint/config";
+import prettierRecommended from "eslint-plugin-prettier/recommended";
+import globals from "globals";
 
-export default defineConfig([
+export default tseslint.config(
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  ...tseslint.configs.recommendedTypeChecked,
+  prettierRecommended,
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
-    plugins: { js },
-    extends: [
-      "js/recommended",
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:@typescript-eslint/recommended-requiring-type-checking",
-      "plugin:prettier/recommended",
-    ],
-    languageOptions: { globals: globals.browser },
+    languageOptions: {
+      globals: globals.browser,
+      parserOptions: {
+        project: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {},
   },
-  tseslint.configs.recommended,
-]);
+  {
+    ignores: ["dist/", "node_modules/", "test-project/**/*"],
+  },
+);

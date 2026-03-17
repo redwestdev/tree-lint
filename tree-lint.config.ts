@@ -1,94 +1,114 @@
-export default {
+import { createConfig } from "./src/utils/create-config.js";
+
+export default createConfig({
   roots: ["src"],
   ignore: ["node_modules", "dist"],
   //"groups": {},
   entities: {
     component: {
-      //
       naming: "PascalCase",
       type: "directory",
-      layer: "components",
+      layers: ["components"],
       rules: {},
       matches: {
-        // how to define entity
+        namePattern: "",
+        parentLayers: ["components", "ui", "layouts", "providers", "managers"],
+        type: "directory",
       },
     },
     section: {
       naming: "PascalCase",
       type: "directory",
-      layer: "sections",
+      layers: ["sections"],
       rules: {},
-      matches: {},
+      matches: {
+        namePattern: "*{Sct,Section}",
+        parentLayers: ["sections"],
+        type: "directory",
+      },
     },
     page: {
       naming: "PascalCase",
       type: "directory",
-      layer: "pages",
+      layers: ["pages"],
+      matches: {
+        namePattern: "",
+        parentLayers: ["pages"],
+        type: "directory",
+      },
       rules: {},
-      matches: {},
     },
     hook: {
       naming: "camelCase",
       type: "file",
-      layer: "hooks",
+      layers: ["hooks"],
       rules: {
         namePattern: "use*.ts",
       },
       matches: {
-        namePattern: "use*.ts",
-        parentLayer: "hooks",
+        namePattern: "use*.ts", // name ONLY
+        parentLayers: ["hooks"],
+        type: "file",
+        children: [], // for type === 'directory'
       },
     },
     route: {
       naming: "camelCase",
       type: "file",
-      layer: "routes",
+      layers: ["routes"],
+      matches: {
+        namePattern: "*.ts",
+        parentLayers: ["routes"],
+        type: "directory",
+      },
       rules: {},
     },
     image: {
       type: "file",
-      layer: "images",
+      layers: ["images"],
       rules: {},
       matches: {
-        extensions: ["png", "jpg", "jpeg", "svg"],
+        namePattern: "*.{png,jpeg}",
+        parentLayers: ["images"],
+        type: "file",
       },
     },
   },
   layers: {
     components: {
-      entities: "component",
+      entities: ["component"],
     },
     ui: {
-      entities: "component",
+      entities: ["component"],
     },
     layouts: {
-      entities: "layout",
+      entities: ["component"],
     },
     providers: {
-      entities: "provider",
+      entities: ["component"],
     },
     managers: {
-      entities: "manager",
+      entities: ["component"],
     },
     sections: {
-      entities: "section",
+      entities: ["section"],
     },
     pages: {
-      entities: "page",
+      entities: ["page"],
     },
     hooks: {
-      entities: "hook",
-      layers: ["components"],
+      entities: ["hook"],
+      allowedLayers: ["components"],
       maxDeep: 0,
       // minDeep: 0,
       // groups rules
     },
     routes: {
-      entities: "route",
+      entities: ["route"],
     },
     images: {
-      entities: "image",
+      entities: ["image"],
     },
   },
   rules: {},
-};
+});

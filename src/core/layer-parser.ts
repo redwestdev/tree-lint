@@ -2,7 +2,7 @@ import { TreeLintConfig } from "../cli.js";
 import { ProjectNode, ProjectTreeResult } from "./file-system-scanner.js";
 
 export interface LayeredProjectNode extends ProjectNode {
-  layer?: string;
+  layer: string | null;
   children?: LayeredProjectNode[];
 }
 
@@ -33,9 +33,11 @@ export class LayerParser {
     const isLayerDirectory =
       node.type === "directory" && this.layerNames.has(node.name);
 
+    const layer = isLayerDirectory ? node.name : null;
+
     return {
       ...node,
-      ...(isLayerDirectory ? { layer: node.name } : {}),
+      layer,
       children: node.children?.map((child) => this.annotateNode(child)),
     };
   }
