@@ -2,14 +2,39 @@ import fs from "fs/promises";
 import path from "path";
 import chalk from "chalk";
 
-export interface ProjectNode {
-  name: string;
-  path: string;
-  type: "file" | "directory";
-  children?: ProjectNode[];
+export class Node {
+  public name: string;
+  public path: string;
+
+  constructor(name: string, path: string) {
+    this.name = name;
+    this.path = path;
+  }
 }
 
-export interface ProjectTreeResult {
+export class FileNode extends Node {
+  public type: string;
+
+  constructor(name: string, path: string) {
+    super(name, path);
+    this.type = "file";
+  }
+}
+
+export class DirNode extends Node {
+  public type: string;
+  public children: ProjectNode[];
+
+  constructor(name: string, path: string, children: ProjectNode[] = []) {
+    super(name, path);
+    this.type = "directory";
+    this.children = children;
+  }
+}
+
+export type ProjectNode = FileNode | DirNode;
+
+export interface ProjectTree {
   generatedAt: string;
   trees: ProjectNode[];
 }
@@ -41,11 +66,13 @@ export class FileSystemScanner {
         (entry) => !this.shouldIgnore(entry.name),
       );
 
-      return filtered.map((entry) => ({
-        path: path.join(dirPath, entry.name),
-        name: entry.name,
-        type: entry.isDirectory() ? "directory" : "file",
-      }));
+      return filtered.map((entry) => {
+        const nodePath: string = path.join(dirPath, entry.name);
+        const name = entry.name;
+        return entry.isDirectory()
+          ? new DirNode(name, nodePath)
+          : new FileNode(name, nodePath);
+      });
     } catch (error) {
       console.error(`Error reading directory ${dirPath}:`, error);
       return [];
@@ -59,11 +86,7 @@ export class FileSystemScanner {
       "/" + path.relative(this.cwd, dirPath).split(path.sep).join("/");
 
     if (!stats.isDirectory()) {
-      return {
-        name,
-        path: relativePath,
-        type: "file",
-      };
+      return new FileNode(name, relativePath);
     }
 
     const entries = await this.getFilesInDirectory(dirPath);
@@ -74,15 +97,10 @@ export class FileSystemScanner {
       children.push(childNode);
     }
 
-    return {
-      name,
-      path: relativePath,
-      type: "directory",
-      children: children.length > 0 ? children : undefined,
-    };
+    return new DirNode(name, relativePath, children);
   }
 
-  async scan(): Promise<ProjectTreeResult> {
+  async scan(): Promise<ProjectTree> {
     const rootsToScan = this.roots.length > 0 ? this.roots : ["."];
     const allTrees: ProjectNode[] = [];
 
