@@ -9,7 +9,7 @@ import { createJiti } from "jiti";
 import { FileSystemScanner, ProjectNode } from "./core/file-system-scanner.js";
 import { LayeredProjectNode, LayerParser } from "./core/layer-parser.js";
 import { EntitiesParser, EntityProjectNode } from "./core/entities-parser.js";
-import { saveToJson } from "./utils/file-utils.js";
+import { printProjectTree, saveToJson } from "./utils/file-utils.js";
 
 export type CustomMatch = (
   node: ProjectNode | LayeredProjectNode | EntityProjectNode,
@@ -109,6 +109,8 @@ program
 
       const entitiesParser = new EntitiesParser(config, layeredTree);
       const outputTree = entitiesParser.parse();
+
+      outputTree.trees.forEach((tree) => printProjectTree(tree));
 
       if (options.output !== undefined) {
         const outputPath =

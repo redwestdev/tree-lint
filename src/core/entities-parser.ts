@@ -10,24 +10,16 @@ import mm from "micromatch";
 import { DirNode, FileNode } from "./file-system-scanner.js";
 
 export class DirEntity extends DirNode implements Validator {
-  public entity: keyof TreeLintConfig["entities"];
-  public isValid: boolean;
-  public errors: string[];
-  public warnings: string[];
-
-  private readonly rules: Record<string, string>;
+  public isValid: boolean = true;
+  public errors: string[] = [];
+  public warnings: string[] = [];
 
   constructor(
     node: DirNode,
-    entity: keyof TreeLintConfig["entities"],
-    rules: Record<string, string>,
+    public readonly entity: keyof TreeLintConfig["entities"],
+    private readonly rules: Record<string, string>,
   ) {
     super(node.name, node.path, node.children);
-    this.entity = entity;
-    this.rules = rules;
-    this.errors = [];
-    this.warnings = [];
-    this.isValid = true;
   }
 
   validate() {
@@ -36,24 +28,16 @@ export class DirEntity extends DirNode implements Validator {
 }
 
 export class FileEntity extends FileNode implements Validator {
-  public entity: keyof TreeLintConfig["entities"];
-  public isValid: boolean;
-  public errors: string[];
-  public warnings: string[];
-
-  private readonly rules: Record<string, string>;
+  public isValid: boolean = true;
+  public errors: string[] = [];
+  public warnings: string[] = [];
 
   constructor(
     node: FileNode,
-    entity: keyof TreeLintConfig["entities"],
-    rules: Record<string, string>,
+    public readonly entity: keyof TreeLintConfig["entities"],
+    private readonly rules: Record<string, string>,
   ) {
     super(node.name, node.path);
-    this.entity = entity;
-    this.rules = rules;
-    this.errors = [];
-    this.warnings = [];
-    this.isValid = true;
   }
 
   validate() {
@@ -62,6 +46,13 @@ export class FileEntity extends FileNode implements Validator {
 }
 
 export type EntityProjectNode = LayeredProjectNode | DirEntity | FileEntity;
+
+export type AnyProjectNode =
+  | FileNode
+  | DirNode
+  | LayerNode
+  | DirEntity
+  | FileEntity;
 
 export interface EntityProjectTree {
   generatedAt: string;
@@ -129,13 +120,13 @@ export class EntitiesParser {
         : node;
     }
 
-    const children = node.children.map((child) =>
+    const updatedChildren = node.children.map((child) =>
       this.annotateNode(child, context),
     );
-    const updatedNode = { ...node, children };
+    const annotatedNode = node.withNewChildren(updatedChildren);
 
     return currentEntity
-      ? new DirEntity(updatedNode, currentEntity, { rule: "warn" })
-      : updatedNode;
+      ? new DirEntity(annotatedNode, currentEntity, { rule: "warn" })
+      : annotatedNode;
   }
 }

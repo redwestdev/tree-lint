@@ -5,6 +5,7 @@ import {
   ProjectNode,
   ProjectTree,
 } from "./file-system-scanner.js";
+import { AnyProjectNode } from "./entities-parser.js";
 
 export interface Validator {
   validate(): void;
@@ -14,28 +15,25 @@ export interface Validator {
 }
 
 export class LayerNode extends DirNode implements Validator {
-  public layer: keyof TreeLintConfig["layers"];
-  public isValid: boolean;
-  public errors: string[];
-  public warnings: string[];
-
-  private readonly rules: Record<string, string>;
+  public isValid: boolean = true;
+  public errors: string[] = [];
+  public warnings: string[] = [];
 
   constructor(
     node: DirNode,
-    layer: keyof TreeLintConfig["layers"],
-    rules: Record<string, string>,
+    public readonly layer: keyof TreeLintConfig["layers"],
+    private readonly rules: Record<string, string>,
   ) {
     super(node.name, node.path, node.children);
-    this.layer = layer;
-    this.rules = rules;
-    this.errors = [];
-    this.warnings = [];
-    this.isValid = true;
   }
 
   validate() {
     console.log("Validation rules:", this.rules);
+  }
+
+  public override withNewChildren(children: AnyProjectNode[]): LayerNode {
+    const dir: DirNode = super.withNewChildren(children);
+    return new LayerNode(dir, this.layer, this.rules);
   }
 }
 
@@ -47,15 +45,14 @@ export interface LayeredProjectTree {
 }
 
 export class LayerParser {
-  protected config: TreeLintConfig;
-  protected tree: ProjectTree;
-  protected layerNames: Set<string>;
+  protected layerNames: Set<string> = new Set(
+    Object.keys(this.config.layers || {}),
+  );
 
-  constructor(config: TreeLintConfig, tree: ProjectTree) {
-    this.config = config;
-    this.tree = tree;
-    this.layerNames = new Set(Object.keys(config.layers || {}));
-  }
+  constructor(
+    protected config: TreeLintConfig,
+    protected tree: ProjectTree,
+  ) {}
 
   public parse(): LayeredProjectTree {
     return {
@@ -72,8 +69,10 @@ export class LayerParser {
       this.annotateNode(child),
     );
 
+    const annotatedNode = node.withNewChildren(updatedChildren);
+
     if (isLayerDirectory) {
-      return new LayerNode({ ...node, children: updatedChildren }, node.name, {
+      return new LayerNode(annotatedNode, node.name, {
         rule: "warn",
       });
     }
