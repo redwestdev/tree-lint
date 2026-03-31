@@ -14,6 +14,11 @@ import {
 } from "./core/index.js";
 import { printProjectTree, saveToJson } from "./utils/index.js";
 
+interface ScanOptions {
+  treeOutput?: string | boolean;
+  annotatedOutput?: string | boolean;
+}
+
 const jiti = createJiti(import.meta.url);
 const configPath = path.resolve(process.cwd(), "tree-lint.config.ts");
 
@@ -28,15 +33,15 @@ program
   .command("scan [path]")
   .description("Scan the project and save structure to file")
   .option(
-    "-o, --output [file]",
+    "-t, --tree-output [file]",
     "Optionally save the project tree to a JSON file",
   )
   .option(
-    "-e, --entities-output [file]",
+    "-a, --annotated-output [file]",
     "Optionally save the project tree enriched with layers and entities to a JSON file",
   )
-  .action(async (projectPath = ".", options) => {
-    const resolvedPath = path.resolve(projectPath);
+  .action(async (projectPath: string | undefined, options: ScanOptions) => {
+    const resolvedPath = path.resolve(projectPath || ".");
 
     const spinner = ora("Scanning...").start();
 
@@ -74,26 +79,26 @@ program
       const layeredTree = layerParser.parse();
 
       const entitiesParser = new EntitiesParser(config, layeredTree);
-      const outputTree = entitiesParser.parse();
+      const annotatedTree = entitiesParser.parse();
 
-      outputTree.trees.forEach((tree) => printProjectTree(tree));
+      annotatedTree.trees.forEach((tree) => printProjectTree(tree));
 
-      if (options.output !== undefined) {
+      if (options.treeOutput !== undefined) {
         const outputPath =
-          typeof options.output === "string"
-            ? path.resolve(resolvedPath, options.output)
+          typeof options.treeOutput === "string"
+            ? path.resolve(resolvedPath, options.treeOutput)
             : path.join(resolvedPath, ".project-tree.json");
 
         await saveToJson(tree, outputPath);
       }
 
-      if (options.entitiesOutput !== undefined) {
+      if (options.annotatedOutput !== undefined) {
         const entitiesOutputPath =
-          typeof options.entitiesOutput === "string"
-            ? path.resolve(resolvedPath, options.entitiesOutput)
+          typeof options.annotatedOutput === "string"
+            ? path.resolve(resolvedPath, options.annotatedOutput)
             : path.join(resolvedPath, ".entities-tree.json");
 
-        await saveToJson(outputTree, entitiesOutputPath);
+        await saveToJson(annotatedTree, entitiesOutputPath);
       }
 
       const duration = Date.now() - startParseTime;

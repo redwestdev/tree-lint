@@ -32,7 +32,7 @@ export default createConfig({
       type: "directory",
       layers: ["pages"],
       matches: {
-        namePattern: "",
+        namePattern: "*{Pg,Page}",
         parentLayers: ["pages"],
         type: "directory",
       },
@@ -68,7 +68,7 @@ export default createConfig({
       layers: ["images"],
       rules: {},
       matches: {
-        namePattern: "*.{png,jpeg}",
+        namePattern: "*.{png,jpeg,jpg,gif,svg,webp,avif}",
         parentLayers: ["images"],
         type: "file",
       },
