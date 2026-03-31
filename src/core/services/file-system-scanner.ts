@@ -1,45 +1,9 @@
 import fs from "fs/promises";
 import path from "path";
 import chalk from "chalk";
-import { AnyProjectNode } from "./entities-parser.js";
 
-export class Node {
-  constructor(
-    public name: string,
-    public path: string,
-  ) {}
-}
-
-export class FileNode extends Node {
-  public readonly type: string = "file";
-
-  constructor(name: string, path: string) {
-    super(name, path);
-  }
-}
-
-export class DirNode extends Node {
-  public readonly type: string = "directory";
-
-  constructor(
-    name: string,
-    path: string,
-    public children: AnyProjectNode[] = [],
-  ) {
-    super(name, path);
-  }
-
-  public withNewChildren(children: AnyProjectNode[]): DirNode {
-    return new DirNode(this.name, this.path, children);
-  }
-}
-
-export type ProjectNode = FileNode | DirNode;
-
-export interface ProjectTree {
-  generatedAt: string;
-  trees: ProjectNode[];
-}
+import { DirNode, FileNode } from "../nodes.js";
+import { ProjectNode, ProjectTree } from "../../types/index.js";
 
 export class FileSystemScanner {
   protected ignore: string[];

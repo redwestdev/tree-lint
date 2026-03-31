@@ -1,66 +1,15 @@
-import { TreeLintConfig } from "../cli.js";
+import mm from "micromatch";
 import {
+  EntityProjectNode,
+  EntityProjectTree,
   LayeredProjectNode,
   LayeredProjectTree,
-  LayerNode,
-  Validator,
-} from "./layer-parser.js";
-
-import mm from "micromatch";
-import { DirNode, FileNode } from "./file-system-scanner.js";
-
-export class DirEntity extends DirNode implements Validator {
-  public isValid: boolean = true;
-  public errors: string[] = [];
-  public warnings: string[] = [];
-
-  constructor(
-    node: DirNode,
-    public readonly entity: keyof TreeLintConfig["entities"],
-    private readonly rules: Record<string, string>,
-  ) {
-    super(node.name, node.path, node.children);
-  }
-
-  validate() {
-    console.log("Validation rules:", this.rules);
-  }
-}
-
-export class FileEntity extends FileNode implements Validator {
-  public isValid: boolean = true;
-  public errors: string[] = [];
-  public warnings: string[] = [];
-
-  constructor(
-    node: FileNode,
-    public readonly entity: keyof TreeLintConfig["entities"],
-    private readonly rules: Record<string, string>,
-  ) {
-    super(node.name, node.path);
-  }
-
-  validate() {
-    console.log("Validation rules:", this.rules);
-  }
-}
-
-export type EntityProjectNode = LayeredProjectNode | DirEntity | FileEntity;
-
-export type AnyProjectNode =
-  | FileNode
-  | DirNode
-  | LayerNode
-  | DirEntity
-  | FileEntity;
-
-export interface EntityProjectTree {
-  generatedAt: string;
-  trees: EntityProjectNode[];
-}
+  TreeLintConfig,
+} from "../../types/index.js";
+import { DirEntity, FileEntity, FileNode, LayerNode } from "../nodes.js";
 
 export interface EntityContext {
-  layer: string | null;
+  layer: keyof TreeLintConfig["layers"] | null;
   depth: number;
 }
 
