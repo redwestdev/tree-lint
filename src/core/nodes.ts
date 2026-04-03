@@ -1,37 +1,46 @@
-import { AnyProjectNode, TreeLintConfig, Validator } from "../types/index.js";
+import {
+  IDirNode,
+  ILayerNode,
+  TFileEntity,
+  TreeLintConfig,
+  IFileNode,
+  IDirEntity,
+} from "../types/index.js";
 
 export class Node {
-  constructor(
-    public name: string,
-    public path: string,
-  ) {}
-}
-
-export class FileNode extends Node {
-  public readonly type: string = "file";
-
+  // public isValid: boolean = true;
+  public errors: string[] = [];
+  public warnings: string[] = [];
+  public name: string;
+  public path: string;
   constructor(name: string, path: string) {
-    super(name, path);
+    this.name = name;
+    this.path = path;
   }
 }
 
-export class DirNode extends Node {
-  public readonly type: string = "directory";
+export class FileNode extends Node implements IFileNode {
+  public extension: string;
+  constructor(name: string, path: string) {
+    super(name, path);
+    this.extension = path.split(".").pop() || "";
+  }
+}
 
+export class DirNode extends Node implements IDirNode {
   constructor(
     name: string,
     path: string,
-    public children: AnyProjectNode[] = [],
+    public children: Array<IDirNode | IFileNode>,
   ) {
     super(name, path);
   }
-
-  public withNewChildren(children: AnyProjectNode[]): DirNode {
-    return new DirNode(this.name, this.path, children);
-  }
+  // public withNewChildren(children: AnyProjectNode[]): DirNode {
+  //   return new DirNode(this.name, this.path, children);
+  // }
 }
 
-export class LayerNode extends DirNode implements Validator {
+export class LayerNode extends DirNode implements ILayerNode {
   public isValid: boolean = true;
   public errors: string[] = [];
   public warnings: string[] = [];
@@ -48,13 +57,13 @@ export class LayerNode extends DirNode implements Validator {
     console.log("Validation rules:", this.rules);
   }
 
-  public override withNewChildren(children: AnyProjectNode[]): LayerNode {
-    const dir: DirNode = super.withNewChildren(children);
-    return new LayerNode(dir, this.layer, this.rules);
-  }
+  // public override withNewChildren(children: AnyProjectNode[]): TFileEntity {
+  //   const dir: DirNode = super.withNewChildren(children);
+  //   return new LayerNode(dir, this.layer, this.rules);
+  // }
 }
 
-export class DirEntity extends DirNode implements Validator {
+export class DirEntity extends DirNode implements IDirEntity {
   public isValid: boolean = true;
   public errors: string[] = [];
   public warnings: string[] = [];
@@ -72,7 +81,7 @@ export class DirEntity extends DirNode implements Validator {
   }
 }
 
-export class FileEntity extends FileNode implements Validator {
+export class FileEntity extends FileNode implements TFileEntity {
   public isValid: boolean = true;
   public errors: string[] = [];
   public warnings: string[] = [];

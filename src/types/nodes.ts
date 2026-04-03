@@ -1,20 +1,40 @@
-import {
-  DirEntity,
-  DirNode,
-  FileEntity,
-  FileNode,
-  LayerNode,
-} from "../core/index.js";
+export interface INode {
+  name: string;
+  path: string;
 
-export type ProjectNode = FileNode | DirNode;
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+}
 
-export type LayeredProjectNode = ProjectNode | LayerNode;
+export interface IFileNode extends INode {
+  extension: string;
+}
 
-export type EntityProjectNode = LayeredProjectNode | DirEntity | FileEntity;
+export interface IDirNode extends INode {
+  children: IAnyNode[];
+}
 
-export type AnyProjectNode =
-  | FileNode
-  | DirNode
-  | LayerNode
-  | DirEntity
-  | FileEntity;
+export interface ILayerNode extends IDirNode {
+  validate(): void;
+}
+
+export interface TFileEntity extends IFileNode {
+  validate(): void;
+}
+
+export interface IDirEntity extends IDirNode {
+  validate(): void;
+}
+
+export interface IGroupNode extends IDirNode {
+  validate(): void;
+}
+
+export type IAnyNode =
+  | IDirNode
+  | IFileNode
+  | ILayerNode
+  | TFileEntity
+  | IDirEntity
+  | IGroupNode;

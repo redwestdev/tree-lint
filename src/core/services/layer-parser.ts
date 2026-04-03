@@ -1,8 +1,6 @@
 import { DirNode, FileNode, LayerNode } from "../nodes.js";
 import {
-  LayeredProjectNode,
   LayeredProjectTree,
-  ProjectNode,
   ProjectTree,
   TreeLintConfig,
 } from "../../types/index.js";

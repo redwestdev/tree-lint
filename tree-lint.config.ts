@@ -3,24 +3,52 @@ import { createConfig } from "./src/utils/create-config.js";
 export default createConfig({
   roots: ["src"],
   ignore: ["node_modules", "dist"],
-  //"groups": {},
+  // groups: {
+    // matches: {
+      // naming: "camelCase?",
+      // children: [
+      //     {
+      //       name: "index",
+      //         type: "file",
+      //       extensions: ["tsx", "ts"],
+      //     },
+      // ],
+    // },
+  // },
   entities: {
     component: {
       naming: "PascalCase",
       type: "directory",
-      layers: ["components"],
-      rules: {},
+      // layers: ["components"],
+      // rules: {},
       matches: {
-        namePattern: "",
-        parentLayers: ["components", "ui", "layouts", "providers", "managers"],
         type: "directory",
+        // layers: ["hooks"],
+        namePattern: "/[A-Z]/",
+        // parentLayers: ["components", "ui", "layouts", "providers", "managers"],
+        children: [
+          {
+            name: "components",
+            type: "directory",
+          },
+          {
+            name: "index",
+            type: "file",
+            extensions: ["tsx", "ts"],
+          },
+          {
+            name: "/W",
+            type: "file",
+            extensions: ["tsx"],
+          },
+        ],
       },
     },
     section: {
       naming: "PascalCase",
       type: "directory",
       layers: ["sections"],
-      rules: {},
+      // rules: {},
       matches: {
         namePattern: "*{Sct,Section}",
         parentLayers: ["sections"],
@@ -36,20 +64,21 @@ export default createConfig({
         parentLayers: ["pages"],
         type: "directory",
       },
-      rules: {},
+      // rules: {},
     },
     hook: {
       naming: "camelCase",
       type: "file",
       layers: ["hooks"],
-      rules: {
-        namePattern: "use*.ts",
-      },
+      // rules: {
+      //   namePattern: "use*.ts",
+      // },
       matches: {
-        namePattern: "use*.ts", // name ONLY
-        parentLayers: ["hooks"],
         type: "file",
-        children: [], // for type === 'directory'
+        extensions: ["tsx", "ts"],
+        namePattern: "use*.ts", // name ONLY
+        // parentLayers: ["hooks"],
+        // children: [], // for type === 'directory'
       },
     },
     route: {
