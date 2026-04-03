@@ -4,102 +4,47 @@ export default createConfig({
   roots: ["src"],
   ignore: ["node_modules", "dist"],
   // groups: {
-    // matches: {
-      // naming: "camelCase?",
-      // children: [
-      //     {
-      //       name: "index",
-      //         type: "file",
-      //       extensions: ["tsx", "ts"],
-      //     },
-      // ],
-    // },
+  // matches: {
+  // naming: "camelCase?",
+  // children: [
+  //     {
+  //       name: "index",
+  //         type: "file",
+  //       extensions: ["tsx", "ts"],
+  //     },
+  // ],
+  // },
   // },
   entities: {
     component: {
-      naming: "PascalCase",
-      type: "directory",
-      // layers: ["components"],
-      // rules: {},
       matches: {
         type: "directory",
-        // layers: ["hooks"],
-        namePattern: "/[A-Z]/",
-        // parentLayers: ["components", "ui", "layouts", "providers", "managers"],
+        name: "/[A-Z]/",
         children: [
           {
-            name: "components",
             type: "directory",
+            name: "component",
           },
           {
-            name: "index",
             type: "file",
-            extensions: ["tsx", "ts"],
+            name: "use*.ts",
           },
           {
-            name: "/W",
             type: "file",
-            extensions: ["tsx"],
+            name: "index.ts",
+          },
+          {
+            type: "file",
+            naming: "camelCase",
+            extensions: ["ts", "tsx"],
           },
         ],
       },
     },
-    section: {
-      naming: "PascalCase",
-      type: "directory",
-      layers: ["sections"],
-      // rules: {},
-      matches: {
-        namePattern: "*{Sct,Section}",
-        parentLayers: ["sections"],
-        type: "directory",
-      },
-    },
-    page: {
-      naming: "PascalCase",
-      type: "directory",
-      layers: ["pages"],
-      matches: {
-        namePattern: "*{Pg,Page}",
-        parentLayers: ["pages"],
-        type: "directory",
-      },
-      // rules: {},
-    },
     hook: {
-      naming: "camelCase",
-      type: "file",
-      layers: ["hooks"],
-      // rules: {
-      //   namePattern: "use*.ts",
-      // },
       matches: {
         type: "file",
-        extensions: ["tsx", "ts"],
-        namePattern: "use*.ts", // name ONLY
-        // parentLayers: ["hooks"],
-        // children: [], // for type === 'directory'
-      },
-    },
-    route: {
-      naming: "camelCase",
-      type: "file",
-      layers: ["routes"],
-      matches: {
-        namePattern: "*.ts",
-        parentLayers: ["routes"],
-        type: "directory",
-      },
-      rules: {},
-    },
-    image: {
-      type: "file",
-      layers: ["images"],
-      rules: {},
-      matches: {
-        namePattern: "*.{png,jpeg,jpg,gif,svg,webp,avif}",
-        parentLayers: ["images"],
-        type: "file",
+        name: "use*.ts", // name ONLY
       },
     },
   },
@@ -127,10 +72,6 @@ export default createConfig({
     },
     hooks: {
       entities: ["hook"],
-      allowedLayers: ["components"],
-      maxDeep: 0,
-      // minDeep: 0,
-      // groups rules
     },
     routes: {
       entities: ["route"],
@@ -139,5 +80,4 @@ export default createConfig({
       entities: ["image"],
     },
   },
-  rules: {},
 });

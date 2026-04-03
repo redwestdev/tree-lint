@@ -1,28 +1,13 @@
 import { AnyProjectNode } from "./nodes.js";
 
 export type CustomMatch = (node: AnyProjectNode) => boolean;
-export type EntityType = "file" | "directory";
-
-export interface Match<L extends string> {
-  namePattern: string; // regexp in glob syntax
-  parentLayers: L[];
-  type: EntityType | EntityType[];
-  children?: string[] | Match<L>[]; // array of file names? matches for children?
-  custom?: CustomMatch;
-}
-
-export interface Entity<L extends string> {
-  naming?: string; // naming convention, 'camelCase', 'kebab-case', 'PascalCase' etc.
-  type: EntityType | EntityType[];
-  layers: L[]; // only existing layers in config ?
-  rules: Record<string, string>;
-  matches: Match<L>;
-}
-export interface Layer<L extends string, E extends string> {
-  entities: E[]; // only existing entities in config ?
-  allowedLayers?: L[]; // only existing layers in config ?
-  maxDeep?: number; // 0 - no groups, > 0 - groups allowed
-}
+// export type TEntityType = "file" | "directory";
+export type TNaming =
+  | "camelCase"
+  | "PascalCase"
+  | "kebab-case"
+  | "snake_case"
+  | "other";
 
 export interface TreeLintConfig<
   L extends string = string,
@@ -30,7 +15,33 @@ export interface TreeLintConfig<
 > {
   roots: string[];
   ignore: string[];
-  entities: Record<E, Entity<L>>;
-  layers: Record<L, Layer<L, E>>;
-  rules: Record<string, string>;
+  entities: Record<E, IEntity>;
+  layers: Record<L, Layer>;
 }
+
+export interface IEntity {
+  matches: TMatches;
+}
+
+export interface Layer {
+  entities: Array<keyof TreeLintConfig["entities"]>; // only existing entities in config ?
+}
+
+export interface IMatchFile {
+  type: "file";
+  name: string; // regexp in glob syntax
+}
+
+export interface IMatchFileExtension {
+  type: "file";
+  naming: TNaming;
+  extensions: string[];
+}
+
+export interface IMatchDirectory {
+  type: "directory";
+  name: string;
+  children?: Array<TMatches>;
+}
+
+export type TMatches = IMatchDirectory | IMatchFileExtension | IMatchFile;

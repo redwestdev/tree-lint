@@ -8,7 +8,7 @@ import {
 } from "../types/index.js";
 
 export class Node {
-  // public isValid: boolean = true;
+  public isValid: boolean = true;
   public errors: string[] = [];
   public warnings: string[] = [];
   public name: string;
