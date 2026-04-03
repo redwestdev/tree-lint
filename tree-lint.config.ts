@@ -52,32 +52,32 @@ export default createConfig({
     components: {
       entities: ["component"],
     },
-    ui: {
-      entities: ["component"],
-    },
-    layouts: {
-      entities: ["component"],
-    },
-    providers: {
-      entities: ["component"],
-    },
-    managers: {
-      entities: ["component"],
-    },
-    sections: {
-      entities: ["section"],
-    },
-    pages: {
-      entities: ["page"],
-    },
     hooks: {
       entities: ["hook"],
     },
-    routes: {
-      entities: ["route"],
-    },
-    images: {
-      entities: ["image"],
-    },
+    // ui: {
+    //   entities: ["component"],
+    // },
+    // layouts: {
+    //   entities: ["component"],
+    // },
+    // providers: {
+    //   entities: ["component"],
+    // },
+    // managers: {
+    //   entities: ["component"],
+    // },
+    // sections: {
+    //   entities: ["section"],
+    // },
+    // pages: {
+    //   entities: ["page"],
+    // },
+    // routes: {
+    //   entities: ["route"],
+    // },
+    // images: {
+    //   entities: ["image"],
+    // },
   },
 });

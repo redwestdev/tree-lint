@@ -15,16 +15,16 @@ export interface TreeLintConfig<
 > {
   roots: string[];
   ignore: string[];
+  layers: Record<L, Layer<E>>;
   entities: Record<E, IEntity>;
-  layers: Record<L, Layer>;
 }
 
 export interface IEntity {
   matches: TMatches;
 }
 
-export interface Layer {
-  entities: Array<keyof TreeLintConfig["entities"]>; // only existing entities in config ?
+export interface Layer<E = string> {
+  entities: Array<E>; // only existing entities in config ?
 }
 
 export interface IMatchFile {
