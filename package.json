@@ -8,8 +8,8 @@
     "tree-lint": "./dist/cli.js"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsc && tsc-alias --resolve-full-paths",
+    "dev": "concurrently \"tsc --watch\" \"tsc-alias --watch\"",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "lint": "eslint . --fix",
@@ -38,11 +38,13 @@
     "@types/lodash.merge": "^4.6.9",
     "@types/micromatch": "^4.0.10",
     "@types/node": "^25.2.3",
+    "concurrently": "^9.2.1",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^17.3.0",
     "prettier": "3.8.1",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.55.0",
     "vitest": "^4.0.18"

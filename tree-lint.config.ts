@@ -3,74 +3,48 @@ import { createConfig } from "./src/utils/create-config.js";
 export default createConfig({
   roots: ["src"],
   ignore: ["node_modules", "dist"],
-  //"groups": {},
+  // groups: {
+  // matches: {
+  // naming: "camelCase?",
+  // children: [
+  //     {
+  //       name: "index",
+  //         type: "file",
+  //       extensions: ["tsx", "ts"],
+  //     },
+  // ],
+  // },
+  // },
   entities: {
     component: {
-      naming: "PascalCase",
-      type: "directory",
-      layers: ["components"],
-      rules: {},
       matches: {
-        namePattern: "",
-        parentLayers: ["components", "ui", "layouts", "providers", "managers"],
         type: "directory",
+        name: "/[A-Z]/",
+        children: [
+          {
+            type: "directory",
+            name: "component",
+          },
+          {
+            type: "file",
+            name: "use*.ts",
+          },
+          {
+            type: "file",
+            name: "index.ts",
+          },
+          {
+            type: "file",
+            naming: "camelCase",
+            extensions: ["ts", "tsx"],
+          },
+        ],
       },
-    },
-    section: {
-      naming: "PascalCase",
-      type: "directory",
-      layers: ["sections"],
-      rules: {},
-      matches: {
-        namePattern: "*{Sct,Section}",
-        parentLayers: ["sections"],
-        type: "directory",
-      },
-    },
-    page: {
-      naming: "PascalCase",
-      type: "directory",
-      layers: ["pages"],
-      matches: {
-        namePattern: "*{Pg,Page}",
-        parentLayers: ["pages"],
-        type: "directory",
-      },
-      rules: {},
     },
     hook: {
-      naming: "camelCase",
-      type: "file",
-      layers: ["hooks"],
-      rules: {
-        namePattern: "use*.ts",
-      },
       matches: {
-        namePattern: "use*.ts", // name ONLY
-        parentLayers: ["hooks"],
         type: "file",
-        children: [], // for type === 'directory'
-      },
-    },
-    route: {
-      naming: "camelCase",
-      type: "file",
-      layers: ["routes"],
-      matches: {
-        namePattern: "*.ts",
-        parentLayers: ["routes"],
-        type: "directory",
-      },
-      rules: {},
-    },
-    image: {
-      type: "file",
-      layers: ["images"],
-      rules: {},
-      matches: {
-        namePattern: "*.{png,jpeg,jpg,gif,svg,webp,avif}",
-        parentLayers: ["images"],
-        type: "file",
+        name: "use*.ts", // name ONLY
       },
     },
   },
@@ -78,37 +52,32 @@ export default createConfig({
     components: {
       entities: ["component"],
     },
-    ui: {
-      entities: ["component"],
-    },
-    layouts: {
-      entities: ["component"],
-    },
-    providers: {
-      entities: ["component"],
-    },
-    managers: {
-      entities: ["component"],
-    },
-    sections: {
-      entities: ["section"],
-    },
-    pages: {
-      entities: ["page"],
-    },
     hooks: {
       entities: ["hook"],
-      allowedLayers: ["components"],
-      maxDeep: 0,
-      // minDeep: 0,
-      // groups rules
     },
-    routes: {
-      entities: ["route"],
-    },
-    images: {
-      entities: ["image"],
-    },
+    // ui: {
+    //   entities: ["component"],
+    // },
+    // layouts: {
+    //   entities: ["component"],
+    // },
+    // providers: {
+    //   entities: ["component"],
+    // },
+    // managers: {
+    //   entities: ["component"],
+    // },
+    // sections: {
+    //   entities: ["section"],
+    // },
+    // pages: {
+    //   entities: ["page"],
+    // },
+    // routes: {
+    //   entities: ["route"],
+    // },
+    // images: {
+    //   entities: ["image"],
+    // },
   },
-  rules: {},
 });

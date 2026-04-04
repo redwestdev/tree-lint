@@ -1,11 +1,7 @@
-import { DirNode, FileNode, LayerNode } from "../nodes.js";
-import {
-  LayeredProjectNode,
-  LayeredProjectTree,
-  ProjectNode,
-  ProjectTree,
-  TreeLintConfig,
-} from "../../types/index.js";
+import { ITreeLintConfig } from "@/types/config.js";
+import { ILayeredProjectTree, IProjectTree } from "@/types/trees.js";
+import { TLayeredProjectNode, TProjectNode } from "@/types/nodes.js";
+import { DirNode, LayerNode } from "@/core/nodes/index.js";
 
 export class LayerParser {
   protected layerNames: Set<string> = new Set(
@@ -13,33 +9,36 @@ export class LayerParser {
   );
 
   constructor(
-    protected config: TreeLintConfig,
-    protected tree: ProjectTree,
+    protected config: ITreeLintConfig,
+    protected tree: IProjectTree,
   ) {}
 
-  public parse(): LayeredProjectTree {
+  public parse(): ILayeredProjectTree {
     return {
       generatedAt: this.tree.generatedAt,
       trees: this.tree.trees.map((node) => this.annotateNode(node)),
     };
   }
 
-  private annotateNode(node: ProjectNode): LayeredProjectNode {
-    if (node instanceof FileNode) return node;
+  private annotateNode(node: TProjectNode): TLayeredProjectNode {
+    if (node instanceof DirNode) {
+      const isLayerDirectory = this.layerNames.has(node.name);
 
-    const isLayerDirectory = this.layerNames.has(node.name);
-    const updatedChildren = node.children?.map((child) =>
-      this.annotateNode(child),
-    );
+      const updatedChildren = node.children.map((child: TProjectNode) =>
+        this.annotateNode(child),
+      );
 
-    const annotatedNode = node.withNewChildren(updatedChildren);
+      node.children = updatedChildren;
 
-    if (isLayerDirectory) {
-      return new LayerNode(annotatedNode, node.name, {
-        rule: "warn",
-      });
+      if (isLayerDirectory) {
+        return new LayerNode(node, {
+          rule: "warn",
+        });
+      }
+
+      return new DirNode(node.name, node.path, updatedChildren);
     }
 
-    return new DirNode(node.name, node.path, updatedChildren);
+    return node;
   }
 }

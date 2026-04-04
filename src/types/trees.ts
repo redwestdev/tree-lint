@@ -1,18 +1,18 @@
-import { EntityProjectNode, LayeredProjectNode, ProjectNode } from "./nodes.js";
+import { TAnyNode, TLayeredProjectNode, TProjectNode } from "./nodes.js";
 
-export interface ProjectTree {
+export interface IProjectTree {
   generatedAt: string;
-  trees: ProjectNode[];
+  trees: TProjectNode[];
 }
 
-export interface LayeredProjectTree {
+export interface ILayeredProjectTree {
   generatedAt: string;
-  trees: LayeredProjectNode[];
+  trees: TLayeredProjectNode[];
 }
 
-export interface EntityProjectTree {
+export interface IEntityProjectTree {
   generatedAt: string;
-  trees: EntityProjectNode[];
+  trees: TAnyNode[];
 }
 
-export type AnyTree = ProjectTree | LayeredProjectTree | EntityProjectTree;
+export type TAnyTree = IProjectTree | ILayeredProjectTree | IEntityProjectTree;

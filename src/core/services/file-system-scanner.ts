@@ -2,8 +2,9 @@ import fs from "fs/promises";
 import path from "path";
 import chalk from "chalk";
 
-import { DirNode, FileNode } from "../nodes.js";
-import { ProjectNode, ProjectTree } from "../../types/index.js";
+import { TProjectNode } from "@/types/nodes.js";
+import { IProjectTree } from "@/types/trees.js";
+import { DirNode, FileNode } from "@/core/nodes/index.js";
 
 export class FileSystemScanner {
   protected ignore: string[];
@@ -24,7 +25,7 @@ export class FileSystemScanner {
     return this.ignore.includes(entryName) || entryName.startsWith(".");
   }
 
-  async getFilesInDirectory(dirPath: string): Promise<ProjectNode[]> {
+  async getFilesInDirectory(dirPath: string): Promise<TProjectNode[]> {
     try {
       const entries = await fs.readdir(dirPath, { withFileTypes: true });
 
@@ -45,7 +46,7 @@ export class FileSystemScanner {
     }
   }
 
-  async buildTree(dirPath: string): Promise<ProjectNode> {
+  async buildTree(dirPath: string): Promise<TProjectNode> {
     const stats = await fs.stat(dirPath);
     const name = path.basename(dirPath);
     const relativePath =
@@ -56,7 +57,7 @@ export class FileSystemScanner {
     }
 
     const entries = await this.getFilesInDirectory(dirPath);
-    const children: ProjectNode[] = [];
+    const children: TProjectNode[] = [];
 
     for (const entry of entries) {
       const childNode = await this.buildTree(entry.path);
@@ -66,9 +67,9 @@ export class FileSystemScanner {
     return new DirNode(name, relativePath, children);
   }
 
-  async scan(): Promise<ProjectTree> {
+  async scan(): Promise<IProjectTree> {
     const rootsToScan = this.roots.length > 0 ? this.roots : ["."];
-    const allTrees: ProjectNode[] = [];
+    const allTrees: TProjectNode[] = [];
 
     for (const root of rootsToScan) {
       const tree = await this.buildTree(root);

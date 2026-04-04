@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import { AnyTree } from "../types/index.js";
+import { TAnyTree } from "@/types/trees.js";
 
 /**
  * Saves given data to a JSON file.
@@ -7,7 +7,7 @@ import { AnyTree } from "../types/index.js";
  * @param outputPath The path to the output file.
  */
 export async function saveToJson(
-  data: AnyTree,
+  data: TAnyTree,
   outputPath: string,
 ): Promise<void> {
   await fs.writeFile(outputPath, JSON.stringify(data, null, 2), "utf-8");
