@@ -1,36 +1,39 @@
 import mm from "micromatch";
-import {
-  EntityProjectNode,
-  EntityProjectTree,
-  LayeredProjectNode,
-  LayeredProjectTree,
-  TreeLintConfig,
-} from "../../types/index.js";
-import { DirEntity, FileEntity, FileNode, LayerNode } from "../nodes.js";
 
-export interface EntityContext {
-  layer: keyof TreeLintConfig["layers"] | null;
+import { ITreeLintConfig } from "@/types/config.js";
+import { IEntityProjectTree, ILayeredProjectTree } from "@/types/trees.js";
+import { TAnyNode, TLayeredProjectNode } from "@/types/nodes.js";
+import {
+  DirEntity,
+  DirNode,
+  FileEntity,
+  FileNode,
+  LayerNode,
+} from "@/core/nodes/index.js";
+
+export interface IEntityContext {
+  layer: keyof ITreeLintConfig["layers"] | null;
   depth: number;
 }
 
 export class EntitiesParser {
-  protected config: TreeLintConfig;
-  protected tree: LayeredProjectTree;
+  protected config: ITreeLintConfig;
+  protected tree: ILayeredProjectTree;
   protected entities: Set<string>;
   protected layers: Set<string>;
-  protected initialContext: EntityContext = {
+  protected initialContext: IEntityContext = {
     layer: null,
     depth: 0,
   };
 
-  constructor(config: TreeLintConfig, tree: LayeredProjectTree) {
+  constructor(config: ITreeLintConfig, tree: ILayeredProjectTree) {
     this.config = config;
     this.tree = tree;
     this.entities = new Set(Object.keys(config.entities || {}));
     this.layers = new Set(Object.keys(config.layers || {}));
   }
 
-  public parse(): EntityProjectTree {
+  public parse(): IEntityProjectTree {
     return {
       generatedAt: this.tree.generatedAt,
       trees: this.tree.trees.map((node) =>
@@ -40,42 +43,41 @@ export class EntitiesParser {
   }
 
   private annotateNode(
-    node: LayeredProjectNode,
-    currentContext: EntityContext,
-  ): EntityProjectNode {
+    node: TLayeredProjectNode,
+    currentContext: IEntityContext,
+  ): TAnyNode {
     const context =
       node instanceof LayerNode
-        ? { ...currentContext, layer: node.layer }
+        ? { ...currentContext, layer: node.name }
         : currentContext;
 
-    let currentEntity: keyof TreeLintConfig["entities"] | null = null;
+    const currentEntity: keyof ITreeLintConfig["entities"] | null = null;
 
     if (context.layer) {
       const allowedEntities = this.config.layers[context.layer].entities;
 
       for (const entity of allowedEntities) {
         const matches = this.config.entities[entity].matches;
-
-        if (matches.namePattern && mm.isMatch(node.name, matches.namePattern)) {
-          currentEntity = entity;
-          break;
-        }
+        console.log(matches);
+        // if (matches.namePattern && mm.isMatch(node.name, matches.namePattern)) {
+        //   currentEntity = entity;
+        //   break;
+        // }
       }
     }
 
-    if (node instanceof FileNode) {
-      return currentEntity
-        ? new FileEntity(node, currentEntity, { rule: "warn" })
-        : node;
+    if (currentEntity) {
+      if (node instanceof DirNode) {
+        node.children = node.children.map((child) =>
+          this.annotateNode(child, context),
+        );
+
+        return new DirEntity(node, currentEntity, { rule: "warn" });
+      } else if (node instanceof FileNode) {
+        return new FileEntity(node, currentEntity, { rule: "warn" });
+      }
     }
 
-    const updatedChildren = node.children.map((child) =>
-      this.annotateNode(child, context),
-    );
-    const annotatedNode = node.withNewChildren(updatedChildren);
-
-    return currentEntity
-      ? new DirEntity(annotatedNode, currentEntity, { rule: "warn" })
-      : annotatedNode;
+    return node;
   }
 }

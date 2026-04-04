@@ -1,7 +1,7 @@
-import { AnyProjectNode } from "./nodes.js";
+import { TAnyNode } from "./nodes.js";
 
-export type CustomMatch = (node: AnyProjectNode) => boolean;
-// export type TEntityType = "file" | "directory";
+export type TCustomMatch = (node: TAnyNode) => boolean;
+
 export type TNaming =
   | "camelCase"
   | "PascalCase"
@@ -9,13 +9,13 @@ export type TNaming =
   | "snake_case"
   | "other";
 
-export interface TreeLintConfig<
+export interface ITreeLintConfig<
   L extends string = string,
   E extends string = string,
 > {
   roots: string[];
   ignore: string[];
-  layers: Record<L, Layer<E>>;
+  layers: Record<L, ILayer<E>>;
   entities: Record<E, IEntity>;
 }
 
@@ -23,13 +23,13 @@ export interface IEntity {
   matches: TMatches;
 }
 
-export interface Layer<E = string> {
-  entities: Array<E>; // only existing entities in config ?
+export interface ILayer<E = string> {
+  entities: Array<E>;
 }
 
 export interface IMatchFile {
   type: "file";
-  name: string; // regexp in glob syntax
+  name: string;
 }
 
 export interface IMatchFileExtension {

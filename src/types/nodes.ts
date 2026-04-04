@@ -12,7 +12,7 @@ export interface IFileNode extends INode {
 }
 
 export interface IDirNode extends INode {
-  children: IAnyNode[];
+  children: TAnyNode[];
 }
 
 export interface ILayerNode extends IDirNode {
@@ -31,7 +31,11 @@ export interface IGroupNode extends IDirNode {
   validate(): void;
 }
 
-export type IAnyNode =
+export type TProjectNode = IDirNode | IFileNode;
+
+export type TLayeredProjectNode = TProjectNode | ILayerNode;
+
+export type TAnyNode =
   | IDirNode
   | IFileNode
   | ILayerNode

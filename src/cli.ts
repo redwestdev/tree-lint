@@ -6,15 +6,16 @@ import ora from "ora";
 import path from "path";
 import { createJiti } from "jiti";
 
-import { TreeLintConfig } from "./types/index.js";
+import { ITreeLintConfig } from "@/types/config.js";
 import {
   EntitiesParser,
   FileSystemScanner,
   LayerParser,
-} from "./core/index.js";
-import { printProjectTree, saveToJson } from "./utils/index.js";
+} from "@/core/services/index.js";
+import { printProjectTree, saveToJson } from "@/utils/index.js";
+import { TAnyNode } from "@/types/nodes.js";
 
-interface ScanOptions {
+interface IScanOptions {
   treeOutput?: string | boolean;
   annotatedOutput?: string | boolean;
 }
@@ -40,7 +41,7 @@ program
     "-a, --annotated-output [file]",
     "Optionally save the project tree enriched with layers and entities to a JSON file",
   )
-  .action(async (projectPath: string | undefined, options: ScanOptions) => {
+  .action(async (projectPath: string | undefined, options: IScanOptions) => {
     const resolvedPath = path.resolve(projectPath || ".");
 
     const spinner = ora("Scanning...").start();
@@ -59,7 +60,7 @@ program
         process.exit(1);
       }
 
-      const config = configModule.default as TreeLintConfig;
+      const config = configModule.default as ITreeLintConfig;
 
       const rootsToScan = config.roots?.length
         ? config.roots.map((r: string) => path.join(resolvedPath, r))
@@ -81,7 +82,7 @@ program
       const entitiesParser = new EntitiesParser(config, layeredTree);
       const annotatedTree = entitiesParser.parse();
 
-      annotatedTree.trees.forEach((tree) => printProjectTree(tree));
+      annotatedTree.trees.forEach((tree: TAnyNode) => printProjectTree(tree));
 
       if (options.treeOutput !== undefined) {
         const outputPath =

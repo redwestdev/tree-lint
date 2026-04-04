@@ -1,8 +1,14 @@
-import { AnyProjectNode } from "../types/index.js";
-import { DirEntity, DirNode, FileEntity, LayerNode } from "../core/index.js";
+import { TAnyNode } from "@/types/nodes.js";
+import {
+  DirEntity,
+  DirNode,
+  FileEntity,
+  FileNode,
+  LayerNode,
+} from "@/core/nodes/index.js";
 
 export function printProjectTree(
-  node: AnyProjectNode,
+  node: TAnyNode,
   indent: string = "",
   isLast: boolean = true,
 ) {
@@ -11,12 +17,12 @@ export function printProjectTree(
   const className =
     node.constructor.name !== "Object"
       ? node.constructor.name
-      : node.type === "file"
+      : node instanceof FileNode
         ? "File"
         : "Dir";
   const layerTag =
-    node instanceof LayerNode && node.layer
-      ? ` \x1b[36m[Layer: ${node.layer}]\x1b[0m`
+    node instanceof LayerNode && node.name
+      ? ` \x1b[36m[Layer: ${node.name}]\x1b[0m`
       : "";
   const entityTag =
     (node instanceof DirEntity || node instanceof FileEntity) && node.entity
@@ -30,7 +36,7 @@ export function printProjectTree(
   const newIndent = indent + (isLast ? "    " : "│   ");
 
   if (node instanceof DirNode && node.children && node.children.length > 0) {
-    node.children.forEach((child: AnyProjectNode, index: number) => {
+    node.children.forEach((child: TAnyNode, index: number) => {
       const lastChild = index === node.children.length - 1;
       printProjectTree(child, newIndent, lastChild);
     });
