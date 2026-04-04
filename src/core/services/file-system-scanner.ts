@@ -1,96 +1,76 @@
 import fs from "fs/promises";
 import path from "path";
-import chalk from "chalk";
+import { Dirent } from "node:fs";
 
 import { TProjectNode } from "@/types/nodes.js";
 import { IProjectTree } from "@/types/trees.js";
 import { DirNode, FileNode } from "@/core/nodes/index.js";
 
-export class FileSystemScanner {
-  protected ignore: string[];
-  protected roots: string[];
-  protected cwd: string;
+const shouldIgnore = (entryName: string, ignore: string[]): boolean => {
+  return ignore.includes(entryName) || entryName.startsWith(".");
+};
 
-  constructor({
-    roots = [],
-    ignore = [],
-    cwd = process.cwd(),
-  }: { roots?: string[]; ignore?: string[]; cwd?: string } = {}) {
-    this.roots = roots;
-    this.ignore = ignore;
-    this.cwd = cwd;
-  }
+async function buildTree(
+  dirPath: string,
+  ignore: string[],
+  dirent?: Dirent,
+): Promise<TProjectNode> {
+  let name, isDirectory;
 
-  private shouldIgnore(entryName: string): boolean {
-    return this.ignore.includes(entryName) || entryName.startsWith(".");
-  }
+  if (dirent) {
+    name = dirent.name;
+    isDirectory = dirent.isDirectory();
+  } else {
+    name = path.basename(dirPath);
 
-  async getFilesInDirectory(dirPath: string): Promise<TProjectNode[]> {
-    try {
-      const entries = await fs.readdir(dirPath, { withFileTypes: true });
-
-      const filtered = entries.filter(
-        (entry) => !this.shouldIgnore(entry.name),
-      );
-
-      return filtered.map((entry) => {
-        const nodePath: string = path.join(dirPath, entry.name);
-        const name = entry.name;
-        return entry.isDirectory()
-          ? new DirNode(name, nodePath)
-          : new FileNode(name, nodePath);
-      });
-    } catch (error) {
-      console.error(`Error reading directory ${dirPath}:`, error);
-      return [];
-    }
-  }
-
-  async buildTree(dirPath: string): Promise<TProjectNode> {
     const stats = await fs.stat(dirPath);
-    const name = path.basename(dirPath);
-    const relativePath =
-      "/" + path.relative(this.cwd, dirPath).split(path.sep).join("/");
-
-    if (!stats.isDirectory()) {
-      return new FileNode(name, relativePath);
-    }
-
-    const entries = await this.getFilesInDirectory(dirPath);
-    const children: TProjectNode[] = [];
-
-    for (const entry of entries) {
-      const childNode = await this.buildTree(entry.path);
-      children.push(childNode);
-    }
-
-    return new DirNode(name, relativePath, children);
+    isDirectory = stats.isDirectory();
   }
 
-  async scan(): Promise<IProjectTree> {
-    const rootsToScan = this.roots.length > 0 ? this.roots : ["."];
-    const allTrees: TProjectNode[] = [];
+  if (isDirectory) {
+    const entries = await fs.readdir(dirPath, { withFileTypes: true });
+    const filteredEntries = entries.filter(
+      (entry) => !shouldIgnore(entry.name, ignore) && !entry.isSymbolicLink(),
+    );
 
-    for (const root of rootsToScan) {
-      const tree = await this.buildTree(root);
-      allTrees.push(tree);
-    }
+    const children: Promise<TProjectNode>[] = filteredEntries.map(
+      async (entry) => {
+        const childPath = path.join(dirPath, entry.name);
+        return await buildTree(childPath, ignore, entry);
+      },
+    );
 
-    return {
-      generatedAt: new Date().toISOString(),
-      trees: allTrees,
-    };
+    const resolvedChildren: TProjectNode[] = await Promise.all(children);
+
+    return new DirNode(name, dirPath, resolvedChildren);
   }
 
-  logScanPlan() {
-    console.log(chalk.bold.green("✅ Will scan the following paths:"));
-    this.roots.forEach((r: string) => console.log("  " + chalk.cyan(r)));
+  return new FileNode(name, dirPath);
+}
 
-    if (this.ignore?.length) {
-      console.log(chalk.bold.yellow("⚠️ Will ignore:"));
-      this.ignore.forEach((i: string) => console.log("  " + chalk.magenta(i)));
-    } else {
-      console.log(chalk.bold.yellow("⚠️ No ignored paths."));
-    }
+export async function buildProjectTree(
+  roots: string[],
+  ignore: string[],
+): Promise<IProjectTree> {
+  const rootsToScan = roots.filter((r) => {
+    const name = path.basename(r);
+    return !shouldIgnore(name, ignore);
+  });
+
+  if (!rootsToScan.length)
+    throw new Error(
+      'There are nothing to scan, check "roots" and "ignore" in your config.',
+    );
+
+  const allTrees: TProjectNode[] = [];
+
+  for (const root of rootsToScan) {
+    const tree = await buildTree(root, ignore);
+    allTrees.push(tree);
   }
+
+  return {
+    generatedAt: new Date().toISOString(),
+    trees: allTrees,
+  };
 }

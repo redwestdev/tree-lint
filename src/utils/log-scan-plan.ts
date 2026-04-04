@@ -1,0 +1,13 @@
+import chalk from "chalk";
+
+export function logScanPlan(roots: string[], ignore: string[]) {
+  console.log(chalk.bold.green("✅ Will scan the following paths:"));
+  roots.forEach((r: string) => console.log("  " + chalk.cyan(r)));
+
+  if (ignore?.length) {
+    console.log(chalk.bold.yellow("⚠️ Will ignore:"));
+    ignore.forEach((i: string) => console.log("  " + chalk.magenta(i)));
+  } else {
+    console.log(chalk.bold.yellow("⚠️ No ignored paths."));
+  }
+}

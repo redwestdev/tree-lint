@@ -7,13 +7,14 @@ import path from "path";
 import { createJiti } from "jiti";
 
 import { ITreeLintConfig } from "@/types/config.js";
-import {
-  EntitiesParser,
-  FileSystemScanner,
-  LayerParser,
-} from "@/core/services/index.js";
-import { printProjectTree, saveToJson } from "@/utils/index.js";
+import { printProjectTree, saveToJson, logScanPlan } from "@/utils/index.js";
 import { TAnyNode } from "@/types/nodes.js";
+import {
+  annotateEntities,
+  annotateGroups,
+  annotateLayers,
+  buildProjectTree,
+} from "@/core/services/index.js";
 
 interface IScanOptions {
   treeOutput?: string | boolean;
@@ -66,21 +67,13 @@ program
         ? config.roots.map((r: string) => path.join(resolvedPath, r))
         : [resolvedPath];
 
-      const fsScanner = new FileSystemScanner({
-        roots: rootsToScan,
-        ignore: config.ignore,
-        cwd: resolvedPath,
-      });
+      logScanPlan(rootsToScan, config.ignore);
 
-      fsScanner.logScanPlan();
+      const tree = await buildProjectTree(rootsToScan, config.ignore);
 
-      const tree = await fsScanner.scan();
-
-      const layerParser = new LayerParser(config, tree);
-      const layeredTree = layerParser.parse();
-
-      const entitiesParser = new EntitiesParser(config, layeredTree);
-      const annotatedTree = entitiesParser.parse();
+      const layeredTree = annotateLayers(tree, config);
+      const entitiesTree = annotateEntities(layeredTree, config);
+      const annotatedTree = annotateGroups(entitiesTree, config);
 
       annotatedTree.trees.forEach((tree: TAnyNode) => printProjectTree(tree));
 
@@ -90,7 +83,7 @@ program
             ? path.resolve(resolvedPath, options.treeOutput)
             : path.join(resolvedPath, ".project-tree.json");
 
-        await saveToJson(tree, outputPath);
+        await saveToJson(tree, outputPath, resolvedPath);
       }
 
       if (options.annotatedOutput !== undefined) {
@@ -99,7 +92,7 @@ program
             ? path.resolve(resolvedPath, options.annotatedOutput)
             : path.join(resolvedPath, ".entities-tree.json");
 
-        await saveToJson(annotatedTree, entitiesOutputPath);
+        await saveToJson(annotatedTree, entitiesOutputPath, resolvedPath);
       }
 
       const duration = Date.now() - startParseTime;

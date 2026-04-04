@@ -3,18 +3,18 @@ import { createConfig } from "./src/utils/create-config.js";
 export default createConfig({
   roots: ["src"],
   ignore: ["node_modules", "dist"],
-  // groups: {
-  // matches: {
-  // naming: "camelCase?",
-  // children: [
-  //     {
-  //       name: "index",
-  //         type: "file",
-  //       extensions: ["tsx", "ts"],
-  //     },
-  // ],
-  // },
-  // },
+  groups: {
+    matches: {
+      naming: "camelCase",
+      children: [
+        {
+          name: "index",
+          type: "file",
+          extensions: ["tsx", "ts"],
+        },
+      ],
+    },
+  },
   entities: {
     component: {
       matches: {
@@ -44,7 +44,7 @@ export default createConfig({
     hook: {
       matches: {
         type: "file",
-        name: "use*.ts", // name ONLY
+        name: "use*.ts",
       },
     },
   },

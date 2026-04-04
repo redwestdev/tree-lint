@@ -17,10 +17,18 @@ export interface ITreeLintConfig<
   ignore: string[];
   layers: Record<L, ILayer<E>>;
   entities: Record<E, IEntity>;
+  groups?: IGroup;
 }
 
 export interface IEntity {
   matches: TMatches;
+}
+
+export interface IGroup {
+  matches: {
+    naming: TNaming;
+    children?: Array<TMatches>;
+  };
 }
 
 export interface ILayer<E = string> {
