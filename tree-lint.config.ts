@@ -19,23 +19,15 @@ export default createConfig({
     component: {
       matches: {
         type: "directory",
-        name: "/[A-Z]/",
+        name: "",
         children: [
-          {
-            type: "directory",
-            name: "component",
-          },
-          {
-            type: "file",
-            name: "use*.ts",
-          },
           {
             type: "file",
             name: "index.ts",
           },
           {
             type: "file",
-            naming: "camelCase",
+            naming: "PascalCase",
             extensions: ["ts", "tsx"],
           },
         ],
@@ -55,29 +47,5 @@ export default createConfig({
     hooks: {
       entities: ["hook"],
     },
-    // ui: {
-    //   entities: ["component"],
-    // },
-    // layouts: {
-    //   entities: ["component"],
-    // },
-    // providers: {
-    //   entities: ["component"],
-    // },
-    // managers: {
-    //   entities: ["component"],
-    // },
-    // sections: {
-    //   entities: ["section"],
-    // },
-    // pages: {
-    //   entities: ["page"],
-    // },
-    // routes: {
-    //   entities: ["route"],
-    // },
-    // images: {
-    //   entities: ["image"],
-    // },
   },
 });
