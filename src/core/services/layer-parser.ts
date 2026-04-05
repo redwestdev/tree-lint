@@ -16,7 +16,7 @@ function annotateNode(
 
     if (isLayerDirectory) {
       return new LayerNode(node, {
-        rule: "warn",
+        rule: "Validate this as 'layer'",
       });
     }
 

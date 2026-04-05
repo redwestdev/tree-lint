@@ -1,5 +1,6 @@
 import { DirNode } from "@/core/nodes/DirNode.js";
 import { ILayerNode } from "@/types/nodes.js";
+import { validationLogger } from "@/utils/index.js";
 
 export class LayerNode extends DirNode implements ILayerNode {
   private readonly rules: Record<string, string>;
@@ -10,6 +11,8 @@ export class LayerNode extends DirNode implements ILayerNode {
   }
 
   validate() {
-    console.log("Validation rules:", this.rules);
+    if (!this.isValid) {
+      validationLogger(this.path, this.warnings, this.errors);
+    }
   }
 }

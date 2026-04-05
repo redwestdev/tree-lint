@@ -15,6 +15,7 @@ import {
   annotateLayers,
   buildProjectTree,
 } from "@/core/services/index.js";
+import { DirNode } from "@/core/nodes/index.js";
 
 interface IScanOptions {
   treeOutput?: string | boolean;
@@ -75,7 +76,16 @@ program
       const entitiesTree = annotateEntities(layeredTree, config);
       const annotatedTree = annotateGroups(entitiesTree, config);
 
-      annotatedTree.trees.forEach((tree: TAnyNode) => printProjectTree(tree));
+      annotatedTree.trees.forEach((node: TAnyNode) => printProjectTree(node));
+
+      const validateNodes = (node: TAnyNode) => {
+        if ("validate" in node) node.validate();
+        if (node instanceof DirNode) {
+          node.children.forEach((child: TAnyNode) => validateNodes(child));
+        }
+      };
+
+      layeredTree.trees.forEach((node: TAnyNode) => validateNodes(node));
 
       if (options.treeOutput !== undefined) {
         const outputPath =
@@ -96,6 +106,8 @@ program
       }
 
       const duration = Date.now() - startParseTime;
+
+      console.log("\n");
       spinner.succeed(`Structure parsed successfully (${duration}ms)`);
 
       process.exit(0);

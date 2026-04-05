@@ -1,5 +1,3 @@
-import mm from "micromatch";
-
 import { ITreeLintConfig } from "@/types/config.js";
 import { ILayeredProjectTree } from "@/types/trees.js";
 import { TAnyNode, TLayeredProjectNode } from "@/types/nodes.js";
@@ -10,6 +8,7 @@ import {
   FileNode,
   LayerNode,
 } from "@/core/nodes/index.js";
+import { matchNode } from "@/core/services/matcher/node-matchers.js";
 
 export interface IEntityContext {
   layer: keyof ITreeLintConfig["layers"] | null;
@@ -19,6 +18,15 @@ export interface IEntityContext {
 const initialContext: IEntityContext = {
   layer: null,
   depth: 0,
+};
+
+export const MATCHING_ERRORS: Record<string, string> = {
+  type: "Node type mismatch.",
+  name: "Name does not match the required pattern or convention.",
+  extensions: "Invalid file extension.",
+  childrenLength:
+    "This directory is empty, but a valid entity must contain files.",
+  children: "Invalid composition of child elements.",
 };
 
 function annotateNode(
@@ -32,22 +40,29 @@ function annotateNode(
       ? { ...currentContext, layer: node.name }
       : currentContext;
 
-  const currentEntity: keyof ITreeLintConfig["entities"] | null = null;
+  let currentEntity: keyof ITreeLintConfig["entities"] | null = null;
 
-  if (context.layer) {
+  if (context.layer && !(node instanceof LayerNode)) {
     const allowedEntities = layers[context.layer].entities;
 
     for (const entity of allowedEntities) {
       const matches = entities[entity].matches;
-      console.log(matches);
-      // if (matches.namePattern && mm.isMatch(node.name, matches.namePattern)) {
-      //   if (node instanceof LayerNode) {
-      //     node.isValid = false;
-      //     node.errors.push("Node is defined as both a Layer and an Entity.");
-      //   }
-      //   currentEntity = entity;
-      //   break;
-      // }
+      if (node.type !== matches.type) continue;
+      const result = matchNode(node, matches);
+      const isEntity = Object.values(result).some(Boolean);
+
+      if (isEntity) {
+        currentEntity = entity;
+        node.isValid = Object.values(result).every(Boolean);
+
+        if (!node.isValid) {
+          for (const key in result) {
+            if (!result[key]) node.errors.push(MATCHING_ERRORS[key]);
+          }
+        }
+
+        break;
+      }
     }
   }
 
@@ -57,11 +72,15 @@ function annotateNode(
     );
 
     return currentEntity
-      ? new DirEntity(node, currentEntity, { rule: "warn" })
+      ? new DirEntity(node, currentEntity, {
+          rule: "Validate this as 'dir entity'",
+        })
       : node;
   } else if (node instanceof FileNode) {
     return currentEntity
-      ? new FileEntity(node, currentEntity, { rule: "warn" })
+      ? new FileEntity(node, currentEntity, {
+          rule: "Validate this as 'file entity'",
+        })
       : node;
   }
 

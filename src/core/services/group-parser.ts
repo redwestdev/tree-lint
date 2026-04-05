@@ -5,6 +5,5 @@ export function annotateGroups(
   tree: IEntityProjectTree,
   config: ITreeLintConfig,
 ) {
-  console.log("annotate groups", config.groups);
   return tree;
 }

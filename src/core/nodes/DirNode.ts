@@ -8,4 +8,8 @@ export class DirNode extends Node implements IDirNode {
     super(name, path);
     this.children = children;
   }
+
+  get type(): "directory" {
+    return "directory";
+  }
 }
