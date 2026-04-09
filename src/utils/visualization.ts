@@ -5,6 +5,7 @@ import {
   DirNode,
   FileEntity,
   FileNode,
+  GroupNode,
   LayerNode,
 } from "@/core/nodes/index.js";
 
@@ -18,6 +19,7 @@ export function printProjectTree(
     className: chalk.gray,
     layer: chalk.cyan,
     entity: chalk.yellow,
+    group: chalk.blue,
     error: chalk.red.bold,
     invalidNode: chalk.red,
   };
@@ -43,12 +45,15 @@ export function printProjectTree(
       ? ` ${colors.entity(`[Entity: ${node.entity}]`)}`
       : "";
 
+  const groupTag =
+    node instanceof GroupNode ? ` ${colors.group(`[Group]`)}` : "";
+
   const nameDisplay = node.isValid
     ? node.name
     : colors.invalidNode(`${colors.error("✖")} ${node.name}`);
 
   console.log(
-    `${indent}${marker}${nameDisplay} ${className}${layerTag}${entityTag}`,
+    `${indent}${marker}${nameDisplay} ${className}${layerTag}${entityTag}${groupTag}`,
   );
 
   const newIndent = indent + (isLast ? "    " : colors.marker("│   "));

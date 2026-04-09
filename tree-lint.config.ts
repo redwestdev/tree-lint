@@ -4,14 +4,19 @@ export default createConfig({
   roots: [],
   ignore: ["node_modules", "dist"],
   groups: {
-    name: "camelCase",
-    children: [],
+    name: "[a-z]*",
+    children: [
+      {
+        type: "file",
+        name: "index.ts",
+      },
+    ],
   },
   entities: {
     component: {
       matches: {
         type: "directory",
-        name: "",
+        name: "[A-Z]*",
         children: [
           {
             type: "file",
@@ -23,7 +28,7 @@ export default createConfig({
     section: {
       matches: {
         type: "directory",
-        name: "*{Sct,Section}",
+        name: "[A-Z]*{Sct,Section}",
         children: [
           {
             type: "file",

@@ -1,9 +1,9 @@
 import { FileNode } from "@/core/nodes/FileNode.js";
 import { TFileEntity } from "@/types/nodes.js";
-import { IMatchFile, ITreeLintConfig, TMatches } from "@/types/config.js";
+import { IMatchFile, ITreeLintConfig } from "@/types/config.js";
 import { validationLogger } from "@/utils/index.js";
 import { matchName } from "@/core/services/matcher/utils.js";
-import { MATCHING_ERRORS } from "@/core/services/matcher/constants.js";
+import { MATCHING_ENTITY_ERRORS } from "@/core/services/matcher/constants.js";
 import { replacePlaceholders } from "@/utils/replace-placeholders.js";
 
 export class FileEntity extends FileNode implements TFileEntity {
@@ -41,10 +41,10 @@ export class FileEntity extends FileNode implements TFileEntity {
     };
     const isMatch = Object.values(result).every(Boolean);
 
-    if (!isMatch) {
+    if (!isMatch && Object.values(result).some(Boolean)) {
       for (const key in result) {
         if (!result[key]) {
-          const warn = replacePlaceholders(MATCHING_ERRORS[key], {
+          const warn = replacePlaceholders(MATCHING_ENTITY_ERRORS[key], {
             entity: entityName,
           });
           node.addWarning(warn);

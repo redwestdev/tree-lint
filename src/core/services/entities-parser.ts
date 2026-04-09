@@ -9,8 +9,6 @@ import {
   LayerNode,
 } from "@/core/nodes/index.js";
 
-import { getNodeType } from "@/utils/get-node-type.js";
-
 export interface IEntityContext {
   layer: keyof ITreeLintConfig["layers"] | null;
   depth: number;
