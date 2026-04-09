@@ -21,10 +21,13 @@ import {
   buildProjectTree,
 } from "@/core/services/index.js";
 import { DirNode } from "@/core/nodes/index.js";
+import { countNodes, getVitals, printReport } from "@/utils/performance.js";
 
 interface IScanOptions {
   treeOutput?: string | boolean;
   annotatedOutput?: string | boolean;
+  vitals?: string | boolean;
+  printTree?: string | boolean;
 }
 
 const jiti = createJiti(import.meta.url);
@@ -42,11 +45,19 @@ program
   .description("Scan the project and save structure to file")
   .option(
     "-t, --tree-output [file]",
-    "Optionally save the project tree to a JSON file",
+    "Export the raw file system structure to a JSON file",
   )
   .option(
     "-a, --annotated-output [file]",
-    "Optionally save the project tree enriched with layers and entities to a JSON file",
+    "Export the processed tree (with identified layers, entities, and groups) to a JSON file",
+  )
+  .option(
+    "-v, --vitals",
+    "Display detailed engine performance metrics (CPU, Memory, and I/O efficiency)",
+  )
+  .option(
+    "-p, --print-tree",
+    "Render the analyzed project structure directly in the terminal",
   )
   .action(async (projectPath: string | undefined, options: IScanOptions) => {
     const resolvedPath = path.resolve(projectPath || ".");
@@ -54,7 +65,7 @@ program
     const spinner = ora("Scanning...").start();
 
     try {
-      const startParseTime = Date.now();
+      const start = getVitals();
 
       const configModule = await jiti.import(configPath);
 
@@ -81,7 +92,8 @@ program
       const entitiesTree = annotateEntities(layeredTree, config);
       const annotatedTree = annotateGroups(entitiesTree, config);
 
-      annotatedTree.trees.forEach((node: TAnyNode) => printProjectTree(node));
+      if (options.printTree)
+        annotatedTree.trees.forEach((node: TAnyNode) => printProjectTree(node));
 
       const validateNodes = (node: TAnyNode) => {
         if (node.warnings.length) validationLogger(node.path, node.warnings);
@@ -92,7 +104,7 @@ program
         }
       };
 
-      layeredTree.trees.forEach((node: TAnyNode) => validateNodes(node));
+      annotatedTree.trees.forEach((node: TAnyNode) => validateNodes(node));
 
       if (options.treeOutput !== undefined) {
         const outputPath =
@@ -112,10 +124,13 @@ program
         await saveToJson(annotatedTree, entitiesOutputPath, resolvedPath);
       }
 
-      const duration = Date.now() - startParseTime;
-
-      console.log("\n");
-      spinner.succeed(`Structure parsed successfully (${duration}ms)`);
+      if (options.vitals !== undefined) {
+        const totalNodes = tree.trees.reduce(
+          (acc, t) => acc + countNodes(t),
+          0,
+        );
+        printReport(start, totalNodes);
+      }
 
       process.exit(0);
     } catch (error) {

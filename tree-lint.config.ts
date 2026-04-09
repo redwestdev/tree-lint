@@ -1,7 +1,7 @@
 import { createConfig } from "./src/utils/create-config.js";
 
 export default createConfig({
-  roots: [],
+  roots: ["src"],
   ignore: ["node_modules", "dist"],
   groups: {
     name: "[a-z]*",
@@ -20,7 +20,11 @@ export default createConfig({
         children: [
           {
             type: "file",
-            name: "*.ts",
+            name: "*.tsx",
+          },
+          {
+            type: "file",
+            name: "index.ts",
           },
         ],
       },
