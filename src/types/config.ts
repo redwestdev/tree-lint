@@ -25,10 +25,9 @@ export interface IEntity {
 }
 
 export interface IGroup {
-  matches: {
-    naming: TNaming;
-    children?: Array<TMatches>;
-  };
+  name: string;
+  children?: Array<TMatches>;
+  // validation: any
 }
 
 export interface ILayer<E = string> {
@@ -40,11 +39,11 @@ export interface IMatchFile {
   name: string;
 }
 
-export interface IMatchFileExtension {
-  type: "file";
-  naming: TNaming;
-  extensions: string[];
-}
+// export interface IMatchFileExtension {
+//   type: "file";
+//   naming: TNaming;
+//   extensions: string[];
+// }
 
 export interface IMatchDirectory {
   type: "directory";
@@ -52,4 +51,4 @@ export interface IMatchDirectory {
   children?: Array<TMatches>;
 }
 
-export type TMatches = IMatchDirectory | IMatchFileExtension | IMatchFile;
+export type TMatches = IMatchDirectory | IMatchFile;

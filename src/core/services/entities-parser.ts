@@ -8,7 +8,8 @@ import {
   FileNode,
   LayerNode,
 } from "@/core/nodes/index.js";
-import { matchNode } from "@/core/services/matcher/node-matchers.js";
+
+import { getNodeType } from "@/utils/get-node-type.js";
 
 export interface IEntityContext {
   layer: keyof ITreeLintConfig["layers"] | null;
@@ -18,15 +19,6 @@ export interface IEntityContext {
 const initialContext: IEntityContext = {
   layer: null,
   depth: 0,
-};
-
-export const MATCHING_ERRORS: Record<string, string> = {
-  type: "Node type mismatch.",
-  name: "Name does not match the required pattern or convention.",
-  extensions: "Invalid file extension.",
-  childrenLength:
-    "This directory is empty, but a valid entity must contain files.",
-  children: "Invalid composition of child elements.",
 };
 
 function annotateNode(
@@ -40,48 +32,26 @@ function annotateNode(
       ? { ...currentContext, layer: node.name }
       : currentContext;
 
-  let currentEntity: keyof ITreeLintConfig["entities"] | null = null;
+  if (node instanceof DirNode) {
+    node.children = node.children.map((child) =>
+      annotateNode(child, context, entities, layers),
+    );
+  }
 
   if (context.layer && !(node instanceof LayerNode)) {
     const allowedEntities = layers[context.layer].entities;
 
     for (const entity of allowedEntities) {
       const matches = entities[entity].matches;
-      if (node.type !== matches.type) continue;
-      const result = matchNode(node, matches);
-      const isEntity = Object.values(result).some(Boolean);
 
-      if (isEntity) {
-        currentEntity = entity;
-        node.isValid = Object.values(result).every(Boolean);
+      if (matches.type === "directory" && node instanceof DirNode) {
+        return DirEntity.match(entity, node, matches);
+      }
 
-        if (!node.isValid) {
-          for (const key in result) {
-            if (!result[key]) node.errors.push(MATCHING_ERRORS[key]);
-          }
-        }
-
-        break;
+      if (matches.type === "file" && node instanceof FileNode) {
+        return FileEntity.match(entity, node, matches);
       }
     }
-  }
-
-  if (node instanceof DirNode) {
-    node.children = node.children.map((child: TAnyNode) =>
-      annotateNode(child, context, entities, layers),
-    );
-
-    return currentEntity
-      ? new DirEntity(node, currentEntity, {
-          rule: "Validate this as 'dir entity'",
-        })
-      : node;
-  } else if (node instanceof FileNode) {
-    return currentEntity
-      ? new FileEntity(node, currentEntity, {
-          rule: "Validate this as 'file entity'",
-        })
-      : node;
   }
 
   return node;

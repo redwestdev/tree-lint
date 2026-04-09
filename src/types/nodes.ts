@@ -1,7 +1,6 @@
 export interface INode {
   name: string;
   path: string;
-  readonly type: TNodeType;
 
   isValid: boolean;
   errors: string[];
@@ -30,6 +29,11 @@ export interface IDirEntity extends IDirNode {
 
 export interface IGroupNode extends IDirNode {
   validate(): void;
+}
+
+export enum NodeType {
+  DirNode = "directory",
+  FileNode = "file",
 }
 
 export type TNodeType = "file" | "directory";

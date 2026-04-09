@@ -1,19 +1,11 @@
 import { createConfig } from "./src/utils/create-config.js";
 
 export default createConfig({
-  roots: ["src"],
+  roots: [],
   ignore: ["node_modules", "dist"],
   groups: {
-    matches: {
-      naming: "camelCase",
-      children: [
-        {
-          name: "index",
-          type: "file",
-          extensions: ["tsx", "ts"],
-        },
-      ],
-    },
+    name: "camelCase",
+    children: [],
   },
   entities: {
     component: {
@@ -23,12 +15,19 @@ export default createConfig({
         children: [
           {
             type: "file",
-            name: "index.ts",
+            name: "*.ts",
           },
+        ],
+      },
+    },
+    section: {
+      matches: {
+        type: "directory",
+        name: "*{Sct,Section}",
+        children: [
           {
             type: "file",
-            naming: "PascalCase",
-            extensions: ["ts", "tsx"],
+            name: "*.tsx",
           },
         ],
       },
@@ -46,6 +45,9 @@ export default createConfig({
     },
     hooks: {
       entities: ["hook"],
+    },
+    sections: {
+      entities: ["section"],
     },
   },
 });

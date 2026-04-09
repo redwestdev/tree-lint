@@ -15,4 +15,11 @@ export class LayerNode extends DirNode implements ILayerNode {
       validationLogger(this.path, this.warnings, this.errors);
     }
   }
+
+  static match(node: DirNode, layers: Set<string>): LayerNode | DirNode {
+    const rules: Record<string, string> = {};
+    const isLayerDirectory = layers.has(node.name);
+
+    return isLayerDirectory ? new this(node, rules) : node;
+  }
 }

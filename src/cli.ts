@@ -7,7 +7,12 @@ import path from "path";
 import { createJiti } from "jiti";
 
 import { ITreeLintConfig } from "@/types/config.js";
-import { printProjectTree, saveToJson, logScanPlan } from "@/utils/index.js";
+import {
+  printProjectTree,
+  saveToJson,
+  logScanPlan,
+  validationLogger,
+} from "@/utils/index.js";
 import { TAnyNode } from "@/types/nodes.js";
 import {
   annotateEntities,
@@ -79,6 +84,8 @@ program
       annotatedTree.trees.forEach((node: TAnyNode) => printProjectTree(node));
 
       const validateNodes = (node: TAnyNode) => {
+        if (node.warnings.length) validationLogger(node.path, node.warnings);
+
         if ("validate" in node) node.validate();
         if (node instanceof DirNode) {
           node.children.forEach((child: TAnyNode) => validateNodes(child));

@@ -8,8 +8,4 @@ export class FileNode extends Node implements IFileNode {
     super(name, path);
     this.extension = path.split(".").pop() || "";
   }
-
-  get type(): "file" {
-    return "file";
-  }
 }

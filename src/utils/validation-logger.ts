@@ -20,8 +20,8 @@ function createPath(absolutePath: string): string {
 
 export function validationLogger(
   path: string,
-  warnings: string[],
-  errors: string[],
+  warnings: string[] = [],
+  errors: string[] = [],
 ) {
   console.log(`\n${createPath(path)}`);
 

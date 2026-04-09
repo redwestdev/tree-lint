@@ -8,19 +8,11 @@ function annotateNode(
   layers: Set<string>,
 ): TLayeredProjectNode {
   if (node instanceof DirNode) {
-    const isLayerDirectory = layers.has(node.name);
-
     node.children = node.children.map((child: TProjectNode) =>
       annotateNode(child, layers),
     );
 
-    if (isLayerDirectory) {
-      return new LayerNode(node, {
-        rule: "Validate this as 'layer'",
-      });
-    }
-
-    return node;
+    return LayerNode.match(node, layers);
   }
 
   return node;
