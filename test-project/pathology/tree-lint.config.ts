@@ -1,7 +1,7 @@
-import { createConfig } from "./src/utils/create-config.js";
+import { createConfig } from "../../src/utils/create-config.js";
 
 export default createConfig({
-  roots: ["src", "src/components"],
+  roots: ["src", "src/components"], // Нахлёст корней
   ignore: ["node_modules", "dist"],
   groups: {
     name: "[a-z]*",

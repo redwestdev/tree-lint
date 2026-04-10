@@ -1,7 +1,7 @@
-import { createConfig } from "./src/utils/create-config.js";
+import { createConfig } from "../../src/utils/create-config.js";
 
 export default createConfig({
-  roots: ["src", "src/components"],
+  roots: ["src"],
   ignore: ["node_modules", "dist"],
   groups: {
     name: "[a-z]*",
@@ -13,16 +13,6 @@ export default createConfig({
     ],
   },
   entities: {
-    "multi-component": {
-      matches: {
-        type: "directory",
-        name: "Multi*",
-        children: [
-          { type: "file", name: "*.tsx" },
-          { type: "file", name: "*.tsx" },
-        ],
-      },
-    },
     component: {
       matches: {
         type: "directory",
@@ -60,7 +50,7 @@ export default createConfig({
   },
   layers: {
     components: {
-      entities: ["multi-component", "component"],
+      entities: ["component"],
     },
     hooks: {
       entities: ["hook"],
