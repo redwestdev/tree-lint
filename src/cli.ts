@@ -4,15 +4,8 @@ import { Command } from "commander";
 import chalk from "chalk";
 import ora from "ora";
 import path from "path";
-import { createJiti } from "jiti";
 
-import { ITreeLintConfig } from "@/types/config.js";
-import {
-  printProjectTree,
-  saveToJson,
-  logScanPlan,
-  validationLogger,
-} from "@/utils/index.js";
+import { printProjectTree, saveToJson, logScanPlan } from "@/utils/index.js";
 import { TAnyNode } from "@/types/nodes.js";
 import {
   annotateEntities,
@@ -20,18 +13,26 @@ import {
   annotateLayers,
   buildProjectTree,
 } from "@/core/services/index.js";
-import { DirNode } from "@/core/nodes/index.js";
 import { countNodes, getVitals, printReport } from "@/utils/performance.js";
+import { validateInitialPaths } from "@/utils/validate-path.js";
+import { getConfig } from "@/utils/find-config.js";
+import { validateNodes } from "@/core/services/validator.js";
 
 interface IScanOptions {
   treeOutput?: string | boolean;
   annotatedOutput?: string | boolean;
-  vitals?: string | boolean;
-  printTree?: string | boolean;
+  vitals?: boolean;
+  printTree?: boolean;
 }
 
-const jiti = createJiti(import.meta.url);
-const configPath = path.resolve(process.cwd(), "tree-lint.config.ts");
+const resolveOutPath = (
+  val: string | boolean,
+  defaultName: string,
+  root: string,
+) => {
+  const fileName = typeof val === "string" && val.length ? val : defaultName;
+  return path.resolve(root, fileName);
+};
 
 const program = new Command();
 
@@ -59,34 +60,27 @@ program
     "-p, --print-tree",
     "Render the analyzed project structure directly in the terminal",
   )
-  .action(async (projectPath: string | undefined, options: IScanOptions) => {
-    const resolvedPath = path.resolve(projectPath || ".");
-
+  .action(async (projectPath: string = ".", options: IScanOptions) => {
     const spinner = ora("Scanning...").start();
 
     try {
       const start = getVitals();
 
-      const configModule = await jiti.import(configPath);
+      const { config, projectRoot } = await getConfig();
 
-      if (
-        !configModule ||
-        typeof configModule !== "object" ||
-        !("default" in configModule)
-      ) {
-        spinner.fail(`File ${configPath} doesn't export default config`);
-        process.exit(1);
-      }
+      const resolvedPath = projectPath
+        ? path.resolve(projectPath)
+        : projectRoot;
 
-      const config = configModule.default as ITreeLintConfig;
+      const roots = validateInitialPaths(
+        resolvedPath,
+        config.roots,
+        config.ignore,
+      );
 
-      const rootsToScan = config.roots?.length
-        ? config.roots.map((r: string) => path.join(resolvedPath, r))
-        : [resolvedPath];
+      logScanPlan(roots, config.ignore);
 
-      logScanPlan(rootsToScan, config.ignore);
-
-      const tree = await buildProjectTree(rootsToScan, config.ignore);
+      const tree = await buildProjectTree(roots, config.ignore);
 
       const layeredTree = annotateLayers(tree, config);
       const entitiesTree = annotateEntities(layeredTree, config);
@@ -95,33 +89,24 @@ program
       if (options.printTree)
         annotatedTree.trees.forEach((node: TAnyNode) => printProjectTree(node));
 
-      const validateNodes = (node: TAnyNode) => {
-        if (node.warnings.length) validationLogger(node.path, node.warnings);
-
-        if ("validate" in node) node.validate();
-        if (node instanceof DirNode) {
-          node.children.forEach((child: TAnyNode) => validateNodes(child));
-        }
-      };
-
       annotatedTree.trees.forEach((node: TAnyNode) => validateNodes(node));
 
       if (options.treeOutput !== undefined) {
-        const outputPath =
-          typeof options.treeOutput === "string"
-            ? path.resolve(resolvedPath, options.treeOutput)
-            : path.join(resolvedPath, ".project-tree.json");
-
-        await saveToJson(tree, outputPath, resolvedPath);
+        const out = resolveOutPath(
+          options.treeOutput,
+          ".project-tree.json",
+          resolvedPath,
+        );
+        await saveToJson(tree, out, resolvedPath);
       }
 
       if (options.annotatedOutput !== undefined) {
-        const entitiesOutputPath =
-          typeof options.annotatedOutput === "string"
-            ? path.resolve(resolvedPath, options.annotatedOutput)
-            : path.join(resolvedPath, ".entities-tree.json");
-
-        await saveToJson(annotatedTree, entitiesOutputPath, resolvedPath);
+        const out = resolveOutPath(
+          options.annotatedOutput,
+          ".entities-tree.json",
+          resolvedPath,
+        );
+        await saveToJson(annotatedTree, out, resolvedPath);
       }
 
       if (options.vitals !== undefined) {

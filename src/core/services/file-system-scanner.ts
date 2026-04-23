@@ -29,6 +29,8 @@ async function buildTree(
 
   if (isDirectory) {
     const entries = await fs.readdir(dirPath, { withFileTypes: true });
+
+    // if node is simlink ==> catch with Error, ex. "We are not support SymbolicLinks"
     const filteredEntries = entries.filter(
       (entry) => !shouldIgnore(entry.name, ignore) && !entry.isSymbolicLink(),
     );
@@ -50,22 +52,12 @@ async function buildTree(
 
 export async function buildProjectTree(
   roots: string[],
-  ignore: string[],
+  ignore?: string[],
 ): Promise<IProjectTree> {
-  const rootsToScan = roots.filter((r) => {
-    const name = path.basename(r);
-    return !shouldIgnore(name, ignore);
-  });
-
-  if (!rootsToScan.length)
-    throw new Error(
-      'There are nothing to scan, check "roots" and "ignore" in your config.',
-    );
-
   const allTrees: TProjectNode[] = [];
 
-  for (const root of rootsToScan) {
-    const tree = await buildTree(root, ignore);
+  for (const root of roots) {
+    const tree = await buildTree(root, ignore ?? []);
     allTrees.push(tree);
   }
 
