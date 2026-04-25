@@ -7,7 +7,7 @@ function annotateNode(
   node: TProjectNode,
   config?: ITreeLintConfig["groups"],
 ): TAnyNode {
-  if (node instanceof DirNode) {
+  if (node instanceof DirNode && !node.isExcluded) {
     node.children = node.children.map((child: TProjectNode) =>
       annotateNode(child, config),
     );

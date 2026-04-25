@@ -15,7 +15,7 @@ export class FileEntity extends FileNode implements TFileEntity {
     entity: keyof ITreeLintConfig["entities"],
     rules: Record<string, string>,
   ) {
-    super(node.name, node.path);
+    super(node);
     this.rules = rules;
     this.entity = entity;
   }

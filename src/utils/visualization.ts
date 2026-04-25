@@ -9,21 +9,43 @@ import {
   LayerNode,
 } from "@/core/nodes/index.js";
 
+const colors = {
+  marker: chalk.gray,
+  className: chalk.gray,
+  layer: chalk.cyan,
+  entity: chalk.yellow,
+  group: chalk.blue,
+  error: chalk.red.bold,
+  invalidNode: chalk.red,
+  excludedNode: chalk.gray.bold,
+};
+
+const EXCLUDE_REASONS: Record<string, string> = {
+  hidden: "is hidden",
+  unreadable: "access denied",
+  ignored: "ignored by config",
+};
+
+const getReason = (node: TAnyNode) => {
+  const reasons = [];
+  const flags: Record<string, boolean> = {
+    hidden: node.hidden || false,
+    unreadable: node.unreadable || false,
+    ignored: node.ignored || false,
+  };
+
+  for (const flag in flags) {
+    if (flags[flag]) reasons.push(EXCLUDE_REASONS[flag]);
+  }
+
+  return reasons;
+};
+
 export function printProjectTree(
   node: TAnyNode,
   indent: string = "",
   isLast: boolean = true,
 ) {
-  const colors = {
-    marker: chalk.gray,
-    className: chalk.gray,
-    layer: chalk.cyan,
-    entity: chalk.yellow,
-    group: chalk.blue,
-    error: chalk.red.bold,
-    invalidNode: chalk.red,
-  };
-
   const marker = colors.marker(isLast ? "└── " : "├── ");
 
   const classNameRaw =
@@ -48,12 +70,19 @@ export function printProjectTree(
   const groupTag =
     node instanceof GroupNode ? ` ${colors.group(`[Group]`)}` : "";
 
-  const nameDisplay = node.isValid
-    ? node.name
-    : colors.invalidNode(`${colors.error("✖")} ${node.name}`);
+  const isExcluded = node.hidden || node.unreadable || node.ignored;
+  const excludeTag = isExcluded
+    ? `${colors.marker(`[Excluded: ${getReason(node).join(", ")}]`)}`
+    : "";
+
+  const nameDisplay = isExcluded
+    ? colors.excludedNode(node.name)
+    : node.isValid
+      ? node.name
+      : colors.invalidNode(`${colors.error("✖")} ${node.name}`);
 
   console.log(
-    `${indent}${marker}${nameDisplay} ${className}${layerTag}${entityTag}${groupTag}`,
+    `${indent}${marker}${nameDisplay} ${className}${layerTag}${entityTag}${groupTag}${excludeTag}`,
   );
 
   const newIndent = indent + (isLast ? "    " : colors.marker("│   "));

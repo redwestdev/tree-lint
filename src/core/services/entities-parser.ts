@@ -30,7 +30,7 @@ function annotateNode(
       ? { ...currentContext, layer: node.name }
       : currentContext;
 
-  if (node instanceof DirNode) {
+  if (node instanceof DirNode && !node.isExcluded) {
     node.children = node.children.map((child) =>
       annotateNode(child, context, entities, layers),
     );
@@ -42,11 +42,19 @@ function annotateNode(
     for (const entity of allowedEntities) {
       const matches = entities[entity].matches;
 
-      if (matches.type === "directory" && node instanceof DirNode) {
+      if (
+        matches.type === "directory" &&
+        node instanceof DirNode &&
+        !node.isExcluded
+      ) {
         return DirEntity.match(entity, node, matches);
       }
 
-      if (matches.type === "file" && node instanceof FileNode) {
+      if (
+        matches.type === "file" &&
+        node instanceof FileNode &&
+        !node.isExcluded
+      ) {
         return FileEntity.match(entity, node, matches);
       }
     }

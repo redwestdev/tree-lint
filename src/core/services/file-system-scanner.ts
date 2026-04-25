@@ -1,20 +1,22 @@
 import fs from "fs/promises";
 import path from "path";
 import { Dirent } from "node:fs";
+import pLimit from "p-limit";
 
 import { TProjectNode } from "@/types/nodes.js";
 import { IProjectTree } from "@/types/trees.js";
-import { DirNode, FileNode } from "@/core/nodes/index.js";
+import { DirNode, FileNode, Node } from "@/core/nodes/index.js";
 
-const shouldIgnore = (entryName: string, ignore: string[]): boolean => {
-  return ignore.includes(entryName) || entryName.startsWith(".");
-};
+const CONCURRENCY_LIMIT = 100;
+const limit = pLimit(CONCURRENCY_LIMIT);
 
 async function buildTree(
   dirPath: string,
   ignore: string[],
   dirent?: Dirent,
 ): Promise<TProjectNode> {
+  await Node.isSymbolicLink(dirent ?? dirPath);
+
   let name, isDirectory;
 
   if (dirent) {
@@ -28,26 +30,24 @@ async function buildTree(
   }
 
   if (isDirectory) {
-    const entries = await fs.readdir(dirPath, { withFileTypes: true });
+    const dir = await DirNode.create(name, dirPath, ignore, []);
 
-    // if node is simlink ==> catch with Error, ex. "We are not support SymbolicLinks"
-    const filteredEntries = entries.filter(
-      (entry) => !shouldIgnore(entry.name, ignore) && !entry.isSymbolicLink(),
+    if (dir.isExcluded) return dir;
+
+    const entries = await limit(() =>
+      fs.readdir(dirPath, { withFileTypes: true }),
     );
 
-    const children: Promise<TProjectNode>[] = filteredEntries.map(
-      async (entry) => {
-        const childPath = path.join(dirPath, entry.name);
-        return await buildTree(childPath, ignore, entry);
-      },
-    );
+    const children = entries.map((entry) => {
+      const childPath = path.join(dirPath, entry.name);
+      return buildTree(childPath, ignore, entry);
+    });
 
-    const resolvedChildren: TProjectNode[] = await Promise.all(children);
-
-    return new DirNode(name, dirPath, resolvedChildren);
+    dir.children = await Promise.all(children);
+    return dir;
   }
 
-  return new FileNode(name, dirPath);
+  return await FileNode.create(name, dirPath, ignore);
 }
 
 export async function buildProjectTree(

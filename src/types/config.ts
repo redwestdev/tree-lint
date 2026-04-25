@@ -13,8 +13,8 @@ export interface ITreeLintConfig<
   L extends string = string,
   E extends string = string,
 > {
-  roots: string[];
-  ignore: string[];
+  roots?: string[];
+  ignore?: string[];
   layers: Record<L, ILayer<E>>;
   entities: Record<E, IEntity>;
   groups?: IGroup;
@@ -22,6 +22,7 @@ export interface ITreeLintConfig<
 
 export interface IEntity {
   matches: TMatches;
+  rules?: Record<string, any>;
 }
 
 export interface IGroup {
@@ -32,7 +33,11 @@ export interface IGroup {
 
 export interface ILayer<E = string> {
   entities: Array<E>;
+  rules?: Record<string, any>;
 }
+
+export interface IFileRule {}
+export interface IDirRule {}
 
 export interface IMatchFile {
   type: "file";

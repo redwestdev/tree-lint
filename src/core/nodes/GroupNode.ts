@@ -12,7 +12,7 @@ export class GroupNode extends DirNode implements IGroupNode {
   private readonly rules: Record<string, string>;
 
   constructor(node: DirNode, rules: Record<string, string>) {
-    super(node.name, node.path, node.children);
+    super(node, node.children);
     this.rules = rules;
   }
 

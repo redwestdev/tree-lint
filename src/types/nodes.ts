@@ -1,10 +1,12 @@
 export interface INode {
   name: string;
   path: string;
-
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
+  isValid?: boolean;
+  errors?: string[];
+  warnings?: string[];
+  ignored?: boolean;
+  unreadable?: boolean;
+  hidden?: boolean;
 }
 
 export interface IFileNode extends INode {

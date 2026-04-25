@@ -15,15 +15,9 @@ export class DirEntity extends DirNode implements IDirEntity {
     entity: keyof ITreeLintConfig["entities"],
     rules: Record<string, string>,
   ) {
-    super(node.name, node.path, node.children);
+    super(node, node.children);
     this.rules = rules;
     this.entity = entity;
-  }
-
-  validate() {
-    if (!this.isValid) {
-      validationLogger(this.path, this.warnings, this.errors);
-    }
   }
 
   static match(
