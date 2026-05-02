@@ -5,8 +5,13 @@
     "noEmit": true,
     "rootDir": ".",
     "lib": ["ES2020"],
-    "types": ["node"]
+    "types": ["node", "vitest/globals"]
   },
   "references": [{ "path": "./tsconfig.json" }],
-  "include": ["eslint.config.ts", "vitest.config.ts", "tree-lint.config.ts"]
+  "include": [
+    "eslint.config.ts",
+    "vitest.config.ts",
+    "tree-lint.config.ts",
+    "tests/**/*.ts"
+  ]
 }
