@@ -70,7 +70,7 @@ export function printProjectTree(
   const groupTag =
     node instanceof GroupNode ? ` ${colors.group(`[Group]`)}` : "";
 
-  const isExcluded = node.hidden || node.unreadable || node.ignored;
+  const isExcluded = node.unreadable || node.ignored;
   const excludeTag = isExcluded
     ? `${colors.marker(`[Excluded: ${getReason(node).join(", ")}]`)}`
     : "";

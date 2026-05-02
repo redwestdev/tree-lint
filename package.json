@@ -14,21 +14,25 @@
     "test:coverage": "vitest --coverage",
     "lint": "eslint . --fix",
     "format": "prettier --write .",
-    "scan": "node dist/cli.js scan"
+    "type-check": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "scan": "node dist/cli.js scan",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@typescript-eslint/parser": "^8.55.0",
     "@typescript-eslint/types": "^8.55.0",
-    "boxen": "^8.0.1",
     "chalk": "^5.6.2",
-    "chokidar": "^5.0.0",
-    "cli-table3": "^0.6.5",
     "commander": "^14.0.3",
-    "cosmiconfig": "^9.0.0",
-    "fast-glob": "^3.3.3",
-    "filesize": "^11.0.13",
     "jiti": "^2.6.1",
-    "lodash.merge": "^4.6.2",
     "micromatch": "^4.0.8",
     "ora": "^9.3.0",
     "p-limit": "^7.3.0",
@@ -36,7 +40,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/lodash.merge": "^4.6.9",
     "@types/micromatch": "^4.0.10",
     "@types/node": "^25.2.3",
     "concurrently": "^9.2.1",
@@ -44,6 +47,8 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^17.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "3.8.1",
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",

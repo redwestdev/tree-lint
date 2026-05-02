@@ -1,7 +1,6 @@
 import { DirNode } from "@/core/nodes/DirNode.js";
 import { IDirEntity } from "@/types/nodes.js";
 import { IMatchDirectory, ITreeLintConfig } from "@/types/config.js";
-import { validationLogger } from "@/utils/index.js";
 import { matchChildren, matchName } from "@/core/services/matcher/utils.js";
 import { MATCHING_ENTITY_ERRORS } from "@/core/services/matcher/constants.js";
 import { replacePlaceholders } from "@/utils/replace-placeholders.js";

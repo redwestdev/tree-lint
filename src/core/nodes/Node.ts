@@ -21,7 +21,7 @@ export class Node implements INode {
   }
 
   get isExcluded(): boolean {
-    return this.ignored || this.hidden || this.unreadable;
+    return this.ignored || this.unreadable;
   }
 
   addWarning(warn: string) {
@@ -40,7 +40,7 @@ export class Node implements INode {
     try {
       await fs.access(dirPath, constants.R_OK);
       return false;
-    } catch (e) {
+    } catch (_e) {
       return true;
     }
   }

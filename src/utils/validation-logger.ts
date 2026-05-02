@@ -13,7 +13,7 @@ function createPath(absolutePath: string): string {
     const fileUrl = pathToFileURL(absolutePath).href;
 
     return `\u001b]8;;${fileUrl}\u0007${absolutePath}\u001b]8;;\u0007`;
-  } catch (e) {
+  } catch (_e) {
     return absolutePath;
   }
 }

@@ -11,15 +11,26 @@ export default tseslint.config(
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
     languageOptions: {
-      globals: globals.browser,
+      globals: globals.node,
       parserOptions: {
-        project: true,
+        project: ["./tsconfig.json", "./tsconfig.node.json"],
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    rules: {},
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+      "@typescript-eslint/no-empty-object-type": "warn",
+    },
   },
   {
-    ignores: ["dist/", "node_modules/", "test-project/**/*"],
+    ignores: ["dist/", "node_modules/", "test-project/**/*", "notes/**/*"],
   },
 );

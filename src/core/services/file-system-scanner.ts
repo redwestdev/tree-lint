@@ -7,7 +7,7 @@ import { TProjectNode } from "@/types/nodes.js";
 import { IProjectTree } from "@/types/trees.js";
 import { DirNode, FileNode, Node } from "@/core/nodes/index.js";
 
-const CONCURRENCY_LIMIT = 100;
+const CONCURRENCY_LIMIT = 50;
 const limit = pLimit(CONCURRENCY_LIMIT);
 
 async function buildTree(
