@@ -1,6 +1,5 @@
 import { DirNode } from "@/core/nodes/DirNode.js";
 import { IGroupNode } from "@/types/nodes.js";
-import { validationLogger } from "@/utils/index.js";
 import { ITreeLintConfig } from "@/types/config.js";
 import { matchChildren, matchName } from "@/core/services/matcher/utils.js";
 
@@ -9,17 +8,8 @@ import { FileEntity } from "@/core/nodes/FileEntity.js";
 import { DirEntity } from "@/core/nodes/DirEntity.js";
 
 export class GroupNode extends DirNode implements IGroupNode {
-  private readonly rules: Record<string, string>;
-
-  constructor(node: DirNode, rules: Record<string, string>) {
+  constructor(node: DirNode) {
     super(node, node.children);
-    this.rules = rules;
-  }
-
-  validate() {
-    if (!this.isValid) {
-      validationLogger(this.path, this.warnings, this.errors);
-    }
   }
 
   static match(
@@ -61,7 +51,11 @@ export class GroupNode extends DirNode implements IGroupNode {
       }
     }
 
-    const rules: Record<string, string> = {};
-    return isMatch ? new this(node, rules) : node;
+    return isMatch ? new this(node) : node;
+  }
+
+  validate() {
+    // do something
+    super.validate();
   }
 }

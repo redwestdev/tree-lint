@@ -1,6 +1,5 @@
 import { IFileNode, INode } from "@/types/nodes.js";
 import { Node } from "@/core/nodes/Node.js";
-import { validationLogger } from "@/utils/index.js";
 
 export class FileNode extends Node implements IFileNode {
   public extension: string;
@@ -25,12 +24,5 @@ export class FileNode extends Node implements IFileNode {
     };
 
     return new this(data);
-  }
-
-  validate() {
-    super.validate();
-    if (!this.isValid) {
-      validationLogger(this.path, this.warnings, this.errors);
-    }
   }
 }

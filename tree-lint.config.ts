@@ -1,4 +1,4 @@
-import { createConfig } from "./src/index.js";
+import { createConfig } from "@/index.js";
 
 export default createConfig({
   roots: ["src"],
@@ -11,6 +11,9 @@ export default createConfig({
         name: "index.ts",
       },
     ],
+    rules: {
+      entities: "", // check one type of entities
+    },
   },
   entities: {
     "multi-component": {
@@ -38,6 +41,9 @@ export default createConfig({
           },
         ],
       },
+      rules: {
+        type: "directory",
+      },
     },
     section: {
       matches: {
@@ -52,17 +58,11 @@ export default createConfig({
       },
       rules: {
         type: "directory",
-        "name-length": { type: "error", max: 20, min: 5 },
-        name: "", // regexp or naming convention
-        "files-amount": { type: "warning", max: 10, min: 2 },
-        weight: { type: "error", max: 20, min: 2 }, // kB; > 20 ==> warning
-        "is-empty": "error", // warning
-        includes: [
-          {
-            type: "file",
-            name: "*.{tsx,ts}",
-          },
-        ],
+        nameLength: { type: "error", max: 20, min: 5 },
+        name: { type: "error", pattern: "PascalCase" },
+        childrenAmount: { type: "warning", max: 10, min: 2 },
+        weight: { type: "error", max: 20, min: 2 },
+        isEmpty: { type: "warning" },
         excludes: [
           {
             type: "directory",
@@ -70,29 +70,29 @@ export default createConfig({
           },
         ],
         children: [
-          // common rules for children
           {
             type: "file",
-            "name-length": { type: "error", max: 20, min: 5 },
-            name: "", // regexp or naming convention
-            extension: "{png,tsx}",
-            weight: { type: "error", max: 20, min: 2 }, // kB; > 20 ==> warning
-            "lines-count": { type: "warning", max: 200, min: 2 },
-            "is-empty": "error", // warning
+            required: { type: "error" },
+            nameLength: { type: "error", max: 20, min: 5 },
+            name: { type: "error", pattern: "" },
+            weight: { type: "error", max: 20, min: 2 },
+            lineCount: { type: "warning", max: 200, min: 2 },
+            isEmpty: { type: "warning" },
             custom: () => {
+              // node + all validation result
               return {
-                type: "error | warning",
+                type: "error",
                 message: "Some error message",
               };
             },
           },
           {
             type: "directory",
-            "name-length": { type: "error", max: 20, min: 5 },
-            name: "", // regexp or naming convention
-            "files-amount": 5,
-            weight: { type: "error", max: 20, min: 2 }, // kB; > 20 ==> warning
-            "is-empty": "error", // warning
+            nameLength: { type: "error", max: 20, min: 5 },
+            name: { type: "error", pattern: "" },
+            childrenAmount: { type: "warning", max: 10, min: 2 },
+            weight: { type: "error", max: 20, min: 2 },
+            isEmpty: { type: "warning" },
             includes: [
               {
                 type: "file",
@@ -105,9 +105,6 @@ export default createConfig({
                 name: "*",
               },
             ],
-            children: [
-              // rules for children's children
-            ],
           },
         ],
       },
@@ -118,31 +115,27 @@ export default createConfig({
         name: "use*",
       },
       rules: {
-        "name-length": { type: "error", max: 20, min: 5 },
-        name: "", // regexp or naming convention
-        "file-extensions": "{png,tsx}",
-        "entity-weight": { type: "error", max: 20, min: 2 }, // kB; > 20 ==> warning
-        "lines-count": { type: "warning", max: 200, min: 2 },
-        "is-empty": "error", // warning, off
+        type: "file",
+        name: { type: "error", pattern: "use*" },
       },
     },
   },
   layers: {
     components: {
       entities: ["multi-component", "component"],
-      rules: {
-        "allow-nested-layers": true, // first layer
-        "should-include-file": [
-          {
-            name: "index", // regexp or naming convention
-            "file-extensions": "ts",
-          },
-        ],
-        "file-for-exclude": [{}],
-      },
     },
     hooks: {
       entities: ["hook"],
+      rules: {
+        type: "directory",
+        children: [
+          {
+            type: "file",
+            name: { type: "error", pattern: "use*.{ts,tsx}" },
+            matches: "*",
+          },
+        ],
+      },
     },
     sections: {
       entities: ["section"],

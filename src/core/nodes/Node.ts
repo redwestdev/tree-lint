@@ -4,6 +4,10 @@ import fs from "fs/promises";
 import { constants } from "node:fs/promises";
 import mm from "micromatch";
 import { INode } from "@/types/nodes.js";
+import { validationLogger } from "@/utils/index.js";
+import { INodeRule, TSeverity } from "@/types/config.js";
+import { validateNameLength } from "@/core/services/validation/utils.js";
+import { VIOLATION_MESSAGES } from "@/core/services/validation/constants.js";
 
 export class Node implements INode {
   public isValid: boolean = true;
@@ -34,6 +38,14 @@ export class Node implements INode {
 
   setValidity(valid: boolean) {
     this.isValid = valid;
+  }
+
+  registerViolation(type: TSeverity, message: string) {
+    if (type === "error") {
+      this.setValidity(false);
+      this.addError(message);
+    }
+    if (type === "warning") this.addWarning(message);
   }
 
   static async isBlockedAccess(dirPath: string): Promise<boolean> {
@@ -85,5 +97,34 @@ export class Node implements INode {
     };
   };
 
-  validate() {}
+  validate(rules?: INodeRule) {
+    if (rules) {
+      const utilsMap: Record<keyof INodeRule, () => boolean> = {
+        nameLength: () =>
+          validateNameLength(
+            this.name,
+            rules?.nameLength?.max ?? 1,
+            rules?.nameLength?.min ?? 1,
+          ),
+        name: () => true,
+        weight: () => true,
+        isEmpty: () => true,
+      };
+
+      for (const rule in rules) {
+        const key = rule as keyof INodeRule;
+        const isValid: boolean = utilsMap[key]();
+
+        if (!isValid)
+          this.registerViolation(
+            rules[key]?.type || "warning",
+            rules[key]?.message || VIOLATION_MESSAGES[rule],
+          );
+      }
+    }
+
+    if (this.warnings.length || this.errors.length) {
+      validationLogger(this.path, this.warnings, this.errors);
+    }
+  }
 }

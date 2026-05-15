@@ -1,35 +1,29 @@
 import { FileNode } from "@/core/nodes/FileNode.js";
-import { TFileEntity } from "@/types/nodes.js";
-import { IMatchFile, ITreeLintConfig } from "@/types/config.js";
-import { validationLogger } from "@/utils/index.js";
+import { IFileEntity } from "@/types/nodes.js";
+import { IMatchFile, ITreeLintConfig, TEntityRule } from "@/types/config.js";
 import { matchName } from "@/core/services/matcher/utils.js";
 import { MATCHING_ENTITY_ERRORS } from "@/core/services/matcher/constants.js";
 import { replacePlaceholders } from "@/utils/replace-placeholders.js";
 
-export class FileEntity extends FileNode implements TFileEntity {
-  private readonly rules: Record<string, string>;
+export class FileEntity extends FileNode implements IFileEntity {
+  private readonly rules: TEntityRule | undefined;
   public readonly entity: keyof ITreeLintConfig["entities"];
 
   constructor(
     node: FileNode,
     entity: keyof ITreeLintConfig["entities"],
-    rules: Record<string, string>,
+    rules?: TEntityRule,
   ) {
     super(node);
     this.rules = rules;
     this.entity = entity;
   }
 
-  validate() {
-    if (!this.isValid) {
-      validationLogger(this.path, this.warnings, this.errors);
-    }
-  }
-
   static match(
     entityName: keyof ITreeLintConfig["entities"],
     node: FileNode,
     matches: IMatchFile,
+    rules?: TEntityRule,
   ): FileEntity | FileNode {
     if ("custom" in matches) {
       // TODO: check with user's callback
@@ -52,7 +46,20 @@ export class FileEntity extends FileNode implements TFileEntity {
       }
     }
 
-    const rules: Record<string, string> = {};
     return isMatch ? new this(node, entityName, rules) : node;
+  }
+
+  validate() {
+    if (!this.rules) return;
+
+    if (this.rules.type !== "file") {
+      this.addError(
+        "There are different types for match and validation entity. Please, check your config",
+      );
+
+      return;
+    }
+
+    super.validate();
   }
 }

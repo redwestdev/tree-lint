@@ -1,6 +1,14 @@
 import { Node } from "@/core/nodes/Node.js";
 import { IDirNode, INode, TProjectNode } from "@/types/nodes.js";
-import { validationLogger } from "@/utils/index.js";
+import { IDirRule, INodeRule } from "@/types/config.js";
+import {
+  getRules,
+  validateChildrenAmount,
+} from "@/core/services/validation/utils.js";
+import {
+  NODE_RULE_KEYS,
+  VIOLATION_MESSAGES,
+} from "@/core/services/validation/constants.js";
 
 export class DirNode extends Node implements IDirNode {
   public children: Array<TProjectNode>;
@@ -31,10 +39,27 @@ export class DirNode extends Node implements IDirNode {
     return new this(data, children);
   }
 
-  validate() {
-    super.validate();
-    if (!this.isValid) {
-      validationLogger(this.path, this.warnings, this.errors);
+  validate(rules?: IDirRule) {
+    for (const rule in rules) {
+      switch (rule) {
+        case "childrenAmount":
+          if (
+            !validateChildrenAmount(
+              this.children,
+              rules[rule]?.max ?? 1,
+              rules[rule]?.min ?? 1,
+            )
+          ) {
+            this.registerViolation(
+              rules[rule]?.type || "warning",
+              rules[rule]?.message || VIOLATION_MESSAGES[rule],
+            );
+          }
+          break;
+      }
     }
+
+    const nodeRules = getRules(rules, NODE_RULE_KEYS);
+    super.validate(nodeRules);
   }
 }

@@ -16,7 +16,10 @@ import {
 import { countNodes, getVitals, printReport } from "@/utils/performance.js";
 import { validateInitialPaths } from "@/utils/validate-path.js";
 import { getConfig } from "@/utils/find-config.js";
-import { validateNodes } from "@/core/services/validator.js";
+import {
+  TValidationStats,
+  validateNodes,
+} from "@/core/services/validation/validator.js";
 
 interface IScanOptions {
   treeOutput?: string | boolean;
@@ -89,7 +92,31 @@ program
       if (options.printTree)
         annotatedTree.trees.forEach((node: TAnyNode) => printProjectTree(node));
 
-      annotatedTree.trees.forEach((node: TAnyNode) => validateNodes(node));
+      const stats: TValidationStats = {
+        errors: 0,
+        warnings: 0,
+      };
+
+      const acc = [
+        {
+          type: "",
+          path: "",
+          message: "",
+        },
+      ];
+
+      annotatedTree.trees.forEach((node: TAnyNode) => {
+        // acc + result validationNode
+        validateNodes(node, stats);
+      });
+
+      // acc.forEach((v) => { validationLogger })
+
+      console.log(
+        chalk.bold(
+          `\nErrors: ${chalk.red(stats.errors)}, warnings: ${chalk.yellow(stats.warnings)}.\n`,
+        ),
+      );
 
       if (options.treeOutput !== undefined) {
         const out = resolveOutPath(
@@ -115,6 +142,11 @@ program
           0,
         );
         printReport(start, totalNodes);
+      }
+
+      if (stats.errors > 0) {
+        console.log(chalk.red(`Validation failed.\n`));
+        process.exit(1);
       }
 
       process.exit(0);

@@ -22,9 +22,9 @@ const initialContext: IEntityContext = {
 function annotateNode(
   node: TLayeredProjectNode,
   currentContext: IEntityContext,
-  entities: ITreeLintConfig["entities"],
-  layers: ITreeLintConfig["layers"],
+  config: ITreeLintConfig,
 ): TAnyNode {
+  const { entities, layers } = config;
   const context =
     node instanceof LayerNode
       ? { ...currentContext, layer: node.name }
@@ -32,7 +32,7 @@ function annotateNode(
 
   if (node instanceof DirNode && !node.isExcluded) {
     node.children = node.children.map((child) =>
-      annotateNode(child, context, entities, layers),
+      annotateNode(child, context, config),
     );
   }
 
@@ -47,7 +47,7 @@ function annotateNode(
         node instanceof DirNode &&
         !node.isExcluded
       ) {
-        return DirEntity.match(entity, node, matches);
+        return DirEntity.match(entity, node, matches, entities[entity].rules);
       }
 
       if (
@@ -55,7 +55,7 @@ function annotateNode(
         node instanceof FileNode &&
         !node.isExcluded
       ) {
-        return FileEntity.match(entity, node, matches);
+        return FileEntity.match(entity, node, matches, entities[entity].rules);
       }
     }
   }
@@ -69,8 +69,6 @@ export function annotateEntities(
 ): ILayeredProjectTree {
   return {
     generatedAt: tree.generatedAt,
-    trees: tree.trees.map((node) =>
-      annotateNode(node, initialContext, config.entities, config.layers),
-    ),
+    trees: tree.trees.map((node) => annotateNode(node, initialContext, config)),
   };
 }

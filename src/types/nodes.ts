@@ -1,3 +1,5 @@
+import { ITreeLintConfig } from "@/types/config.js";
+
 export interface INode {
   name: string;
   path: string;
@@ -7,6 +9,7 @@ export interface INode {
   ignored?: boolean;
   unreadable?: boolean;
   hidden?: boolean;
+  validate?: () => void;
 }
 
 export interface IFileNode extends INode {
@@ -17,21 +20,17 @@ export interface IDirNode extends INode {
   children: TAnyNode[];
 }
 
-export interface ILayerNode extends IDirNode {
-  validate(): void;
-}
+export interface ILayerNode extends IDirNode {}
 
-export interface TFileEntity extends IFileNode {
-  validate(): void;
+export interface IFileEntity extends IFileNode {
+  entity: keyof ITreeLintConfig["entities"];
 }
 
 export interface IDirEntity extends IDirNode {
-  validate(): void;
+  entity: keyof ITreeLintConfig["entities"];
 }
 
-export interface IGroupNode extends IDirNode {
-  validate(): void;
-}
+export interface IGroupNode extends IDirNode {}
 
 export enum NodeType {
   DirNode = "directory",
@@ -48,6 +47,6 @@ export type TAnyNode =
   | IDirNode
   | IFileNode
   | ILayerNode
-  | TFileEntity
+  | IFileEntity
   | IDirEntity
   | IGroupNode;
