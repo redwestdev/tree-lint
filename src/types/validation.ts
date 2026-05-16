@@ -3,16 +3,6 @@ import { TMatches, TNaming } from "@/types/config.js";
 
 export type TSeverity = "error" | "warning" | (string & {});
 
-export type TNodeRulesNames = "nameLength" | "name" | "weight" | "isEmpty";
-
-export type TFilesRulesNames = "extension" | "lineCount";
-
-export type TDirRulesNames =
-  | "childrenAmount"
-  | "includes"
-  | "excludes"
-  | "children";
-
 export interface IBaseRule {
   type: TSeverity;
   message?: string;

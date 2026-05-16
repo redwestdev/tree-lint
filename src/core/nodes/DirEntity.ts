@@ -4,9 +4,7 @@ import { IMatchDirectory, ITreeLintConfig } from "@/types/config.js";
 import { matchChildren, matchName } from "@/core/services/matcher/utils.js";
 import { MATCHING_ENTITY_ERRORS } from "@/core/services/matcher/constants.js";
 import { replacePlaceholders } from "@/utils/replace-placeholders.js";
-import { getRules } from "@/core/services/validation/utils.js";
-import { DIR_RULE_KEYS } from "@/core/services/validation/constants.js";
-import { IDirEntityRule } from "@/types/validation.js";
+import { IDirEntityRule, IValidationResult } from "@/types/validation.js";
 
 export class DirEntity extends DirNode implements IDirEntity {
   private readonly rules: IDirEntityRule | undefined;
@@ -27,7 +25,7 @@ export class DirEntity extends DirNode implements IDirEntity {
     node: DirNode,
     matches: IMatchDirectory,
     rules?: IDirEntityRule,
-  ): DirEntity | DirNode {
+  ): DirEntity | IValidationResult {
     if ("custom" in matches) {
       // TODO: check with user's callback
       return node; // callback result
@@ -56,12 +54,11 @@ export class DirEntity extends DirNode implements IDirEntity {
     return isMatch ? new this(node, entityName, rules) : node;
   }
 
-  validate() {
-    const dirRules = getRules(this.rules, DIR_RULE_KEYS);
-    const results = super.validate(dirRules);
+  validate(
+    rules?: IDirEntityRule,
+  ): Partial<Record<keyof IDirEntityRule, IValidationResult>> {
+    // if (this.rules?.custom) results.custom = this.rules.custom(this, results);
 
-    if (this.rules?.custom) results.custom = this.rules.custom(this, results);
-
-    return results;
+    return super.validate(rules);
   }
 }

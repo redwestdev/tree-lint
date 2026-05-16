@@ -87,6 +87,14 @@ program
 
       const tree = await buildProjectTree(roots, config.ignore);
 
+      const acc = [
+        {
+          type: "",
+          path: "",
+          message: "",
+        },
+      ];
+
       const layeredTree = annotateLayers(tree, config);
       const entitiesTree = annotateEntities(layeredTree, config);
       const annotatedTree = annotateGroups(entitiesTree, config);
@@ -99,18 +107,10 @@ program
         warnings: 0,
       };
 
-      const acc = [
-        {
-          type: "",
-          path: "",
-          message: "",
-        },
-      ];
-
-      annotatedTree.trees.forEach((node: TAnyNode) => {
-        // acc + result validationNode
-        validateNodes(node, stats);
-      });
+      // annotatedTree.trees.forEach((node: TAnyNode) => {
+      //   // acc + result validationNode
+      //   validateNodes(node, stats);
+      // });
 
       // acc.forEach((v) => { validationLogger })
 

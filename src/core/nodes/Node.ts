@@ -8,6 +8,7 @@ import {
   INameLengthRule,
   INodeRule,
   IValidationResult,
+  TNodeRulesNames,
   TSeverity,
 } from "@/types/validation.js";
 import { VIOLATION_MESSAGES } from "@/core/services/validation/constants.js";
@@ -116,12 +117,13 @@ export class Node implements INode {
     };
   }
 
-  validate(rules?: INodeRule) {
-    const result: Record<string, IValidationResult> = {};
+  validate(
+    rules?: INodeRule,
+  ): Partial<Record<keyof INodeRule, IValidationResult>> {
+    const result: Partial<Record<keyof INodeRule, IValidationResult>> = {};
 
-    // add types
     for (const rule in rules) {
-      switch (rule) {
+      switch (rule as keyof typeof rules) {
         case "nameLength":
           if (rules.nameLength)
             result.nameLength = this.validateNameLength(rules.nameLength);
