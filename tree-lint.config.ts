@@ -12,7 +12,7 @@ export default createConfig({
       },
     ],
     rules: {
-      entities: "", // check one type of entities
+      entities: { type: "error" }, // check one type of entities
     },
   },
   entities: {
@@ -41,9 +41,7 @@ export default createConfig({
           },
         ],
       },
-      rules: {
-        type: "directory",
-      },
+      rules: {},
     },
     section: {
       matches: {
@@ -57,7 +55,6 @@ export default createConfig({
         ],
       },
       rules: {
-        type: "directory",
         nameLength: { type: "error", max: 20, min: 5 },
         name: { type: "error", pattern: "PascalCase" },
         childrenAmount: { type: "warning", max: 10, min: 2 },
@@ -71,8 +68,6 @@ export default createConfig({
         ],
         children: [
           {
-            type: "file",
-            required: { type: "error" },
             nameLength: { type: "error", max: 20, min: 5 },
             name: { type: "error", pattern: "" },
             weight: { type: "error", max: 20, min: 2 },
@@ -80,14 +75,17 @@ export default createConfig({
             isEmpty: { type: "warning" },
             custom: () => {
               // node + all validation result
-              return {
-                type: "error",
-                message: "Some error message",
-              };
+              const result = true;
+              // do something
+              return result
+                ? result
+                : {
+                    type: "error",
+                    message: "Some error message",
+                  };
             },
           },
           {
-            type: "directory",
             nameLength: { type: "error", max: 20, min: 5 },
             name: { type: "error", pattern: "" },
             childrenAmount: { type: "warning", max: 10, min: 2 },
@@ -115,7 +113,6 @@ export default createConfig({
         name: "use*",
       },
       rules: {
-        type: "file",
         name: { type: "error", pattern: "use*" },
       },
     },
@@ -127,10 +124,8 @@ export default createConfig({
     hooks: {
       entities: ["hook"],
       rules: {
-        type: "directory",
         children: [
           {
-            type: "file",
             name: { type: "error", pattern: "use*.{ts,tsx}" },
             matches: "*",
           },

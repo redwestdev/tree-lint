@@ -1,10 +1,12 @@
 import { Node } from "@/core/nodes/Node.js";
 import { IDirNode, INode, TProjectNode } from "@/types/nodes.js";
-import { IDirRule, INodeRule } from "@/types/config.js";
 import {
-  getRules,
-  validateChildrenAmount,
-} from "@/core/services/validation/utils.js";
+  IChildrenAmountRule,
+  IDirRule,
+  IValidationResult,
+  TAnyRule,
+} from "@/types/validation.js";
+import { getRules } from "@/core/services/validation/utils.js";
 import {
   NODE_RULE_KEYS,
   VIOLATION_MESSAGES,
@@ -39,27 +41,41 @@ export class DirNode extends Node implements IDirNode {
     return new this(data, children);
   }
 
+  validateChildrenAmount(rule: IChildrenAmountRule): IValidationResult {
+    const res =
+      this.children.length >= (rule?.min || 1) &&
+      this.children.length <= rule.max;
+
+    return {
+      result: res,
+      ...(!res && {
+        violation: {
+          type: rule.type,
+          path: this.path,
+          message: rule.message || VIOLATION_MESSAGES.childrenAmount,
+        },
+      }),
+    };
+  }
+
   validate(rules?: IDirRule) {
+    const nodeRules = getRules(rules, NODE_RULE_KEYS);
+    const results = super.validate(nodeRules);
+
     for (const rule in rules) {
       switch (rule) {
         case "childrenAmount":
-          if (
-            !validateChildrenAmount(
-              this.children,
-              rules[rule]?.max ?? 1,
-              rules[rule]?.min ?? 1,
-            )
-          ) {
-            this.registerViolation(
-              rules[rule]?.type || "warning",
-              rules[rule]?.message || VIOLATION_MESSAGES[rule],
+          if (rules?.childrenAmount)
+            results.childrenAmount = this.validateChildrenAmount(
+              rules.childrenAmount,
             );
-          }
+          break;
+        case "children":
+        default:
           break;
       }
     }
 
-    const nodeRules = getRules(rules, NODE_RULE_KEYS);
-    super.validate(nodeRules);
+    return results;
   }
 }

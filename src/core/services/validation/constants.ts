@@ -1,4 +1,4 @@
-import { IDirRule, INodeRule } from "@/types/config.js";
+import { IDirRule, INodeRule } from "@/types/validation.js";
 
 export const NODE_RULE_KEYS: Array<keyof INodeRule> = [
   "nameLength",
@@ -9,7 +9,6 @@ export const NODE_RULE_KEYS: Array<keyof INodeRule> = [
 
 export const DIR_RULE_KEYS: Array<keyof IDirRule> = [
   ...NODE_RULE_KEYS,
-  "type",
   "childrenAmount",
   "includes",
   "excludes",

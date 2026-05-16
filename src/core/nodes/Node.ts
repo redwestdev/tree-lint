@@ -4,9 +4,12 @@ import fs from "fs/promises";
 import { constants } from "node:fs/promises";
 import mm from "micromatch";
 import { INode } from "@/types/nodes.js";
-import { validationLogger } from "@/utils/index.js";
-import { INodeRule, TSeverity } from "@/types/config.js";
-import { validateNameLength } from "@/core/services/validation/utils.js";
+import {
+  INameLengthRule,
+  INodeRule,
+  IValidationResult,
+  TSeverity,
+} from "@/types/validation.js";
 import { VIOLATION_MESSAGES } from "@/core/services/validation/constants.js";
 
 export class Node implements INode {
@@ -97,34 +100,40 @@ export class Node implements INode {
     };
   };
 
+  validateNameLength(rule: INameLengthRule): IValidationResult {
+    const res =
+      this.name.length >= (rule?.min || 1) && this.name.length <= rule.max;
+
+    return {
+      result: res,
+      ...(!res && {
+        violation: {
+          type: rule.type,
+          path: this.path,
+          message: rule.message || VIOLATION_MESSAGES.nameLength,
+        },
+      }),
+    };
+  }
+
   validate(rules?: INodeRule) {
-    if (rules) {
-      const utilsMap: Record<keyof INodeRule, () => boolean> = {
-        nameLength: () =>
-          validateNameLength(
-            this.name,
-            rules?.nameLength?.max ?? 1,
-            rules?.nameLength?.min ?? 1,
-          ),
-        name: () => true,
-        weight: () => true,
-        isEmpty: () => true,
-      };
+    const result: Record<string, IValidationResult> = {};
 
-      for (const rule in rules) {
-        const key = rule as keyof INodeRule;
-        const isValid: boolean = utilsMap[key]();
-
-        if (!isValid)
-          this.registerViolation(
-            rules[key]?.type || "warning",
-            rules[key]?.message || VIOLATION_MESSAGES[rule],
-          );
+    // add types
+    for (const rule in rules) {
+      switch (rule) {
+        case "nameLength":
+          if (rules.nameLength)
+            result.nameLength = this.validateNameLength(rules.nameLength);
+          break;
+        case "name":
+        case "weight":
+        case "isEmpty":
+        default:
+          break;
       }
     }
 
-    if (this.warnings.length || this.errors.length) {
-      validationLogger(this.path, this.warnings, this.errors);
-    }
+    return result;
   }
 }

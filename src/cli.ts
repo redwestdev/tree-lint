@@ -71,6 +71,8 @@ program
 
       const { config, projectRoot } = await getConfig();
 
+      // work with config (validation, ...)
+
       const resolvedPath = projectPath
         ? path.resolve(projectPath)
         : projectRoot;
