@@ -8,6 +8,7 @@ import {
   FileNode,
   LayerNode,
 } from "@/core/nodes/index.js";
+import { IValidationResult } from "@/types/validation.js";
 
 export interface IEntityContext {
   layer: keyof ITreeLintConfig["layers"] | null;
@@ -18,6 +19,8 @@ const initialContext: IEntityContext = {
   layer: null,
   depth: 0,
 };
+
+const matchesLog: IValidationResult[] = [];
 
 function annotateNode(
   node: TLayeredProjectNode,
@@ -47,7 +50,15 @@ function annotateNode(
         node instanceof DirNode &&
         !node.isExcluded
       ) {
-        return DirEntity.match(entity, node, matches, entities[entity].rules);
+        const matchResult: IValidationResult[] = DirEntity.match(
+          node,
+          matches,
+          entity,
+        );
+        matchesLog.push(...matchResult);
+
+        if (matchResult.every((r) => Boolean(r.result)))
+          return DirEntity.create(node, entity, entities[entity].rules);
       }
 
       if (
@@ -66,9 +77,14 @@ function annotateNode(
 export function annotateEntities(
   tree: ILayeredProjectTree,
   config: ITreeLintConfig,
-): ILayeredProjectTree {
+): { tree: ILayeredProjectTree; log: IValidationResult[] } {
   return {
-    generatedAt: tree.generatedAt,
-    trees: tree.trees.map((node) => annotateNode(node, initialContext, config)),
+    tree: {
+      generatedAt: tree.generatedAt,
+      trees: tree.trees.map((node) =>
+        annotateNode(node, initialContext, config),
+      ),
+    },
+    log: matchesLog,
   };
 }

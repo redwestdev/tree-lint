@@ -9,7 +9,7 @@ export interface IBaseRule {
 }
 
 export interface IViolation {
-  type: string;
+  type: TSeverity;
   path: string;
   message: string;
 }

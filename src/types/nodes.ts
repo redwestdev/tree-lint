@@ -1,6 +1,9 @@
 import { ITreeLintConfig } from "@/types/config.js";
+import { IDirRule, INodeRule, IValidationResult } from "@/types/validation.js";
 
-export interface INode {
+type TValidationMap<R> = Partial<Record<keyof R, IValidationResult>>;
+
+export interface INode<R extends object = INodeRule> {
   name: string;
   path: string;
   isValid?: boolean;
@@ -9,14 +12,14 @@ export interface INode {
   ignored?: boolean;
   unreadable?: boolean;
   hidden?: boolean;
-  validate?: () => void;
+  validate?: (rules?: R) => TValidationMap<R>[];
 }
 
 export interface IFileNode extends INode {
   extension: string;
 }
 
-export interface IDirNode extends INode {
+export interface IDirNode extends INode<IDirRule> {
   children: TAnyNode[];
 }
 

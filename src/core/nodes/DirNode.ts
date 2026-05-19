@@ -64,19 +64,29 @@ export class DirNode extends Node implements IDirNode {
 
   validate(
     rules: IDirRule | undefined = this.rules,
-  ): Partial<Record<keyof IDirRule, IValidationResult>> {
-    // const nodeRules = getRules(rules, NODE_RULE_KEYS);
+  ): Partial<Record<keyof TAnyRule, IValidationResult>>[] {
+    const childrenResults: Partial<
+      Record<keyof TAnyRule, IValidationResult>
+    >[] = this.children.reduce(
+      (
+        prev: Partial<Record<keyof TAnyRule, IValidationResult>>[],
+        node: TAnyNode,
+      ) => {
+        const res = node?.validate?.();
 
-    let childrenResults;
-    this.children.forEach((node: TAnyNode) => {
-      childrenResults = node?.validate();
-    });
+        if (!res) return prev;
+
+        prev.push(...res);
+        return prev;
+      },
+      [],
+    );
 
     if (!rules) return childrenResults;
 
-
     const supperResults = super.validate(rules);
     const results: Partial<Record<keyof IDirRule, IValidationResult>> = {};
+
     for (const rule in rules) {
       switch (rule as keyof typeof rules) {
         case "childrenAmount":
@@ -91,9 +101,6 @@ export class DirNode extends Node implements IDirNode {
     }
     const selfResult = { ...supperResults, ...results };
 
-
-
-
-    return {  ...selfResult, ...childrenResults };
+    return [selfResult, ...childrenResults];
   }
 }

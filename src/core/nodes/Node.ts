@@ -8,7 +8,6 @@ import {
   INameLengthRule,
   INodeRule,
   IValidationResult,
-  TNodeRulesNames,
   TSeverity,
 } from "@/types/validation.js";
 import { VIOLATION_MESSAGES } from "@/core/services/validation/constants.js";
@@ -119,7 +118,7 @@ export class Node implements INode {
 
   validate(
     rules?: INodeRule,
-  ): Partial<Record<keyof INodeRule, IValidationResult>> {
+  ): Partial<Record<keyof INodeRule, IValidationResult>>[] {
     const result: Partial<Record<keyof INodeRule, IValidationResult>> = {};
 
     for (const rule in rules) {
@@ -136,6 +135,6 @@ export class Node implements INode {
       }
     }
 
-    return result;
+    return [result];
   }
 }

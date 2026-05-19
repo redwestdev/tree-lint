@@ -5,7 +5,12 @@ import chalk from "chalk";
 import ora from "ora";
 import path from "path";
 
-import { printProjectTree, saveToJson, logScanPlan } from "@/utils/index.js";
+import {
+  printProjectTree,
+  saveToJson,
+  logScanPlan,
+  validationLogger,
+} from "@/utils/index.js";
 import { TAnyNode } from "@/types/nodes.js";
 import {
   annotateEntities,
@@ -16,10 +21,8 @@ import {
 import { countNodes, getVitals, printReport } from "@/utils/performance.js";
 import { validateInitialPaths } from "@/utils/validate-path.js";
 import { getConfig } from "@/utils/find-config.js";
-import {
-  TValidationStats,
-  validateNodes,
-} from "@/core/services/validation/validator.js";
+import { TValidationStats } from "@/core/services/validation/validator.js";
+import { IValidationResult, IViolation } from "@/types/validation.js";
 
 interface IScanOptions {
   treeOutput?: string | boolean;
@@ -27,6 +30,8 @@ interface IScanOptions {
   vitals?: boolean;
   printTree?: boolean;
 }
+
+type TGroupedByPath = Record<string, { errors: string[]; warnings: string[] }>;
 
 const resolveOutPath = (
   val: string | boolean,
@@ -87,38 +92,57 @@ program
 
       const tree = await buildProjectTree(roots, config.ignore);
 
-      const acc = [
-        {
-          type: "",
-          path: "",
-          message: "",
-        },
-      ];
-
       const layeredTree = annotateLayers(tree, config);
-      const entitiesTree = annotateEntities(layeredTree, config);
+      const { tree: entitiesTree, log: entitiesLog } = annotateEntities(
+        layeredTree,
+        config,
+      );
       const annotatedTree = annotateGroups(entitiesTree, config);
 
       if (options.printTree)
         annotatedTree.trees.forEach((node: TAnyNode) => printProjectTree(node));
+
+      const workLog = [...entitiesLog];
 
       const stats: TValidationStats = {
         errors: 0,
         warnings: 0,
       };
 
-      // annotatedTree.trees.forEach((node: TAnyNode) => {
-      //   // acc + result validationNode
-      //   validateNodes(node, stats);
-      // });
+      function logViolations(log: IValidationResult[]) {
+        const violations: IViolation[] = log
+          .map((item) => {
+            if (!item.result) return item.violation;
+          })
+          .filter((v) => v !== undefined);
 
-      // acc.forEach((v) => { validationLogger })
+        const grouped = violations.reduce<TGroupedByPath>((acc, res) => {
+          const { path, type, message } = res;
 
-      console.log(
-        chalk.bold(
-          `\nErrors: ${chalk.red(stats.errors)}, warnings: ${chalk.yellow(stats.warnings)}.\n`,
-        ),
-      );
+          if (!acc[path]) {
+            acc[path] = { errors: [], warnings: [] };
+          }
+
+          const key = type as "errors" | "warnings";
+          acc[path][key].push(message);
+          return acc;
+        }, {});
+
+        for (const path in grouped) {
+          stats.warnings += grouped[path].warnings.length;
+          stats.errors += grouped[path].errors.length;
+
+          validationLogger(path, grouped[path].warnings, grouped[path].errors);
+        }
+
+        console.log(
+          chalk.bold(
+            `\nErrors: ${chalk.red(stats.errors)}, warnings: ${chalk.yellow(stats.warnings)}.\n`,
+          ),
+        );
+      }
+
+      logViolations(workLog);
 
       if (options.treeOutput !== undefined) {
         const out = resolveOutPath(
