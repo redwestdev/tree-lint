@@ -75,4 +75,7 @@ export interface IFileEntityRule extends IFileRule {
   ) => IValidationResult;
 }
 
+export type ILayerRule = IDirRule;
+export type IGroupRule = IDirRule;
+
 export type TAnyRule = TEntityRule | INodeRule | IFileRule | IDirRule;

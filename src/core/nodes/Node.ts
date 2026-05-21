@@ -8,19 +8,22 @@ import {
   INameLengthRule,
   INodeRule,
   IValidationResult,
-  TSeverity,
 } from "@/types/validation.js";
 import { VIOLATION_MESSAGES } from "@/core/services/validation/constants.js";
 
+export interface INodeAnalyze {
+  ignored: boolean;
+  unreadable: boolean;
+  hidden: boolean;
+}
+
 export class Node implements INode {
-  public isValid: boolean = true;
-  public errors: string[] = [];
-  public warnings: string[] = [];
   public name: string;
   public path: string;
   public ignored: boolean = false;
   public unreadable: boolean = false;
   public hidden: boolean = false;
+  public rules?: INodeRule;
 
   constructor(name: string, path: string) {
     this.name = name;
@@ -29,26 +32,6 @@ export class Node implements INode {
 
   get isExcluded(): boolean {
     return this.ignored || this.unreadable;
-  }
-
-  addWarning(warn: string) {
-    this.warnings.push(warn);
-  }
-
-  addError(err: string) {
-    this.errors.push(err);
-  }
-
-  setValidity(valid: boolean) {
-    this.isValid = valid;
-  }
-
-  registerViolation(type: TSeverity, message: string) {
-    if (type === "error") {
-      this.setValidity(false);
-      this.addError(message);
-    }
-    if (type === "warning") this.addWarning(message);
   }
 
   static async isBlockedAccess(dirPath: string): Promise<boolean> {
@@ -90,7 +73,7 @@ export class Node implements INode {
     dirPath: string,
     ignore?: string[],
     dirent?: Dirent,
-  ) => {
+  ): Promise<INodeAnalyze> => {
     await this.isSymbolicLink(dirent ?? dirPath);
 
     return {

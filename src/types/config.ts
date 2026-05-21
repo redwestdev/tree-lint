@@ -1,8 +1,9 @@
 import { TAnyNode } from "./nodes.js";
 import {
-  IBaseRule,
   IDirEntityRule,
   IFileEntityRule,
+  IGroupRule,
+  ILayerRule,
 } from "@/types/validation.js";
 
 export type TCustomMatch = (node: TAnyNode) => boolean;
@@ -39,14 +40,12 @@ export type IEntity = IDirEntityConf | IFileEntityConf;
 export interface IGroup {
   name: string;
   children?: Array<TMatches>;
-  rules?: {
-    entities: IBaseRule;
-  };
+  rules?: IGroupRule;
 }
 
 export interface ILayer<E = string> {
   entities: Array<E>;
-  rules?: Record<string, any>;
+  rules?: ILayerRule;
 }
 
 export interface IMatchFile {

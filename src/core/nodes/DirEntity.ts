@@ -12,7 +12,6 @@ import {
 } from "@/types/validation.js";
 
 export class DirEntity extends DirNode implements IDirEntity {
-  private readonly rules: IDirEntityRule | undefined;
   public readonly entity: keyof ITreeLintConfig["entities"];
 
   constructor(
@@ -25,7 +24,7 @@ export class DirEntity extends DirNode implements IDirEntity {
     this.entity = entity;
   }
 
-  static create(
+  static createNew(
     node: DirNode,
     entity: keyof ITreeLintConfig["entities"],
     rules?: IDirEntityRule,

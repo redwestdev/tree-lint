@@ -12,7 +12,7 @@ export default createConfig({
       },
     ],
     rules: {
-      entities: { type: "error" }, // check one type of entities
+      isEmpty: { type: "error" }, // check one type of entities
     },
   },
   entities: {
@@ -78,10 +78,14 @@ export default createConfig({
               const result = true;
               // do something
               return result
-                ? result
+                ? { result }
                 : {
-                    type: "error",
-                    message: "Some error message",
+                    result: false,
+                    violation: {
+                      type: "error",
+                      path: "",
+                      message: "Some error message",
+                    },
                   };
             },
           },
@@ -127,7 +131,6 @@ export default createConfig({
         children: [
           {
             name: { type: "error", pattern: "use*.{ts,tsx}" },
-            matches: "*",
           },
         ],
       },

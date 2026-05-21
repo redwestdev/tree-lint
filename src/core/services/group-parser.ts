@@ -1,7 +1,10 @@
-import { IEntityProjectTree } from "@/types/trees.js";
+import { IAnnotatedProjectTree, IEntityProjectTree } from "@/types/trees.js";
 import { TAnyNode, TProjectNode } from "@/types/nodes.js";
 import { DirNode, GroupNode } from "@/core/nodes/index.js";
 import { ITreeLintConfig } from "@/types/config.js";
+import { IValidationResult } from "@/types/validation.js";
+
+const matchesLog: IValidationResult[] = [];
 
 function annotateNode(
   node: TProjectNode,
@@ -12,7 +15,15 @@ function annotateNode(
       annotateNode(child, config),
     );
 
-    return node.constructor === DirNode ? GroupNode.match(node, config) : node;
+    if (node.constructor === DirNode) {
+      const matchGroup = GroupNode.match(node, config);
+      matchesLog.push(...matchGroup);
+
+      if (matchGroup.every((r) => Boolean(r.result))) {
+        const rules = config?.rules;
+        return new GroupNode(node, rules);
+      } else return node;
+    }
   }
 
   return node;
@@ -21,10 +32,13 @@ function annotateNode(
 export function annotateGroups(
   tree: IEntityProjectTree,
   config: ITreeLintConfig,
-) {
+): { tree: IAnnotatedProjectTree; log: IValidationResult[] } {
   const groupsConfig = config.groups;
   return {
-    generatedAt: tree.generatedAt,
-    trees: tree.trees.map((node) => annotateNode(node, groupsConfig)),
+    tree: {
+      generatedAt: tree.generatedAt,
+      trees: tree.trees.map((node) => annotateNode(node, groupsConfig)),
+    },
+    log: matchesLog,
   };
 }

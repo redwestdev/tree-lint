@@ -8,7 +8,11 @@ import {
   FileNode,
   LayerNode,
 } from "@/core/nodes/index.js";
-import { IValidationResult } from "@/types/validation.js";
+import {
+  IDirEntityRule,
+  IFileEntityRule,
+  IValidationResult,
+} from "@/types/validation.js";
 
 export interface IEntityContext {
   layer: keyof ITreeLintConfig["layers"] | null;
@@ -43,7 +47,8 @@ function annotateNode(
     const allowedEntities = layers[context.layer].entities;
 
     for (const entity of allowedEntities) {
-      const matches = entities[entity].matches;
+      const entityConfig = entities[entity];
+      const { matches, rules } = entityConfig;
 
       if (
         matches.type === "directory" &&
@@ -58,7 +63,7 @@ function annotateNode(
         matchesLog.push(...matchResult);
 
         if (matchResult.every((r) => Boolean(r.result)))
-          return DirEntity.create(node, entity, entities[entity].rules);
+          return DirEntity.createNew(node, entity, rules as IDirEntityRule);
       }
 
       if (
@@ -66,7 +71,15 @@ function annotateNode(
         node instanceof FileNode &&
         !node.isExcluded
       ) {
-        return FileEntity.match(entity, node, matches, entities[entity].rules);
+        const matchResult: IValidationResult[] = FileEntity.match(
+          node,
+          matches,
+          entity,
+        );
+        matchesLog.push(...matchResult);
+
+        if (matchResult.every((r) => Boolean(r.result)))
+          return FileEntity.createNew(node, entity, rules as IFileEntityRule);
       }
     }
   }

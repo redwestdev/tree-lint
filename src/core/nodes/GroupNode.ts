@@ -6,17 +6,24 @@ import { matchChildren, matchName } from "@/core/services/matcher/utils.js";
 import { MATCHING_GROUP_ERRORS } from "@/core/services/matcher/constants.js";
 import { FileEntity } from "@/core/nodes/FileEntity.js";
 import { DirEntity } from "@/core/nodes/DirEntity.js";
+import {
+  IGroupRule,
+  IValidationResult,
+  IViolation,
+  TAnyRule,
+} from "@/types/validation.js";
 
 export class GroupNode extends DirNode implements IGroupNode {
-  constructor(node: DirNode) {
+  constructor(node: DirNode, rules?: IGroupRule) {
     super(node, node.children);
+    this.rules = rules;
   }
 
   static match(
     node: DirNode,
     config?: ITreeLintConfig["groups"],
-  ): GroupNode | DirNode {
-    if (!node.children.length) return node;
+  ): IValidationResult[] {
+    if (!node.children.length) return [{ result: false }];
 
     const children: Set<string | undefined> = new Set(
       node.children
@@ -33,7 +40,7 @@ export class GroupNode extends DirNode implements IGroupNode {
         .filter((name) => !!name),
     );
 
-    if (children.size === 0) return node;
+    if (children.size === 0) return [{ result: false }];
 
     const result: Record<string, boolean> = {
       hasValidChildren: children.size >= 1,
@@ -45,17 +52,31 @@ export class GroupNode extends DirNode implements IGroupNode {
 
     const isMatch = Object.values(result).every(Boolean);
 
+    if (isMatch) return [{ result: true }];
+
+    const log: IValidationResult[] = [];
+
     if (!isMatch && Object.values(result).some(Boolean)) {
       for (const key in result) {
-        if (!result[key]) node.addWarning(MATCHING_GROUP_ERRORS[key]);
+        if (!result[key]) {
+          const violation: IViolation = {
+            type: "warning",
+            path: node.path,
+            message: MATCHING_GROUP_ERRORS[key],
+          };
+
+          log.push({ result: false, violation });
+        }
       }
     }
 
-    return isMatch ? new this(node) : node;
+    return log;
   }
 
-  validate() {
+  validate(
+    rules: IGroupRule | undefined = this.rules,
+  ): Partial<Record<keyof TAnyRule, IValidationResult>>[] {
     // do something
-    super.validate();
+    return super.validate(rules);
   }
 }

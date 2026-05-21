@@ -1,25 +1,20 @@
-import { Node } from "@/core/nodes/Node.js";
+import { INodeAnalyze, Node } from "@/core/nodes/Node.js";
 import { IDirNode, INode, TAnyNode, TProjectNode } from "@/types/nodes.js";
 import {
   IChildrenAmountRule,
   IDirRule,
-  INodeRule,
   IValidationResult,
   TAnyRule,
 } from "@/types/validation.js";
-import { getRules } from "@/core/services/validation/utils.js";
-import {
-  NODE_RULE_KEYS,
-  VIOLATION_MESSAGES,
-} from "@/core/services/validation/constants.js";
-import { validateNodes } from "@/core/services/validation/validator.js";
+import { VIOLATION_MESSAGES } from "@/core/services/validation/constants.js";
 
 export class DirNode extends Node implements IDirNode {
   public children: Array<TProjectNode>;
-  private rules?: IDirRule;
+
   constructor(
-    { name, path, ...analyze }: INode,
+    { name, path }: INode,
     children: Array<TProjectNode> = [],
+    analyze?: INodeAnalyze,
     rules?: IDirRule,
   ) {
     super(name, path);
@@ -36,13 +31,9 @@ export class DirNode extends Node implements IDirNode {
   ): Promise<DirNode> {
     const analyze = await Node.check(path, ignore);
 
-    const data = {
-      ...analyze,
-      name,
-      path,
-    };
+    const node = new Node(name, path);
 
-    return new this(data, children);
+    return new this(node, children, analyze);
   }
 
   validateChildrenAmount(rule: IChildrenAmountRule): IValidationResult {
@@ -99,8 +90,8 @@ export class DirNode extends Node implements IDirNode {
           break;
       }
     }
-    const selfResult = { ...supperResults, ...results };
+    const selfResult = [...supperResults, results];
 
-    return [selfResult, ...childrenResults];
+    return [...selfResult, ...childrenResults];
   }
 }

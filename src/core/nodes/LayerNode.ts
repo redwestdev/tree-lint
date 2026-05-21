@@ -1,19 +1,19 @@
 import { DirNode } from "@/core/nodes/DirNode.js";
 import { ILayerNode } from "@/types/nodes.js";
+import { ILayerRule } from "@/types/validation.js";
 
 export class LayerNode extends DirNode implements ILayerNode {
-  constructor(node: DirNode) {
+  constructor(node: DirNode, rules?: ILayerRule) {
     super(node, node.children);
+    this.rules = rules;
   }
 
-  static match(node: DirNode, layers: Set<string>): LayerNode | DirNode {
-    const isLayerDirectory = layers.has(node.name);
-
-    return isLayerDirectory ? new this(node) : node;
+  static match(node: DirNode, layers: Set<string>): boolean {
+    return layers.has(node.name);
   }
 
-  validate() {
+  validate(rules: ILayerRule | undefined = this.rules) {
     // do something
-    super.validate();
+    return super.validate(rules);
   }
 }

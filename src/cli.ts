@@ -21,7 +21,7 @@ import {
 import { countNodes, getVitals, printReport } from "@/utils/performance.js";
 import { validateInitialPaths } from "@/utils/validate-path.js";
 import { getConfig } from "@/utils/find-config.js";
-import { TValidationStats } from "@/core/services/validation/validator.js";
+
 import { IValidationResult, IViolation } from "@/types/validation.js";
 
 interface IScanOptions {
@@ -31,7 +31,11 @@ interface IScanOptions {
   printTree?: boolean;
 }
 
-type TGroupedByPath = Record<string, { errors: string[]; warnings: string[] }>;
+type TGroupedByPath = Record<string, { error: string[]; warning: string[] }>;
+export type TValidationStats = {
+  errors: number;
+  warnings: number;
+};
 
 const resolveOutPath = (
   val: string | boolean,
@@ -97,12 +101,28 @@ program
         layeredTree,
         config,
       );
-      const annotatedTree = annotateGroups(entitiesTree, config);
+      const { tree: annotatedTree, log: groupLog } = annotateGroups(
+        entitiesTree,
+        config,
+      );
 
       if (options.printTree)
         annotatedTree.trees.forEach((node: TAnyNode) => printProjectTree(node));
 
-      const workLog = [...entitiesLog];
+      const validationLog = annotatedTree.trees.reduce<IValidationResult[]>(
+        (log, node: TAnyNode) => {
+          const res = node.validate();
+          for (const entry of res) {
+            for (const item of Object.values(entry)) {
+              if (item) log.push(item);
+            }
+          }
+          return log;
+        },
+        [],
+      );
+
+      const workLog = [...entitiesLog, ...groupLog, ...validationLog];
 
       const stats: TValidationStats = {
         errors: 0,
@@ -120,19 +140,18 @@ program
           const { path, type, message } = res;
 
           if (!acc[path]) {
-            acc[path] = { errors: [], warnings: [] };
+            acc[path] = { error: [], warning: [] };
           }
-
-          const key = type as "errors" | "warnings";
+          const key = type as "error" | "warning";
           acc[path][key].push(message);
           return acc;
         }, {});
 
         for (const path in grouped) {
-          stats.warnings += grouped[path].warnings.length;
-          stats.errors += grouped[path].errors.length;
+          stats.warnings += grouped[path].warning.length;
+          stats.errors += grouped[path].error.length;
 
-          validationLogger(path, grouped[path].warnings, grouped[path].errors);
+          validationLogger(path, grouped[path].warning, grouped[path].error);
         }
 
         console.log(

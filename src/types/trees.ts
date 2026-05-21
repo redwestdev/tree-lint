@@ -15,4 +15,9 @@ export interface IEntityProjectTree {
   trees: TAnyNode[];
 }
 
+export interface IAnnotatedProjectTree {
+  generatedAt: string;
+  trees: TAnyNode[];
+}
+
 export type TAnyTree = IProjectTree | ILayeredProjectTree | IEntityProjectTree;

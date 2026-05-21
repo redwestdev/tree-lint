@@ -1,13 +1,19 @@
 import { IFileNode, INode } from "@/types/nodes.js";
-import { Node } from "@/core/nodes/Node.js";
+import { INodeAnalyze, Node } from "@/core/nodes/Node.js";
+import { IFileRule, INodeRule, IValidationResult } from "@/types/validation.js";
 
 export class FileNode extends Node implements IFileNode {
   public extension: string;
 
-  constructor({ name, path, ...analyze }: INode) {
+  constructor(
+    { name, path }: INode,
+    analyze?: INodeAnalyze,
+    rules?: IFileRule,
+  ) {
     super(name, path);
     Object.assign(this, analyze);
     this.extension = path.split(".").pop() || "";
+    this.rules = rules;
   }
 
   static async create(
@@ -17,12 +23,14 @@ export class FileNode extends Node implements IFileNode {
   ): Promise<FileNode> {
     const analyze = await Node.check(path, ignore);
 
-    const data = {
-      ...analyze,
-      name,
-      path,
-    };
+    const node = new Node(name, path);
 
-    return new this(data);
+    return new this(node, analyze);
+  }
+
+  validate(
+    rules: INodeRule | undefined = this.rules,
+  ): Partial<Record<keyof INodeRule, IValidationResult>>[] {
+    return super.validate(rules);
   }
 }
