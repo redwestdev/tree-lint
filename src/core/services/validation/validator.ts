@@ -31,7 +31,8 @@ export function validateTree(tree: IAnnotatedProjectTree): IValidationResult[] {
   const invalidPaths = new Set(
     log
       .map((item) => {
-        if (!item.result) return item.violation?.path;
+        if (!item.result && item.violation?.type === "error")
+          return item.violation?.path;
       })
       .filter((v) => v !== undefined),
   );

@@ -67,6 +67,10 @@ export class DirEntity extends DirNode<IDirEntityRule> implements IDirEntity {
       }
     }
 
+    if (log.length === 0) {
+      log.push({ result: false });
+    }
+
     return log;
   }
 

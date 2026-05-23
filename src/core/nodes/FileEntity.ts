@@ -66,6 +66,10 @@ export class FileEntity
       }
     }
 
+    if (log.length === 0) {
+      log.push({ result: false });
+    }
+
     return log;
   }
 

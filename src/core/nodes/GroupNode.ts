@@ -72,6 +72,10 @@ export class GroupNode extends DirNode<IGroupRule> implements IGroupNode {
       }
     }
 
+    if (log.length === 0) {
+      log.push({ result: false });
+    }
+
     return log;
   }
 
