@@ -8,6 +8,7 @@ import {
   INameLengthRule,
   INodeRule,
   IValidationResult,
+  TAnyRule,
 } from "@/types/validation.js";
 import { VIOLATION_MESSAGES } from "@/core/services/validation/constants.js";
 
@@ -24,6 +25,7 @@ export class Node implements INode {
   public unreadable: boolean = false;
   public hidden: boolean = false;
   public rules?: INodeRule;
+  public isValid: boolean = true;
 
   constructor(name: string, path: string) {
     this.name = name;
@@ -32,6 +34,14 @@ export class Node implements INode {
 
   get isExcluded(): boolean {
     return this.ignored || this.unreadable;
+  }
+
+  setRules(rules: TAnyRule) {
+    this.rules = rules;
+  }
+
+  setValidity(value: boolean) {
+    this.isValid = value;
   }
 
   static async isBlockedAccess(dirPath: string): Promise<boolean> {

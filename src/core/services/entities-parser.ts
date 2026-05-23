@@ -13,6 +13,11 @@ import {
   IFileEntityRule,
   IValidationResult,
 } from "@/types/validation.js";
+import {
+  matchChildren,
+  matchName,
+  matchType,
+} from "@/core/services/matcher/utils.js";
 
 export interface IEntityContext {
   layer: keyof ITreeLintConfig["layers"] | null;
@@ -62,8 +67,39 @@ function annotateNode(
         );
         matchesLog.push(...matchResult);
 
-        if (matchResult.every((r) => Boolean(r.result)))
-          return DirEntity.createNew(node, entity, rules as IDirEntityRule);
+        if (matchResult.every((r) => Boolean(r.result))) {
+          const dirRules = rules as IDirEntityRule | undefined;
+          const dirEntity = new DirEntity(node, entity, dirRules);
+
+          if (dirEntity.children.length > 0 && dirRules?.children?.length) {
+            for (const child of dirEntity.children) {
+              for (const rule of dirRules.children) {
+                if (!rule._matches) continue;
+
+                const childMatches: Record<string, boolean> = {
+                  type: matchType(child, rule._matches.type),
+                  name: matchName(child.name, rule._matches.name || ""),
+                };
+
+                if (
+                  child instanceof DirNode &&
+                  child.children.length &&
+                  "children" in rule._matches
+                )
+                  childMatches.children = matchChildren(
+                    child.children,
+                    rule._matches.children,
+                  );
+
+                if (Object.values(childMatches).every(Boolean)) {
+                  child.setRules?.(rule);
+                }
+              }
+            }
+          }
+
+          return dirEntity;
+        }
       }
 
       if (
@@ -79,7 +115,7 @@ function annotateNode(
         matchesLog.push(...matchResult);
 
         if (matchResult.every((r) => Boolean(r.result)))
-          return FileEntity.createNew(node, entity, rules as IFileEntityRule);
+          return new FileEntity(node, entity, rules as IFileEntityRule);
       }
     }
   }

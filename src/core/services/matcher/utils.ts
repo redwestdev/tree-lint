@@ -10,15 +10,17 @@ export const matchName = (name: string, match: string): boolean => {
   return mm.isMatch(name, match);
 };
 
-export const matchType = (node: TAnyNode, type: TNodeType) => {
+export const matchType = (node: TAnyNode, type?: TNodeType) => {
+  if (!type) return false;
   if (node instanceof DirNode && type === "directory") return true;
   return node instanceof FileNode && type === "file";
 };
 
 export const matchChildren = (
   children: TAnyNode[],
-  matches: TMatches[],
+  matches?: TMatches[],
 ): boolean => {
+  if (!matches) return false;
   const result: boolean[] = [];
   let childrenArr: TAnyNode[] = [...children];
 

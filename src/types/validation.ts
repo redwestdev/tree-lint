@@ -44,6 +44,7 @@ export interface IChildrenAmountRule extends IBaseRule {
 }
 
 export interface INodeRule {
+  _matches?: TMatches;
   nameLength?: INameLengthRule;
   name?: INameRule;
   weight?: IWeightRule;

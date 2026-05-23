@@ -23,6 +23,8 @@ import { validateInitialPaths } from "@/utils/validate-path.js";
 import { getConfig } from "@/utils/find-config.js";
 
 import { IValidationResult, IViolation } from "@/types/validation.js";
+import { validateTree } from "@/core/services/validation/validator.js";
+import { getValidationResult } from "@/core/services/validation/get-validation-result.js";
 
 interface IScanOptions {
   treeOutput?: string | boolean;
@@ -30,12 +32,6 @@ interface IScanOptions {
   vitals?: boolean;
   printTree?: boolean;
 }
-
-type TGroupedByPath = Record<string, { error: string[]; warning: string[] }>;
-export type TValidationStats = {
-  errors: number;
-  warnings: number;
-};
 
 const resolveOutPath = (
   val: string | boolean,
@@ -106,62 +102,28 @@ program
         config,
       );
 
+      const validationLog = validateTree(annotatedTree);
+
       if (options.printTree)
         annotatedTree.trees.forEach((node: TAnyNode) => printProjectTree(node));
 
-      const validationLog = annotatedTree.trees.reduce<IValidationResult[]>(
-        (log, node: TAnyNode) => {
-          const res = node.validate();
-          for (const entry of res) {
-            for (const item of Object.values(entry)) {
-              if (item) log.push(item);
-            }
-          }
-          return log;
-        },
-        [],
-      );
-
       const workLog = [...entitiesLog, ...groupLog, ...validationLog];
 
-      const stats: TValidationStats = {
-        errors: 0,
-        warnings: 0,
-      };
+      const stats = getValidationResult(workLog);
 
-      function logViolations(log: IValidationResult[]) {
-        const violations: IViolation[] = log
-          .map((item) => {
-            if (!item.result) return item.violation;
-          })
-          .filter((v) => v !== undefined);
-
-        const grouped = violations.reduce<TGroupedByPath>((acc, res) => {
-          const { path, type, message } = res;
-
-          if (!acc[path]) {
-            acc[path] = { error: [], warning: [] };
-          }
-          const key = type as "error" | "warning";
-          acc[path][key].push(message);
-          return acc;
-        }, {});
-
-        for (const path in grouped) {
-          stats.warnings += grouped[path].warning.length;
-          stats.errors += grouped[path].error.length;
-
-          validationLogger(path, grouped[path].warning, grouped[path].error);
-        }
-
-        console.log(
-          chalk.bold(
-            `\nErrors: ${chalk.red(stats.errors)}, warnings: ${chalk.yellow(stats.warnings)}.\n`,
-          ),
+      for (const res in stats.grouped) {
+        validationLogger(
+          res,
+          stats.grouped[res].warning,
+          stats.grouped[res].error,
         );
       }
 
-      logViolations(workLog);
+      console.log(
+        chalk.bold(
+          `\nErrors: ${chalk.red(stats.errors)}, warnings: ${chalk.yellow(stats.warnings)}.\n`,
+        ),
+      );
 
       if (options.treeOutput !== undefined) {
         const out = resolveOutPath(

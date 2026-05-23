@@ -68,6 +68,10 @@ export default createConfig({
         ],
         children: [
           {
+            _matches: {
+              type: "file",
+              name: "*",
+            },
             nameLength: { type: "error", max: 20, min: 5 },
             name: { type: "error", pattern: "" },
             weight: { type: "error", max: 20, min: 2 },
@@ -90,6 +94,10 @@ export default createConfig({
             },
           },
           {
+            _matches: {
+              type: "directory",
+              name: "[A-Z]*",
+            },
             nameLength: { type: "error", max: 20, min: 5 },
             name: { type: "error", pattern: "" },
             childrenAmount: { type: "warning", max: 10, min: 2 },

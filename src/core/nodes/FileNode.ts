@@ -16,18 +16,6 @@ export class FileNode extends Node implements IFileNode {
     this.rules = rules;
   }
 
-  static async create(
-    name: string,
-    path: string,
-    ignore: string[],
-  ): Promise<FileNode> {
-    const analyze = await Node.check(path, ignore);
-
-    const node = new Node(name, path);
-
-    return new this(node, analyze);
-  }
-
   validate(
     rules: INodeRule | undefined = this.rules,
   ): Partial<Record<keyof INodeRule, IValidationResult>>[] {

@@ -23,19 +23,6 @@ export class DirNode extends Node implements IDirNode {
     this.rules = rules;
   }
 
-  static async create(
-    name: string,
-    path: string,
-    ignore: string[],
-    children: Array<TProjectNode>,
-  ): Promise<DirNode> {
-    const analyze = await Node.check(path, ignore);
-
-    const node = new Node(name, path);
-
-    return new this(node, children, analyze);
-  }
-
   validateChildrenAmount(rule: IChildrenAmountRule): IValidationResult {
     const res =
       this.children.length >= (rule?.min || 1) &&

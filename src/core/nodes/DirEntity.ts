@@ -24,15 +24,6 @@ export class DirEntity extends DirNode implements IDirEntity {
     this.entity = entity;
   }
 
-  static createNew(
-    node: DirNode,
-    entity: keyof ITreeLintConfig["entities"],
-    rules?: IDirEntityRule,
-  ): DirEntity {
-    // TODO: append rules for children
-    return new this(node, entity, rules);
-  }
-
   static match(
     node: DirNode,
     matches: IMatchDirectory,

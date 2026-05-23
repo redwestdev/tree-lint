@@ -30,7 +30,8 @@ async function buildTree(
   }
 
   if (isDirectory) {
-    const dir = await DirNode.create(name, dirPath, ignore, []);
+    const analyzeDir = await Node.check(dirPath, ignore);
+    const dir = new DirNode({ name, path: dirPath }, [], analyzeDir);
 
     if (dir.isExcluded) return dir;
 
@@ -47,7 +48,8 @@ async function buildTree(
     return dir;
   }
 
-  return await FileNode.create(name, dirPath, ignore);
+  const analyzeFile = await Node.check(dirPath, ignore);
+  return new FileNode({ name, path: dirPath }, analyzeFile);
 }
 
 export async function buildProjectTree(

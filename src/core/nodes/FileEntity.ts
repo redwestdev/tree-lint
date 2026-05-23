@@ -23,15 +23,6 @@ export class FileEntity extends FileNode implements IFileEntity {
     this.entity = entity;
   }
 
-  static createNew(
-    node: FileNode,
-    entity: keyof ITreeLintConfig["entities"],
-    rules?: IFileEntityRule,
-  ): FileEntity {
-    // FIXME: do we really need this?
-    return new this(node, entity, rules);
-  }
-
   static match(
     node: FileNode,
     matches: IMatchFile,
