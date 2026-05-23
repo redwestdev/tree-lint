@@ -5,26 +5,32 @@ import { matchName } from "@/core/services/matcher/utils.js";
 import { MATCHING_ENTITY_ERRORS } from "@/core/services/matcher/constants.js";
 import { replacePlaceholders } from "@/utils/replace-placeholders.js";
 import {
+  ICustomFileEntityRule,
   IFileEntityRule,
+  IFileRuleBase,
   IValidationResult,
   IViolation,
 } from "@/types/validation.js";
+import { createValidationResult } from "@/utils/create-validation-result.js";
 
-export class FileEntity extends FileNode implements IFileEntity {
+export class FileEntity
+  extends FileNode<IFileEntityRule>
+  implements IFileEntity
+{
   public readonly entity: keyof ITreeLintConfig["entities"];
 
   constructor(
-    node: FileNode,
+    node: FileNode<IFileRuleBase>,
     entity: keyof ITreeLintConfig["entities"],
     rules?: IFileEntityRule,
   ) {
-    super(node);
-    this.rules = rules;
+    super(node, node.lines);
+    this._rules = rules;
     this.entity = entity;
   }
 
   static match(
-    node: FileNode,
+    node: FileNode<IFileRuleBase>,
     matches: IMatchFile,
     entityName: keyof ITreeLintConfig["entities"],
   ): IValidationResult[] {
@@ -63,9 +69,38 @@ export class FileEntity extends FileNode implements IFileEntity {
     return log;
   }
 
+  override validateCustom(
+    rule: unknown,
+    results: Partial<Record<string, IValidationResult>>[],
+  ): IValidationResult {
+    const r = rule as ICustomFileEntityRule;
+
+    const res = r.callback(this, results);
+    return createValidationResult(res, this.path, r, "custom");
+  }
+
   validate(
     rules: IFileEntityRule | undefined = this.rules,
-  ): Partial<Record<keyof IFileEntityRule, IValidationResult>>[] {
-    return super.validate(rules);
+  ): Partial<Record<string, IValidationResult>>[] {
+    if (!rules) return [];
+
+    const r = rules as unknown as IFileEntityRule;
+    const { custom, ...rulesWithoutCustom } = r || {};
+
+    const superResult = super.validate(rulesWithoutCustom);
+    const selfResult: Partial<Record<string, IValidationResult>> = {};
+
+    for (const rule in rules) {
+      switch (rule as keyof typeof rules) {
+        case "custom":
+          if (custom)
+            selfResult.custom = this.validateCustom(custom, superResult);
+          break;
+        default:
+          break;
+      }
+    }
+
+    return [...superResult, selfResult];
   }
 }

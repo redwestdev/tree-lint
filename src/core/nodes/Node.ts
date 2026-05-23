@@ -6,11 +6,13 @@ import mm from "micromatch";
 import { INode } from "@/types/nodes.js";
 import {
   INameLengthRule,
+  INameRule,
   INodeRule,
   IValidationResult,
-  TAnyRule,
+  ISizeRule,
+  IBaseRule,
 } from "@/types/validation.js";
-import { VIOLATION_MESSAGES } from "@/core/services/validation/constants.js";
+import { createValidationResult } from "@/utils/create-validation-result.js";
 
 export interface INodeAnalyze {
   ignored: boolean;
@@ -18,30 +20,48 @@ export interface INodeAnalyze {
   hidden: boolean;
 }
 
-export class Node implements INode {
+export class Node<TRule extends INodeRule = INodeRule> implements INode<TRule> {
   public name: string;
   public path: string;
+  public _size: number = 0;
+  public _rules?: TRule;
+  public _isValid: boolean = true;
   public ignored: boolean = false;
   public unreadable: boolean = false;
   public hidden: boolean = false;
-  public rules?: INodeRule;
-  public isValid: boolean = true;
 
-  constructor(name: string, path: string) {
+  constructor(name: string, path: string, size: number) {
     this.name = name;
     this.path = path;
+    this._size = size;
   }
 
   get isExcluded(): boolean {
     return this.ignored || this.unreadable;
   }
 
-  setRules(rules: TAnyRule) {
-    this.rules = rules;
+  get size(): number {
+    return this._size;
   }
 
-  setValidity(value: boolean) {
-    this.isValid = value;
+  set size(value: number) {
+    this._size = value;
+  }
+
+  get rules(): TRule | undefined {
+    return this._rules;
+  }
+
+  set rules(rules: TRule | undefined) {
+    this._rules = rules;
+  }
+
+  get isValid(): boolean {
+    return this._isValid;
+  }
+
+  set isValid(value: boolean) {
+    this._isValid = value;
   }
 
   static async isBlockedAccess(dirPath: string): Promise<boolean> {
@@ -97,22 +117,30 @@ export class Node implements INode {
     const res =
       this.name.length >= (rule?.min || 1) && this.name.length <= rule.max;
 
-    return {
-      result: res,
-      ...(!res && {
-        violation: {
-          type: rule.type,
-          path: this.path,
-          message: rule.message || VIOLATION_MESSAGES.nameLength,
-        },
-      }),
-    };
+    return createValidationResult(res, this.path, rule, "nameLength");
   }
 
-  validate(
-    rules?: INodeRule,
-  ): Partial<Record<keyof INodeRule, IValidationResult>>[] {
-    const result: Partial<Record<keyof INodeRule, IValidationResult>> = {};
+  validateName(rule: INameRule): IValidationResult {
+    const res = mm.isMatch(this.name, rule.pattern || "");
+    return createValidationResult(res, this.path, rule, "name");
+  }
+
+  validateSize(rule: ISizeRule): IValidationResult {
+    const fileSize = this._size / 1024;
+    const res = fileSize >= (rule?.min || 1) && fileSize <= rule.max;
+
+    return createValidationResult(res, this.path, rule, "size");
+  }
+
+  validateEmpty(rule: IBaseRule) {
+    const res = this._size !== 0;
+    return createValidationResult(res, this.path, rule, "isEmpty");
+  }
+
+  validate(rules?: TRule): Partial<Record<string, IValidationResult>>[] {
+    if (!rules) return [];
+
+    const result: Partial<Record<string, IValidationResult>> = {};
 
     for (const rule in rules) {
       switch (rule as keyof typeof rules) {
@@ -121,8 +149,14 @@ export class Node implements INode {
             result.nameLength = this.validateNameLength(rules.nameLength);
           break;
         case "name":
-        case "weight":
+          if (rules.name) result.name = this.validateName(rules.name);
+          break;
+        case "size":
+          if (rules.size) result.size = this.validateSize(rules.size);
+          break;
         case "isEmpty":
+          if (rules.isEmpty) result.isEmpty = this.validateEmpty(rules.isEmpty);
+          break;
         default:
           break;
       }

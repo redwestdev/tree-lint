@@ -10,9 +10,7 @@ function annotateNode(
   const layers: Set<string> = new Set(Object.keys(config.layers || {}));
 
   if (node instanceof DirNode && !node.isExcluded) {
-    node.children = node.children.map((child: TProjectNode) =>
-      annotateNode(child, config),
-    );
+    node.children = node.children.map((child) => annotateNode(child, config));
 
     const isLayer = LayerNode.match(node, layers);
 

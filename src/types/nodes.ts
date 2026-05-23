@@ -1,45 +1,62 @@
 import { ITreeLintConfig } from "@/types/config.js";
 import {
+  IDirEntityRule,
   IDirRule,
+  IDirRuleBase,
+  IFileEntityRule,
+  IFileRule,
+  IFileRuleBase,
+  IGroupRule,
+  ILayerRule,
   INodeRule,
   IValidationResult,
-  TAnyRule,
 } from "@/types/validation.js";
+import {
+  DirEntity,
+  DirNode,
+  FileEntity,
+  FileNode,
+  GroupNode,
+  LayerNode,
+} from "@/core/nodes/index.js";
 
-type TValidationMap<R> = Partial<Record<keyof R, IValidationResult>>;
-
-export interface INode<R extends object = INodeRule> {
+export interface INode<TRule extends object = INodeRule> {
   name: string;
   path: string;
+  size: number;
   ignored?: boolean;
   unreadable?: boolean;
   hidden?: boolean;
   isValid?: boolean;
-  rules?: R;
-  setRules?: (rules: TAnyRule) => void;
-  validate?: (rules?: R) => TValidationMap<R>[];
-  setValidity?: (isValid: boolean) => void;
+  isExcluded?: boolean;
+  rules?: TRule;
+  validate?: (rules?: TRule) => Partial<Record<string, IValidationResult>>[];
 }
 
-export interface IFileNode extends INode {
+export interface IFileNode<
+  TRule extends IFileRuleBase = IFileRule,
+> extends INode<TRule> {
   extension: string;
+  lines: number;
 }
 
-export interface IDirNode extends INode<IDirRule> {
+export interface IDirNode<
+  TRule extends IDirRuleBase = IDirRule,
+> extends INode<TRule> {
   children: TAnyNode[];
 }
 
-export interface ILayerNode extends IDirNode {}
+export interface ILayerNode extends IDirNode<ILayerRule> {}
 
-export interface IFileEntity extends IFileNode {
+export interface IFileEntity extends IFileNode<IFileEntityRule> {
   entity: keyof ITreeLintConfig["entities"];
 }
 
-export interface IDirEntity extends IDirNode {
+export interface IDirEntity extends IDirNode<IDirEntityRule> {
   entity: keyof ITreeLintConfig["entities"];
 }
 
-export interface IGroupNode extends IDirNode {}
+export interface IGroupNode extends IDirNode<IGroupRule> {}
 
 export enum NodeType {
   DirNode = "directory",
@@ -48,14 +65,14 @@ export enum NodeType {
 
 export type TNodeType = "file" | "directory";
 
-export type TProjectNode = IDirNode | IFileNode;
+export type TProjectNode = DirNode<IDirRuleBase> | FileNode<IFileRuleBase>;
 
-export type TLayeredProjectNode = TProjectNode | ILayerNode;
+export type TLayeredProjectNode = TProjectNode | LayerNode;
 
 export type TAnyNode =
-  | IDirNode
-  | IFileNode
-  | ILayerNode
-  | IFileEntity
-  | IDirEntity
-  | IGroupNode;
+  | DirNode<IDirRuleBase>
+  | FileNode<IFileRuleBase>
+  | LayerNode
+  | FileEntity
+  | DirEntity
+  | GroupNode;

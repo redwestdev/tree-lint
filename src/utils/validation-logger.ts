@@ -23,6 +23,8 @@ export function validationLogger(
   warnings: string[] = [],
   errors: string[] = [],
 ) {
+  if (!warnings.length && !errors.length) return;
+
   console.log(`\n${createPath(path)}`);
 
   if (warnings.length)

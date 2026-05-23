@@ -7,20 +7,22 @@ import { MATCHING_GROUP_ERRORS } from "@/core/services/matcher/constants.js";
 import { FileEntity } from "@/core/nodes/FileEntity.js";
 import { DirEntity } from "@/core/nodes/DirEntity.js";
 import {
+  ICustomGroupRule,
+  IDirRuleBase,
   IGroupRule,
   IValidationResult,
   IViolation,
-  TAnyRule,
 } from "@/types/validation.js";
+import { createValidationResult } from "@/utils/create-validation-result.js";
 
-export class GroupNode extends DirNode implements IGroupNode {
-  constructor(node: DirNode, rules?: IGroupRule) {
+export class GroupNode extends DirNode<IGroupRule> implements IGroupNode {
+  constructor(node: DirNode<IDirRuleBase>, rules?: IGroupRule) {
     super(node, node.children);
     this.rules = rules;
   }
 
   static match(
-    node: DirNode,
+    node: DirNode<IDirRuleBase>,
     config?: ITreeLintConfig["groups"],
   ): IValidationResult[] {
     if (!node.children.length) return [{ result: false }];
@@ -73,10 +75,37 @@ export class GroupNode extends DirNode implements IGroupNode {
     return log;
   }
 
+  override validateCustom(
+    rule: unknown,
+    results: Partial<Record<string, IValidationResult>>[],
+  ): IValidationResult {
+    const r = rule as ICustomGroupRule;
+    const res = r.callback(this, results);
+
+    return createValidationResult(res, this.path, r, "custom");
+  }
+
   validate(
     rules: IGroupRule | undefined = this.rules,
-  ): Partial<Record<keyof TAnyRule, IValidationResult>>[] {
-    // do something
-    return super.validate(rules);
+  ): Partial<Record<string, IValidationResult>>[] {
+    const r = rules as unknown as IGroupRule;
+    const { custom, ...rulesWithoutCustom } = r || {};
+
+    const results: Partial<Record<string, IValidationResult>>[] =
+      super.validate(rulesWithoutCustom);
+
+    const selfResult: Partial<Record<string, IValidationResult>> = {};
+
+    for (const rule in rules) {
+      switch (rule as keyof typeof rules) {
+        case "custom":
+          if (custom) selfResult.custom = this.validateCustom(custom, results);
+          break;
+        default:
+          break;
+      }
+    }
+
+    return [...results, selfResult];
   }
 }

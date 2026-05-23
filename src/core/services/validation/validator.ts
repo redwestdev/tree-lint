@@ -4,7 +4,7 @@ import { IAnnotatedProjectTree } from "@/types/trees.js";
 
 function updateNodeValidity(node: TAnyNode, paths: Set<string>) {
   if (paths.has(node.path)) {
-    node.setValidity?.(false);
+    node.isValid = false;
   }
 
   if ("children" in node && Array.isArray(node.children)) {
@@ -16,9 +16,6 @@ export function validateTree(tree: IAnnotatedProjectTree): IValidationResult[] {
   const log: IValidationResult[] = tree.trees.reduce<IValidationResult[]>(
     (log, node: TAnyNode) => {
       const res = node.validate?.() ?? [];
-
-      const isValid = res.every((r) => Object.values(r).every((v) => v.result));
-      node.setValidity?.(isValid);
 
       for (const entry of res) {
         for (const item of Object.values(entry)) {

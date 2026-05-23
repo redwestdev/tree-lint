@@ -58,7 +58,7 @@ export default createConfig({
         nameLength: { type: "error", max: 20, min: 5 },
         name: { type: "error", pattern: "PascalCase" },
         childrenAmount: { type: "warning", max: 10, min: 2 },
-        weight: { type: "error", max: 20, min: 2 },
+        size: { type: "error", max: 20, min: 2 },
         isEmpty: { type: "warning" },
         excludes: [
           {
@@ -74,23 +74,15 @@ export default createConfig({
             },
             nameLength: { type: "error", max: 20, min: 5 },
             name: { type: "error", pattern: "" },
-            weight: { type: "error", max: 20, min: 2 },
+            size: { type: "error", max: 20, min: 2 },
             lineCount: { type: "warning", max: 200, min: 2 },
             isEmpty: { type: "warning" },
-            custom: () => {
-              // node + all validation result
-              const result = true;
-              // do something
-              return result
-                ? { result }
-                : {
-                    result: false,
-                    violation: {
-                      type: "error",
-                      path: "",
-                      message: "Some error message",
-                    },
-                  };
+            custom: {
+              type: "error",
+              callback: () => {
+                return false;
+              },
+              message: "Help me, I'm a vibecoder!",
             },
           },
           {
@@ -101,7 +93,7 @@ export default createConfig({
             nameLength: { type: "error", max: 20, min: 5 },
             name: { type: "error", pattern: "" },
             childrenAmount: { type: "warning", max: 10, min: 2 },
-            weight: { type: "error", max: 20, min: 2 },
+            size: { type: "error", max: 20, min: 2 },
             isEmpty: { type: "warning" },
             includes: [
               {

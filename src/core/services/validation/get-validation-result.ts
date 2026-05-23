@@ -31,8 +31,8 @@ export function getValidationResult(
     const key = type as "error" | "warning";
     acc[path][key].push(message);
 
-    stats.warnings += acc[path].warning.length;
-    stats.errors += acc[path].error.length;
+    if (key === "warning") stats.warnings += 1;
+    else stats.errors += 1;
 
     return acc;
   }, {});

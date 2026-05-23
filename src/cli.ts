@@ -22,7 +22,6 @@ import { countNodes, getVitals, printReport } from "@/utils/performance.js";
 import { validateInitialPaths } from "@/utils/validate-path.js";
 import { getConfig } from "@/utils/find-config.js";
 
-import { IValidationResult, IViolation } from "@/types/validation.js";
 import { validateTree } from "@/core/services/validation/validator.js";
 import { getValidationResult } from "@/core/services/validation/get-validation-result.js";
 
@@ -104,24 +103,24 @@ program
 
       const validationLog = validateTree(annotatedTree);
 
-      if (options.printTree)
+      if (options.printTree !== undefined)
         annotatedTree.trees.forEach((node: TAnyNode) => printProjectTree(node));
 
       const workLog = [...entitiesLog, ...groupLog, ...validationLog];
 
-      const stats = getValidationResult(workLog);
+      const {
+        errors,
+        warnings,
+        grouped: results,
+      } = getValidationResult(workLog);
 
-      for (const res in stats.grouped) {
-        validationLogger(
-          res,
-          stats.grouped[res].warning,
-          stats.grouped[res].error,
-        );
+      for (const res in results) {
+        validationLogger(res, results[res].warning, results[res].error);
       }
 
       console.log(
         chalk.bold(
-          `\nErrors: ${chalk.red(stats.errors)}, warnings: ${chalk.yellow(stats.warnings)}.\n`,
+          `\nErrors: ${chalk.red(errors)}, warnings: ${chalk.yellow(warnings)}.\n`,
         ),
       );
 
@@ -151,11 +150,12 @@ program
         printReport(start, totalNodes);
       }
 
-      if (stats.errors > 0) {
-        console.log(chalk.red(`Validation failed.\n`));
+      if (errors > 0) {
+        spinner.fail(chalk.red(`Validation failed.\n`));
         process.exit(1);
       }
 
+      spinner.succeed("Done!");
       process.exit(0);
     } catch (error) {
       spinner.fail("Error");

@@ -1,6 +1,6 @@
 import { ITreeLintConfig } from "@/types/config.js";
-import { ILayeredProjectTree } from "@/types/trees.js";
-import { TAnyNode, TLayeredProjectNode } from "@/types/nodes.js";
+import { IEntityProjectTree, ILayeredProjectTree } from "@/types/trees.js";
+import { TAnyNode } from "@/types/nodes.js";
 import {
   DirEntity,
   DirNode,
@@ -32,7 +32,7 @@ const initialContext: IEntityContext = {
 const matchesLog: IValidationResult[] = [];
 
 function annotateNode(
-  node: TLayeredProjectNode,
+  node: TAnyNode,
   currentContext: IEntityContext,
   config: ITreeLintConfig,
 ): TAnyNode {
@@ -92,7 +92,7 @@ function annotateNode(
                   );
 
                 if (Object.values(childMatches).every(Boolean)) {
-                  child.setRules?.(rule);
+                  child.rules = rule;
                 }
               }
             }
@@ -126,7 +126,9 @@ function annotateNode(
 export function annotateEntities(
   tree: ILayeredProjectTree,
   config: ITreeLintConfig,
-): { tree: ILayeredProjectTree; log: IValidationResult[] } {
+): { tree: IEntityProjectTree; log: IValidationResult[] } {
+  matchesLog.length = 0;
+
   return {
     tree: {
       generatedAt: tree.generatedAt,

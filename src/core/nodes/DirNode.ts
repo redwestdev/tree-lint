@@ -1,26 +1,30 @@
 import { INodeAnalyze, Node } from "@/core/nodes/Node.js";
-import { IDirNode, INode, TAnyNode, TProjectNode } from "@/types/nodes.js";
+import { IDirNode, INode, TAnyNode } from "@/types/nodes.js";
 import {
   IChildrenAmountRule,
+  ICustomDirRule,
   IDirRule,
+  IDirRuleBase,
   IValidationResult,
-  TAnyRule,
 } from "@/types/validation.js";
-import { VIOLATION_MESSAGES } from "@/core/services/validation/constants.js";
+import { createValidationResult } from "@/utils/create-validation-result.js";
 
-export class DirNode extends Node implements IDirNode {
-  public children: Array<TProjectNode>;
+export class DirNode<TRule extends IDirRuleBase = IDirRule>
+  extends Node<TRule>
+  implements IDirNode<TRule>
+{
+  public children: Array<TAnyNode>;
 
   constructor(
-    { name, path }: INode,
-    children: Array<TProjectNode> = [],
+    { name, path, size }: INode,
+    children: Array<TAnyNode> = [],
     analyze?: INodeAnalyze,
-    rules?: IDirRule,
+    rules?: TRule,
   ) {
-    super(name, path);
+    super(name, path, size);
     this.children = children;
     Object.assign(this, analyze);
-    this.rules = rules;
+    this._rules = rules;
   }
 
   validateChildrenAmount(rule: IChildrenAmountRule): IValidationResult {
@@ -28,56 +32,61 @@ export class DirNode extends Node implements IDirNode {
       this.children.length >= (rule?.min || 1) &&
       this.children.length <= rule.max;
 
-    return {
-      result: res,
-      ...(!res && {
-        violation: {
-          type: rule.type,
-          path: this.path,
-          message: rule.message || VIOLATION_MESSAGES.childrenAmount,
-        },
-      }),
-    };
+    return createValidationResult(res, this.path, rule, "childrenAmount");
+  }
+
+  validateCustom(
+    rule: unknown,
+    results: Partial<Record<string, IValidationResult>>[],
+  ): IValidationResult {
+    const r = rule as ICustomDirRule;
+
+    const res = r.callback(this, results);
+    return createValidationResult(res, this.path, r, "custom");
   }
 
   validate(
-    rules: IDirRule | undefined = this.rules,
-  ): Partial<Record<keyof TAnyRule, IValidationResult>>[] {
-    const childrenResults: Partial<
-      Record<keyof TAnyRule, IValidationResult>
-    >[] = this.children.reduce(
-      (
-        prev: Partial<Record<keyof TAnyRule, IValidationResult>>[],
-        node: TAnyNode,
-      ) => {
-        const res = node?.validate?.();
+    rules: TRule | undefined = this.rules,
+  ): Partial<Record<string, IValidationResult>>[] {
+    const childrenResults: Partial<Record<string, IValidationResult>>[] =
+      this.children.reduce(
+        (
+          prev: Partial<Record<string, IValidationResult>>[],
+          node: TAnyNode,
+        ) => {
+          const res = node?.validate?.();
 
-        if (!res) return prev;
+          if (!res) return prev;
 
-        prev.push(...res);
-        return prev;
-      },
-      [],
-    );
+          prev.push(...res);
+          return prev;
+        },
+        [],
+      );
 
     if (!rules) return childrenResults;
 
-    const supperResults = super.validate(rules);
-    const results: Partial<Record<keyof IDirRule, IValidationResult>> = {};
+    const r = rules as unknown as IDirRule;
+    const superResults = super.validate(rules);
+    const results: Partial<Record<string, IValidationResult>> = {};
 
     for (const rule in rules) {
       switch (rule as keyof typeof rules) {
         case "childrenAmount":
-          if (rules?.childrenAmount)
+          if (r.childrenAmount)
             results.childrenAmount = this.validateChildrenAmount(
-              rules.childrenAmount,
+              r.childrenAmount,
             );
+          break;
+        case "custom":
+          if (r.custom)
+            results.custom = this.validateCustom(r.custom, superResults);
           break;
         default:
           break;
       }
     }
-    const selfResult = [...supperResults, results];
+    const selfResult = [...superResults, results];
 
     return [...selfResult, ...childrenResults];
   }

@@ -1,5 +1,13 @@
-import { DirEntity, FileEntity } from "@/core/nodes/index.js";
 import { TMatches, TNaming } from "@/types/config.js";
+import {
+  DirEntity,
+  DirNode,
+  FileEntity,
+  FileNode,
+  GroupNode,
+  LayerNode,
+  Node,
+} from "@/core/nodes/index.js";
 
 export type TSeverity = "error" | "warning" | (string & {});
 
@@ -28,7 +36,7 @@ export interface INameRule extends IBaseRule {
   pattern: TNaming | (string & {});
 }
 
-export interface IWeightRule extends IBaseRule {
+export interface ISizeRule extends IBaseRule {
   min?: number;
   max: number;
 }
@@ -43,40 +51,98 @@ export interface IChildrenAmountRule extends IBaseRule {
   max: number;
 }
 
+export interface ICustomRule extends IBaseRule {
+  callback: (
+    node: Node,
+    results?: Partial<Record<string, IValidationResult>>[],
+  ) => boolean;
+}
+
+export interface ICustomFileEntityRule extends IBaseRule {
+  callback: (
+    node: FileEntity,
+    results?: Partial<Record<string, IValidationResult>>[],
+  ) => boolean;
+}
+export interface ICustomFileRule extends IBaseRule {
+  callback: (
+    node: FileNode,
+    results?: Partial<Record<string, IValidationResult>>[],
+  ) => boolean;
+}
+export interface ICustomDirRule extends IBaseRule {
+  callback: (
+    node: DirNode,
+    results?: Partial<Record<string, IValidationResult>>[],
+  ) => boolean;
+}
+export interface ICustomDirEntityRule extends IBaseRule {
+  callback: (
+    node: DirEntity,
+    results?: Partial<Record<string, IValidationResult>>[],
+  ) => boolean;
+}
+export interface ICustomLayerRule extends IBaseRule {
+  callback: (
+    node: LayerNode,
+    results?: Partial<Record<string, IValidationResult>>[],
+  ) => boolean;
+}
+export interface ICustomGroupRule extends IBaseRule {
+  callback: (
+    node: GroupNode,
+    results?: Partial<Record<string, IValidationResult>>[],
+  ) => boolean;
+}
+
 export interface INodeRule {
   _matches?: TMatches;
   nameLength?: INameLengthRule;
   name?: INameRule;
-  weight?: IWeightRule;
+  size?: ISizeRule;
   isEmpty?: IBaseRule;
 }
 
-export interface IFileRule extends INodeRule {
+export interface IFileRuleBase extends INodeRule {
   lineCount?: ILineCountRule;
 }
-export interface IDirRule extends INodeRule {
+
+export interface IDirRuleBase extends INodeRule {
   childrenAmount?: IChildrenAmountRule;
   includes?: Array<TMatches>;
   excludes?: Array<TMatches>;
   children?: Array<TAnyRule>;
 }
 
+export interface IFileRule extends IFileRuleBase {
+  custom?: ICustomFileRule;
+}
+
+export interface IDirRule extends IDirRuleBase {
+  custom?: ICustomDirRule;
+}
+
+export interface IDirEntityRule extends IDirRuleBase {
+  custom?: ICustomDirEntityRule;
+}
+export interface IFileEntityRule extends IFileRuleBase {
+  custom?: ICustomFileEntityRule;
+}
+
 export type TEntityRule = IFileEntityRule | IDirEntityRule;
 
-export interface IDirEntityRule extends IDirRule {
-  custom?: (
-    node: DirEntity,
-    results: Record<keyof IDirEntityRule, IValidationResult>,
-  ) => IValidationResult;
+export interface ILayerRule extends IDirRuleBase {
+  custom?: ICustomLayerRule;
 }
-export interface IFileEntityRule extends IFileRule {
-  custom?: (
-    node: FileEntity,
-    results: Record<keyof IFileEntityRule, IValidationResult>,
-  ) => IValidationResult;
+export interface IGroupRule extends IDirRuleBase {
+  custom?: ICustomGroupRule;
 }
 
-export type ILayerRule = IDirRule;
-export type IGroupRule = IDirRule;
-
-export type TAnyRule = TEntityRule | INodeRule | IFileRule | IDirRule;
+export type TAnyRule =
+  | INodeRule
+  | IFileRule
+  | IDirRule
+  | IFileEntityRule
+  | IDirEntityRule
+  | ILayerRule
+  | IGroupRule;

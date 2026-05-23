@@ -5,27 +5,29 @@ import { matchChildren, matchName } from "@/core/services/matcher/utils.js";
 import { MATCHING_ENTITY_ERRORS } from "@/core/services/matcher/constants.js";
 import { replacePlaceholders } from "@/utils/replace-placeholders.js";
 import {
+  ICustomDirEntityRule,
   IDirEntityRule,
+  IDirRuleBase,
   IValidationResult,
   IViolation,
-  TAnyRule,
 } from "@/types/validation.js";
+import { createValidationResult } from "@/utils/create-validation-result.js";
 
-export class DirEntity extends DirNode implements IDirEntity {
+export class DirEntity extends DirNode<IDirEntityRule> implements IDirEntity {
   public readonly entity: keyof ITreeLintConfig["entities"];
 
   constructor(
-    node: DirNode,
+    node: DirNode<IDirRuleBase>,
     entity: keyof ITreeLintConfig["entities"],
     rules?: IDirEntityRule,
   ) {
     super(node, node.children);
-    this.rules = rules;
+    this._rules = rules;
     this.entity = entity;
   }
 
   static match(
-    node: DirNode,
+    node: DirNode<IDirRuleBase>,
     matches: IMatchDirectory,
     entityName: keyof ITreeLintConfig["entities"],
   ): IValidationResult[] {
@@ -68,11 +70,37 @@ export class DirEntity extends DirNode implements IDirEntity {
     return log;
   }
 
+  override validateCustom(
+    rule: unknown,
+    results: Partial<Record<string, IValidationResult>>[],
+  ): IValidationResult {
+    const r = rule as ICustomDirEntityRule;
+    const res = r.callback(this, results);
+
+    return createValidationResult(res, this.path, r, "custom");
+  }
+
   validate(
     rules: IDirEntityRule | undefined = this.rules,
-  ): Partial<Record<keyof TAnyRule, IValidationResult>>[] {
-    // if (this.rules?.custom) results.custom = this.rules.custom(this, results);
+  ): Partial<Record<string, IValidationResult>>[] {
+    const r = rules as unknown as IDirEntityRule;
+    const { custom, ...rulesWithoutCustom } = r || {};
 
-    return super.validate(rules);
+    const results: Partial<Record<string, IValidationResult>>[] =
+      super.validate(rulesWithoutCustom);
+
+    const selfResult: Partial<Record<string, IValidationResult>> = {};
+
+    for (const rule in rules) {
+      switch (rule as keyof typeof rules) {
+        case "custom":
+          if (custom) selfResult.custom = this.validateCustom(custom, results);
+          break;
+        default:
+          break;
+      }
+    }
+
+    return [...results, selfResult];
   }
 }
