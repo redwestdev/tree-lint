@@ -24,12 +24,14 @@ import { getConfig } from "@/utils/find-config.js";
 
 import { validateTree } from "@/core/services/validation/validator.js";
 import { getValidationResult } from "@/core/services/validation/get-validation-result.js";
+import { TGroupOptions } from "@/types/validation.js";
 
 interface IScanOptions {
   treeOutput?: string | boolean;
   annotatedOutput?: string | boolean;
   vitals?: boolean;
   printTree?: boolean;
+  groupBy?: TGroupOptions;
 }
 
 const resolveOutPath = (
@@ -58,6 +60,11 @@ program
   .option(
     "-a, --annotated-output [file]",
     "Export the processed tree (with identified layers, entities, and groups) to a JSON file",
+  )
+  .option(
+    "-g, --group-by <type>",
+    "Group validation output by: path, severity, or rule (default: path)",
+    "path",
   )
   .option(
     "-v, --vitals",
@@ -108,21 +115,9 @@ program
 
       const workLog = [...entitiesLog, ...groupLog, ...validationLog];
 
-      const {
-        errors,
-        warnings,
-        grouped: results,
-      } = getValidationResult(workLog);
+      const validationResult = getValidationResult(workLog, options.groupBy);
 
-      for (const res in results) {
-        validationLogger(res, results[res].warning, results[res].error);
-      }
-
-      console.log(
-        chalk.bold(
-          `\nErrors: ${chalk.red(errors)}, warnings: ${chalk.yellow(warnings)}.\n`,
-        ),
-      );
+      validationLogger(validationResult);
 
       if (options.treeOutput !== undefined) {
         const out = resolveOutPath(
@@ -150,7 +145,7 @@ program
         printReport(start, totalNodes);
       }
 
-      if (errors > 0) {
+      if (validationResult.errors > 0) {
         spinner.fail(chalk.red(`Validation failed.\n`));
         process.exit(1);
       }

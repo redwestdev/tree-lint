@@ -146,3 +146,43 @@ export type TAnyRule =
   | IDirEntityRule
   | ILayerRule
   | IGroupRule;
+
+export type TGroupedByPath = Record<
+  string,
+  { error: string[]; warning: string[] }
+>;
+
+export type TGroupedBySeverity = {
+  error: { message: string; path: string }[];
+  warning: { message: string; path: string }[];
+};
+
+export type TGroupedByRule = Record<
+  string,
+  { error: Set<string>; warning: Set<string> }
+>;
+
+export interface IValidationStatsPath {
+  type: "path";
+  errors: number;
+  warnings: number;
+  grouped: TGroupedByPath;
+}
+export interface IValidationStatsSeverity {
+  type: "severity";
+  errors: number;
+  warnings: number;
+  grouped: TGroupedBySeverity;
+}
+export interface IValidationStatsRule {
+  type: "rule";
+  errors: number;
+  warnings: number;
+  grouped: TGroupedByRule;
+}
+export type TValidationStats =
+  | IValidationStatsPath
+  | IValidationStatsSeverity
+  | IValidationStatsRule;
+
+export type TGroupOptions = "path" | "severity" | "rule";
