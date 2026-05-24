@@ -31,6 +31,12 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ["dist/", "node_modules/", "test-project/**/*", "notes/**/*"],
+    ignores: [
+      "dist/",
+      "node_modules/",
+      "test-project/**/*",
+      "notes/**/*",
+      "coverage/**/*",
+    ],
   },
 );

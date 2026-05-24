@@ -38,7 +38,7 @@ export interface IDirEntityConf {
 export type IEntity = IDirEntityConf | IFileEntityConf;
 
 export interface IGroup {
-  name: string;
+  name?: string;
   children?: Array<TMatches>;
   rules?: IGroupRule;
 }

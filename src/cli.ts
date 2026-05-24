@@ -25,6 +25,7 @@ import { getConfig } from "@/utils/find-config.js";
 import { validateTree } from "@/core/services/validation/validator.js";
 import { getValidationResult } from "@/core/services/validation/get-validation-result.js";
 import { TGroupOptions } from "@/types/validation.js";
+import { createDefaultConfig } from "@/core/services/config/create-default-config.js";
 
 interface IScanOptions {
   treeOutput?: string | boolean;
@@ -51,8 +52,31 @@ program
   .version("0.1.0");
 
 program
+  .command("init")
+  .description("Initialize a new tree-lint configuration")
+  .action(async () => {
+    // TODO: add options for different configs
+    const spinner = ora(`Creating default configuration...`).start();
+
+    try {
+      await createDefaultConfig();
+
+      spinner.succeed("Configuration file created successfully!");
+      process.exit(0);
+    } catch (error) {
+      spinner.fail("Error");
+
+      if (error instanceof Error) {
+        console.error(chalk.red(error.message));
+      }
+
+      process.exit(1);
+    }
+  });
+
+program
   .command("scan [path]")
-  .description("Scan the project and save structure to file")
+  .description("Scan the project and optionally save structure to file")
   .option(
     "-t, --tree-output [file]",
     "Export the raw file system structure to a JSON file",
