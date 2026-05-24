@@ -5,7 +5,7 @@ export function createValidationResult(
   result: boolean,
   nodePath: string,
   rule: IBaseRule,
-  key: keyof typeof VIOLATION_MESSAGES,
+  key: keyof typeof VIOLATION_MESSAGES = "custom",
 ): IValidationResult {
   if (result) {
     return { result: true };

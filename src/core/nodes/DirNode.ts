@@ -8,6 +8,7 @@ import {
   IValidationResult,
 } from "@/types/validation.js";
 import { createValidationResult } from "@/utils/create-validation-result.js";
+import { formatCustomError } from "@/utils/format-custom-error.js";
 
 export class DirNode<TRule extends IDirRuleBase = IDirRule>
   extends Node<TRule>
@@ -41,8 +42,22 @@ export class DirNode<TRule extends IDirRuleBase = IDirRule>
   ): IValidationResult {
     const r = rule as ICustomDirRule;
 
-    const res = r.callback(this, results);
-    return createValidationResult(res, this.path, r, "custom");
+    try {
+      const res = r.callback(this, results);
+
+      if (typeof res !== "boolean") {
+        const error = new Error(
+          `Custom rule must return a boolean, but returned ${typeof res}`,
+        );
+        const errorRule = formatCustomError(error);
+        return createValidationResult(false, this.path, errorRule);
+      }
+
+      return createValidationResult(res, this.path, r, "custom");
+    } catch (e) {
+      const errorRule = formatCustomError(e);
+      return createValidationResult(false, this.path, errorRule);
+    }
   }
 
   validate(

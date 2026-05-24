@@ -7,6 +7,7 @@ import {
   IValidationResult,
 } from "@/types/validation.js";
 import { createValidationResult } from "@/utils/create-validation-result.js";
+import { formatCustomError } from "@/utils/format-custom-error.js";
 
 export class LayerNode extends DirNode<ILayerRule> implements ILayerNode {
   constructor(node: DirNode<IDirRuleBase>, rules?: ILayerRule) {
@@ -23,9 +24,23 @@ export class LayerNode extends DirNode<ILayerRule> implements ILayerNode {
     results: Partial<Record<string, IValidationResult>>[],
   ): IValidationResult {
     const r = rule as ICustomLayerRule;
-    const res = r.callback(this, results);
 
-    return createValidationResult(res, this.path, r, "custom");
+    try {
+      const res = r.callback(this, results);
+
+      if (typeof res !== "boolean") {
+        const error = new Error(
+          `Custom rule must return a boolean, but returned ${typeof res}`,
+        );
+        const errorRule = formatCustomError(error);
+        return createValidationResult(false, this.path, errorRule);
+      }
+
+      return createValidationResult(res, this.path, r, "custom");
+    } catch (e) {
+      const errorRule = formatCustomError(e);
+      return createValidationResult(false, this.path, errorRule);
+    }
   }
 
   validate(
