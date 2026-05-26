@@ -2,64 +2,19 @@ import fs from "fs/promises";
 import path from "path";
 import { Dirent } from "node:fs";
 import pLimit from "p-limit";
-import * as readline from "node:readline";
 
 import { TProjectNode } from "@/types/nodes.js";
 import { IProjectTree } from "@/types/trees.js";
 import { DirNode, FileNode, Node } from "@/core/nodes/index.js";
-
-export interface IMetadata {
-  name: string;
-  size: number;
-  isDirectory: boolean;
-  isFile: boolean;
-}
+import {
+  countLines,
+  getNodeMetadata,
+} from "@/core/services/file-system-scanner/utils.js";
 
 const CONCURRENCY_LIMIT = 50;
 const limit = pLimit(CONCURRENCY_LIMIT);
 
-async function countLines(filePath: string): Promise<number> {
-  const fileHandle = await fs.open(filePath, "r");
-  let count = 0;
-
-  try {
-    const rl = readline.createInterface({
-      input: fileHandle.createReadStream(),
-      crlfDelay: Infinity,
-    });
-
-    for await (const _line of rl) {
-      count++;
-    }
-  } catch (_e) {
-    return 0;
-  } finally {
-    await fileHandle.close();
-  }
-
-  return count;
-}
-
-async function getNodeMetadata(
-  dirPath: string,
-  dirent?: Dirent,
-): Promise<IMetadata | null> {
-  try {
-    const name = dirent ? dirent.name : path.basename(dirPath);
-    const stats = await fs.stat(dirPath);
-
-    return {
-      name,
-      size: stats.size,
-      isDirectory: dirent ? dirent.isDirectory() : stats.isDirectory(),
-      isFile: dirent ? dirent.isFile() : stats.isFile(),
-    };
-  } catch (_e) {
-    return null;
-  }
-}
-
-async function createFileNode(
+export async function createFileNode(
   dirPath: string,
   ignore: string[],
   name: string,
@@ -78,7 +33,7 @@ async function createFileNode(
   return new FileNode({ name, path: dirPath, size }, lines, analyze);
 }
 
-async function createDirNode(
+export async function createDirNode(
   dirPath: string,
   ignore: string[],
   name: string,
