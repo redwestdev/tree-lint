@@ -20,12 +20,13 @@ import {
 } from "@/core/services/index.js";
 import { countNodes, getVitals, printReport } from "@/utils/performance.js";
 import { validateInitialPaths } from "@/utils/validate-path.js";
-import { getConfig } from "@/utils/find-config.js";
+import { getConfig } from "@/core/services/config/find-config.js";
 
 import { validateTree } from "@/core/services/validation/validator.js";
 import { getValidationResult } from "@/core/services/validation/get-validation-result.js";
 import { TGroupOptions } from "@/types/validation.js";
 import { createDefaultConfig } from "@/core/services/config/create-default-config.js";
+import { parseConfig } from "@/core/services/config/config-parser.js";
 
 interface IScanOptions {
   treeOutput?: string | boolean;
@@ -33,6 +34,7 @@ interface IScanOptions {
   vitals?: boolean;
   printTree?: boolean;
   groupBy?: TGroupOptions;
+  configPath?: string;
 }
 
 const resolveOutPath = (
@@ -90,6 +92,7 @@ program
     "Group validation output by: path, severity, or rule (default: path)",
     "path",
   )
+  .option("-c, --config-path [path]", "Path to configuration file")
   .option(
     "-v, --vitals",
     "Display detailed engine performance metrics (CPU, Memory, and I/O efficiency)",
@@ -104,9 +107,10 @@ program
     try {
       const start = getVitals();
 
-      const { config, projectRoot } = await getConfig();
+      const configPath = options.configPath;
+      const { config, projectRoot } = await getConfig(configPath);
 
-      // work with config (validation, ...)
+      const internalConfig = parseConfig(config);
 
       const resolvedPath = projectPath
         ? path.resolve(projectPath)
@@ -114,22 +118,22 @@ program
 
       const roots = validateInitialPaths(
         resolvedPath,
-        config.roots,
-        config.ignore,
+        internalConfig.roots,
+        internalConfig.ignore,
       );
 
-      logScanPlan(roots, config.ignore);
+      logScanPlan(roots, internalConfig.ignore);
 
-      const tree = await buildProjectTree(roots, config.ignore);
+      const tree = await buildProjectTree(roots, internalConfig.ignore);
 
-      const layeredTree = annotateLayers(tree, config);
+      const layeredTree = annotateLayers(tree, internalConfig);
       const { tree: entitiesTree, log: entitiesLog } = annotateEntities(
         layeredTree,
-        config,
+        internalConfig,
       );
       const { tree: annotatedTree, log: groupLog } = annotateGroups(
         entitiesTree,
-        config,
+        internalConfig,
       );
 
       const validationLog = validateTree(annotatedTree);
