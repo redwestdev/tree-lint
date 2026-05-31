@@ -1,10 +1,27 @@
 import fs from "fs/promises";
+import { TAnyTree } from "@/types/trees.js";
+import path from "path";
 
 /**
  * Saves given data to a JSON file.
  * @param data The data to save.
  * @param outputPath The path to the output file.
+ * @param cwd
  */
-export async function saveToJson(data: any, outputPath: string): Promise<void> {
-  await fs.writeFile(outputPath, JSON.stringify(data, null, 2), "utf-8");
+export async function saveToJson(
+  data: TAnyTree,
+  outputPath: string,
+  cwd: string,
+): Promise<void> {
+  await fs.writeFile(
+    outputPath,
+    JSON.stringify(
+      data,
+      (key: string, value: string) => {
+        return key === "path" ? path.relative(cwd, value) : value;
+      },
+      2,
+    ),
+    "utf-8",
+  );
 }
