@@ -1,9 +1,30 @@
 {
-  "name": "tree-lint",
+  "name": "@redwestdev/tree-lint",
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "description": "A file structure linter that helps maintain architectural order and prevents chaos in projects.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "license": "MIT",
+  "author": "redwestdev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redwestdev/tree-lint.git"
+  },
+  "keywords": [
+    "linter",
+    "architecture",
+    "cli",
+    "fsd",
+    "deep-tree",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "bin": {
     "tree-lint": "./dist/cli.js"
   },
@@ -16,7 +37,7 @@
     "lint": "eslint . --fix",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
-    "scan": "node dist/cli.js scan",
+    "scan": "node ./dist/cli.js scan",
     "prepare": "husky"
   },
   "lint-staged": {
