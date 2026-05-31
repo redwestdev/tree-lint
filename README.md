@@ -18,6 +18,8 @@ The main tasks the linter covers are:
 
 - **Legacy Project Audit** - The tool allows you to quickly assess the state of the file structure. This is indispensable when taking over projects with accumulated technical debt to understand how much the current organization of files corresponds to the target model.
 
+- **Incremental Refactoring** - Introducing a new architecture to a legacy codebase? Enforce rules only on new code while ignoring old files via `ignore` patterns. No need to refactor everything at once to start benefiting from the linter.
+
 ## Installation
 
 ```bash
