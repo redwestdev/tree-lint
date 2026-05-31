@@ -178,7 +178,7 @@ program
         process.exit(1);
       }
 
-      spinner.succeed("Done!");
+      spinner.succeed("Validation complete successfully!");
       process.exit(0);
     } catch (error) {
       spinner.fail("Error");
