@@ -1,45 +1,63 @@
 import path from "path";
 import fs from "fs/promises";
 import { constants } from "node:fs/promises";
+import chalk from "chalk";
 
-const baseTemplate = `
-import { createConfig } from "tree-lint";
+export type TConfFormat = "ts" | "js" | "json" | "yaml";
+export type TConfType = "default" | "deep-tree";
 
-export default createConfig({
-  roots: ["src"],
-  ignore: ["node_modules", "dist", "build"],
-  groups: {},
-  entities: {},
-  layers: {},
-});
-`;
+export interface IInitOptions {
+  format?: TConfFormat;
+  type?: TConfType;
+}
 
-// TODO: create default configs for different architectures
+function getTemplatePath(type: string, format: string): string {
+  return path.join(
+    import.meta.dirname,
+    "..",
+    "..",
+    "..",
+    "templates",
+    "config",
+    type,
+    `tree-lint.${format}`,
+  );
+}
 
-export async function createDefaultConfig(type = "default") {
+export async function createConfig(options?: IInitOptions) {
+  if (!options?.type || !options?.format) return;
+
+  const { type, format } = options;
+
   const rootDir = process.cwd();
-  const configPath = path.join(rootDir, "tree-lint.config.ts");
-  let template;
+  const templatePath = getTemplatePath(type, format);
 
-  switch (type) {
-    case "default":
-    default:
-      template = baseTemplate;
-      break;
-  }
-
-  let isConfigExists;
+  const configPath = path.join(rootDir, `tree-lint.config.${format}`);
 
   try {
-    await fs.access(configPath, constants.F_OK);
-    isConfigExists = true;
-  } catch (_e) {
-    isConfigExists = false;
+    await fs.access(templatePath);
+  } catch {
+    console.error(
+      chalk.red(
+        `[Init error]: Invalid configuration type "${type}" or format "${format}". Please check your options.`,
+      ),
+    );
+    process.exit(1);
   }
 
-  if (isConfigExists) {
-    throw new Error("Configuration file already exists.");
+  try {
+    await fs.copyFile(templatePath, configPath, constants.COPYFILE_EXCL);
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error) {
+      if (error.code === "EEXIST") {
+        console.error(
+          chalk.red(
+            `Configuration file tree-lint.config.${format} already exists.`,
+          ),
+        );
+        process.exit(1);
+      }
+    }
+    throw error;
   }
-
-  await fs.writeFile(configPath, template, "utf-8");
 }

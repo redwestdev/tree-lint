@@ -37,6 +37,7 @@ export default tseslint.config(
       "test-project/**/*",
       "notes/**/*",
       "coverage/**/*",
+      "templates/**/*",
     ],
   },
 );

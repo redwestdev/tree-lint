@@ -1,0 +1,9 @@
+roots:
+  - src
+ignore:
+  - node_modules
+  - dist
+  - build
+groups: {}
+entities: {}
+layers: {}

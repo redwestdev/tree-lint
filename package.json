@@ -29,8 +29,8 @@
     "tree-lint": "./dist/cli.js"
   },
   "scripts": {
-    "build": "tsc && tsc-alias --resolve-full-paths",
-    "dev": "concurrently \"tsc --watch\" \"tsc-alias --watch\"",
+    "build": "tsc && tsc-alias --resolve-full-paths && cpx \"templates/**/*\" dist/templates",
+    "dev": "concurrently \"tsc --watch\" \"tsc-alias --watch\" \"cpx \"templates/**/*\" dist/templates --watch\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -59,6 +59,7 @@
     "micromatch": "^4.0.8",
     "ora": "^9.3.0",
     "p-limit": "^7.3.0",
+    "prompts": "^2.4.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -66,8 +67,10 @@
     "@types/js-yaml": "^4.0.9",
     "@types/micromatch": "^4.0.10",
     "@types/node": "^25.2.3",
+    "@types/prompts": "^2.4.9",
     "@vitest/coverage-v8": "4.0.18",
     "concurrently": "^9.2.1",
+    "cpx2": "^9.0.0",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
