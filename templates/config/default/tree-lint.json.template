@@ -1,7 +1,214 @@
 {
   "roots": ["src"],
   "ignore": ["node_modules", "dist", "build"],
-  "groups": {},
-  "entities": {},
-  "layers": {}
+  "entities": {
+    "component": {
+      "matches": {
+        "type": "directory",
+        "name": "[A-Z]*",
+        "children": [
+          {
+            "type": "file",
+            "name": "*.tsx"
+          },
+          {
+            "type": "file",
+            "name": "index.ts"
+          }
+        ]
+      },
+      "rules": {
+        "name": {
+          "type": "error",
+          "pattern": "[A-Z]*"
+        },
+        "isEmpty": {
+          "type": "error"
+        },
+        "childrenAmount": {
+          "type": "warning",
+          "max": 6
+        },
+        "children": [
+          {
+            "_matches": {
+              "type": "file",
+              "name": "*.tsx"
+            },
+            "lineCount": {
+              "type": "warning",
+              "max": 200
+            }
+          }
+        ]
+      }
+    },
+    "hook": {
+      "matches": {
+        "type": "file",
+        "name": "use*.{ts,tsx}"
+      },
+      "rules": {
+        "name": {
+          "type": "error",
+          "pattern": "use*"
+        },
+        "lineCount": {
+          "type": "warning",
+          "max": 80
+        }
+      }
+    },
+    "page": {
+      "matches": {
+        "type": "directory",
+        "name": "[A-Z]*",
+        "children": [
+          {
+            "type": "file",
+            "name": "*.tsx"
+          }
+        ]
+      },
+      "rules": {
+        "name": {
+          "type": "error",
+          "pattern": "[A-Z]*"
+        },
+        "isEmpty": {
+          "type": "error"
+        },
+        "childrenAmount": {
+          "type": "warning",
+          "max": 8
+        }
+      }
+    },
+    "util": {
+      "matches": {
+        "type": "file",
+        "name": "*.{ts,js}"
+      },
+      "rules": {
+        "name": {
+          "type": "error",
+          "pattern": "[a-z]*"
+        },
+        "lineCount": {
+          "type": "warning",
+          "max": 60
+        }
+      }
+    },
+    "service": {
+      "matches": {
+        "type": "file",
+        "name": "*.service.ts"
+      },
+      "rules": {
+        "name": {
+          "type": "error",
+          "pattern": "[a-z]*.service.ts"
+        },
+        "lineCount": {
+          "type": "warning",
+          "max": 200
+        }
+      }
+    },
+    "context": {
+      "matches": {
+        "type": "file",
+        "name": "*Context.tsx"
+      },
+      "rules": {
+        "name": {
+          "type": "error",
+          "pattern": "[A-Z]*Context.tsx"
+        },
+        "lineCount": {
+          "type": "warning",
+          "max": 150
+        }
+      }
+    },
+    "typeFile": {
+      "matches": {
+        "type": "file",
+        "name": "*.types.ts"
+      },
+      "rules": {
+        "name": {
+          "type": "error",
+          "pattern": "[a-z]*.types.ts"
+        },
+        "lineCount": {
+          "type": "warning",
+          "max": 80
+        }
+      }
+    }
+  },
+  "layers": {
+    "components": {
+      "entities": ["component"],
+      "rules": {
+        "isEmpty": {
+          "type": "warning"
+        },
+        "childrenAmount": {
+          "type": "warning",
+          "max": 20
+        }
+      }
+    },
+    "hooks": {
+      "entities": ["hook"],
+      "rules": {
+        "isEmpty": {
+          "type": "warning"
+        }
+      }
+    },
+    "pages": {
+      "entities": ["page"],
+      "rules": {
+        "isEmpty": {
+          "type": "warning"
+        }
+      }
+    },
+    "utils": {
+      "entities": ["util"],
+      "rules": {
+        "isEmpty": {
+          "type": "warning"
+        }
+      }
+    },
+    "services": {
+      "entities": ["service"],
+      "rules": {
+        "isEmpty": {
+          "type": "warning"
+        }
+      }
+    },
+    "context": {
+      "entities": ["context"],
+      "rules": {
+        "isEmpty": {
+          "type": "warning"
+        }
+      }
+    },
+    "types": {
+      "entities": ["typeFile"],
+      "rules": {
+        "isEmpty": {
+          "type": "warning"
+        }
+      }
+    }
+  }
 }

@@ -3,7 +3,198 @@ import { createConfig } from "@redwestdev/tree-lint";
 export default createConfig({
   roots: ["src"],
   ignore: ["node_modules", "dist", "build"],
-  groups: {},
-  entities: {},
-  layers: {},
+
+  groups: {
+    name: "[a-z]*",
+    rules: {
+      isEmpty: { type: "warning" },
+      nameLength: { type: "warning", max: 20 },
+    },
+  },
+
+  entities: {
+     page: {
+      matches: {
+        type: "directory",
+        name: "[A-Z]*{Pg,Page}",
+        children: [
+          { type: "file", name: "*.tsx" },
+          { type: "file", name: "index.ts" },
+        ],
+      },
+      rules: {
+        name: { type: "error", pattern: "[A-Z]*{Pg,Page}" },
+        nameLength: { type: "warning", min: 6, max: 20 },
+        isEmpty: { type: "error" },
+        childrenAmount: { type: "warning", max: 12 },
+        custom: {
+          type: "error",
+          message:
+            "Page must contain a view file matching the folder name (e.g. HomePage.tsx) and index.ts",
+          callback: (node) => {
+            const names = node.children.map((c) => c.name);
+            return names.includes(`${node.name}.tsx`) && names.includes("index.ts");
+          },
+        },
+        children: [
+          {
+            _matches: { type: "file", name: "*.tsx" },
+            lineCount: { type: "warning", max: 100 },
+          },
+        ],
+      },
+    },
+
+    section: {
+      matches: {
+        type: "directory",
+        name: "[A-Z]*{Sct,Section}",
+        children: [
+          { type: "file", name: "*.tsx" },
+          { type: "file", name: "index.ts" },
+        ],
+      },
+      rules: {
+        name: { type: "error", pattern: "[A-Z]*{Sct,Section}" },
+        nameLength: { type: "warning", min: 5, max: 20 },
+        isEmpty: { type: "error" },
+        custom: {
+          type: "error",
+          message:
+            "Section must contain a view file matching the folder name (e.g. HeroSct.tsx) and index.ts",
+          callback: (node) => {
+            const names = node.children.map((c) => c.name);
+            return names.includes(`${node.name}.tsx`) && names.includes("index.ts");
+          },
+        },
+        children: [
+          {
+            _matches: { type: "file", name: "*.tsx" },
+            lineCount: { type: "warning", max: 150 },
+          },
+        ],
+      },
+    },
+
+    component: {
+      matches: {
+        type: "directory",
+        name: "[A-Z]*",
+        children: [
+          { type: "file", name: "*.tsx" },
+          { type: "file", name: "index.ts" },
+        ],
+      },
+      rules: {
+        name: { type: "error", pattern: "[A-Z]*" },
+        nameLength: { type: "warning", min: 3, max: 20 },
+        isEmpty: { type: "error" },
+        childrenAmount: { type: "warning", max: 8 },
+        custom: {
+          type: "error",
+          message:
+            "Component must contain a view file matching the folder name (e.g. Button.tsx) and index.ts",
+          callback: (node) => {
+            const names = node.children.map((c) => c.name);
+            return names.includes(`${node.name}.tsx`) && names.includes("index.ts");
+          },
+        },
+        children: [
+          {
+            _matches: { type: "file", name: "*.tsx" },
+            lineCount: { type: "warning", max: 200 },
+          },
+        ],
+      },
+    },
+
+    manager: {
+      matches: {
+        type: "directory",
+        name: "[A-Z]*{Mng,Manager}",
+        children: [
+          { type: "file", name: "*.tsx" },
+          { type: "file", name: "index.ts" },
+        ],
+      },
+      rules: {
+        name: { type: "error", pattern: "[A-Z]*{Mng,Manager}" },
+        nameLength: { type: "warning", min: 5, max: 20 },
+        isEmpty: { type: "error" },
+        custom: {
+          type: "error",
+          message:
+            "Manager must contain index.ts, and a main file (e.g. ThemeMng.tsx)",
+          callback: (node) => {
+            const names = node.children.map((c) => c.name);
+            return (
+              names.includes("index.ts") &&
+              names.some((n) => n === `${node.name}.tsx`)
+            );
+          },
+        },
+      },
+    },
+    hook: {
+      matches: {
+        type: "file",
+        name: "use*.{ts,tsx}",
+      },
+      rules: {
+        name: { type: "error", pattern: "use*" },
+        lineCount: { type: "warning", max: 80 },
+      },
+    },
+    util: {
+      matches: {
+        type: "file",
+        name: "*.ts",
+      },
+      rules: {
+        name: { type: "error", pattern: "[a-z]*" },
+        lineCount: { type: "warning", max: 60 },
+      },
+    },
+  },
+
+  layers: {
+    pages: {
+      entities: ["page"],
+      rules: {
+        isEmpty: { type: "warning" },
+      },
+    },
+    sections: {
+      entities: ["section"],
+      rules: {
+        isEmpty: { type: "warning" },
+      },
+    },
+    components: {
+      entities: ["component"],
+      rules: {
+        isEmpty: { type: "warning" },
+        childrenAmount: { type: "warning", max: 20 },
+      },
+    },
+    hooks: {
+      entities: ["hook"],
+      rules: {
+        isEmpty: { type: "warning" },
+      },
+    },
+    utils: {
+      entities: ["util"],
+      rules: {
+        isEmpty: { type: "warning" },
+      },
+    },
+    managers: {
+      entities: ["manager"],
+      rules: {
+        isEmpty: { type: "warning" },
+        childrenAmount: { type: "warning", max: 10 },
+      },
+    },
+  },
 });

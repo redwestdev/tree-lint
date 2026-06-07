@@ -100,6 +100,8 @@ export default createConfig({
 });
 ```
 
+[Подробнее о правилах проверки](./rules_ru.md)
+
 Поддерживаемые форматы файлов конфигурации:
 
 - `tree-lint.config.ts` (рекомендуется)
@@ -258,4 +260,4 @@ roots: ["packages/ui", "packages/core", "packages/api"],
 
 ## Лицензия
 
-MIT
+[MIT](../../LICENSE)

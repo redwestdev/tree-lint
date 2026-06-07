@@ -100,6 +100,8 @@ export default createConfig({
 });
 ```
 
+[More details about the validation rules](./docs/en/rules.md)
+
 Supported configuration file formats:
 
 - `tree-lint.config.ts` (recommended)
@@ -258,4 +260,4 @@ roots: ["packages/ui", "packages/core", "packages/api"],
 
 ## License
 
-MIT
+[MIT](./LICENSE)
