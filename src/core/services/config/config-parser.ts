@@ -1,6 +1,7 @@
-import { ITreeLintConfig } from "@/types/config.js";
-import { ConfigSchema } from "@/core/services/config/schema.js";
 import * as z from "zod";
+
+import { ConfigSchema } from "@/core/services/config/schema.js";
+import type { ITreeLintConfig } from "@/types/config.js";
 
 export type IInternalConfig = ITreeLintConfig;
 

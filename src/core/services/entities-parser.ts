@@ -1,6 +1,3 @@
-import { ITreeLintConfig } from "@/types/config.js";
-import { IEntityProjectTree, ILayeredProjectTree } from "@/types/trees.js";
-import { TAnyNode } from "@/types/nodes.js";
 import {
   DirEntity,
   DirNode,
@@ -9,15 +6,18 @@ import {
   LayerNode,
 } from "@/core/nodes/index.js";
 import {
-  IDirEntityRule,
-  IFileEntityRule,
-  IValidationResult,
-} from "@/types/validation.js";
-import {
   matchChildren,
   matchName,
   matchType,
 } from "@/core/services/matcher/utils.js";
+import type { ITreeLintConfig } from "@/types/config.js";
+import type { TAnyNode } from "@/types/nodes.js";
+import type { IEntityProjectTree, ILayeredProjectTree } from "@/types/trees.js";
+import type {
+  IDirEntityRule,
+  IFileEntityRule,
+  IValidationResult,
+} from "@/types/validation.js";
 
 export interface IEntityContext {
   layer: keyof ITreeLintConfig["layers"] | null;

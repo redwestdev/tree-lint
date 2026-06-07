@@ -1,6 +1,7 @@
-import path from "path";
-import mm from "micromatch";
+import path from "node:path";
+
 import chalk from "chalk";
+import mm from "micromatch";
 
 export function validateInitialPaths(
   projectPath: string,

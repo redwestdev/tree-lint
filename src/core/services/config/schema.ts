@@ -1,5 +1,6 @@
 import * as z from "zod";
-import { ITreeLintConfig } from "@/types/config.js";
+
+import type { ITreeLintConfig } from "@/types/config.js";
 
 const FileEntitySchema = z.looseObject({
   matches: z.object({

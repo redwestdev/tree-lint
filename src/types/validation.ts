@@ -1,5 +1,4 @@
-import { TMatches, TNaming } from "@/types/config.js";
-import {
+import type {
   DirEntity,
   DirNode,
   FileEntity,
@@ -8,6 +7,7 @@ import {
   LayerNode,
   Node,
 } from "@/core/nodes/index.js";
+import type { TMatches, TNaming } from "@/types/config.js";
 
 export type TSeverity = "error" | "warning" | (string & {});
 

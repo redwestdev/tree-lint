@@ -1,6 +1,6 @@
-import fs from "fs/promises";
-import path from "path";
-import { Dirent } from "node:fs";
+import type { Dirent } from "node:fs";
+import fs from "node:fs/promises";
+import path from "node:path";
 import * as readline from "node:readline";
 
 export interface IMetadata {

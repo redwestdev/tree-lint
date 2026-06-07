@@ -1,4 +1,4 @@
-import { createConfig } from "tree-lint";
+import { createConfig } from "@redwestdev/tree-lint";
 
 export default createConfig({
   roots: ["src"],

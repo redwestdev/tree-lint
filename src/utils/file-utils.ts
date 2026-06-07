@@ -1,6 +1,7 @@
-import fs from "fs/promises";
-import { TAnyTree } from "@/types/trees.js";
-import path from "path";
+import fs from "node:fs/promises";
+import path from "node:path";
+
+import type { TAnyTree } from "@/types/trees.js";
 
 /**
  * Saves given data to a JSON file.

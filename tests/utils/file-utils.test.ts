@@ -1,9 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
-import fs from "fs/promises";
-vi.mock(import("fs/promises"));
+import fs from "node:fs/promises";
 
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock(import("node:fs/promises"));
+
+import type { TAnyTree } from "@/types/trees.js";
 import { saveToJson } from "@/utils/index.js";
-import { TAnyTree } from "@/types/trees.js";
 
 interface ITree {
   generatedAt: string;

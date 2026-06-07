@@ -1,10 +1,9 @@
 import { DirNode } from "@/core/nodes/DirNode.js";
-import { IDirEntity } from "@/types/nodes.js";
-import { IMatchDirectory, ITreeLintConfig } from "@/types/config.js";
-import { matchChildren, matchName } from "@/core/services/matcher/utils.js";
 import { MATCHING_ENTITY_ERRORS } from "@/core/services/matcher/constants.js";
-import { replacePlaceholders } from "@/utils/replace-placeholders.js";
-import {
+import { matchChildren, matchName } from "@/core/services/matcher/utils.js";
+import type { IMatchDirectory, ITreeLintConfig } from "@/types/config.js";
+import type { IDirEntity } from "@/types/nodes.js";
+import type {
   ICustomDirEntityRule,
   IDirEntityRule,
   IDirRuleBase,
@@ -13,6 +12,7 @@ import {
 } from "@/types/validation.js";
 import { createValidationResult } from "@/utils/create-validation-result.js";
 import { formatCustomError } from "@/utils/format-custom-error.js";
+import { replacePlaceholders } from "@/utils/replace-placeholders.js";
 
 export class DirEntity extends DirNode<IDirEntityRule> implements IDirEntity {
   public readonly entity: keyof ITreeLintConfig["entities"];

@@ -1,16 +1,17 @@
-import path from "path";
-import { Dirent } from "node:fs";
-import fs from "fs/promises";
-import { constants } from "node:fs/promises";
+import type { Dirent } from "node:fs";
+import fs, { constants } from "node:fs/promises";
+import path from "node:path";
+
 import mm from "micromatch";
-import { INode } from "@/types/nodes.js";
-import {
+
+import type { INode } from "@/types/nodes.js";
+import type {
+  IBaseRule,
   INameLengthRule,
   INameRule,
   INodeRule,
-  IValidationResult,
   ISizeRule,
-  IBaseRule,
+  IValidationResult,
 } from "@/types/validation.js";
 import { createValidationResult } from "@/utils/create-validation-result.js";
 

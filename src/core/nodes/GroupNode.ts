@@ -1,12 +1,11 @@
-import { DirNode } from "@/core/nodes/DirNode.js";
-import { IGroupNode } from "@/types/nodes.js";
-import { ITreeLintConfig } from "@/types/config.js";
-import { matchChildren, matchName } from "@/core/services/matcher/utils.js";
-
-import { MATCHING_GROUP_ERRORS } from "@/core/services/matcher/constants.js";
-import { FileEntity } from "@/core/nodes/FileEntity.js";
 import { DirEntity } from "@/core/nodes/DirEntity.js";
-import {
+import { DirNode } from "@/core/nodes/DirNode.js";
+import { FileEntity } from "@/core/nodes/FileEntity.js";
+import { MATCHING_GROUP_ERRORS } from "@/core/services/matcher/constants.js";
+import { matchChildren, matchName } from "@/core/services/matcher/utils.js";
+import type { ITreeLintConfig } from "@/types/config.js";
+import type { IGroupNode } from "@/types/nodes.js";
+import type {
   ICustomGroupRule,
   IDirRuleBase,
   IGroupRule,

@@ -1,6 +1,6 @@
 import { DirNode } from "@/core/nodes/DirNode.js";
-import { ILayerNode } from "@/types/nodes.js";
-import {
+import type { ILayerNode } from "@/types/nodes.js";
+import type {
   ICustomLayerRule,
   IDirRuleBase,
   ILayerRule,

@@ -1,4 +1,4 @@
-import { TAnyNode, TLayeredProjectNode, TProjectNode } from "./nodes.js";
+import type { TAnyNode, TLayeredProjectNode, TProjectNode } from "./nodes.js";
 
 export interface IProjectTree {
   generatedAt: string;

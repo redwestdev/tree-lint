@@ -1,6 +1,8 @@
-import chalk from "chalk";
 import { pathToFileURL } from "node:url";
-import {
+
+import chalk from "chalk";
+
+import type {
   TGroupedByPath,
   TGroupedByRule,
   TGroupedBySeverity,
@@ -35,12 +37,12 @@ function logByPath(data: TGroupedByPath) {
 
     if (warning.length)
       warning.forEach((w) => {
-        console.warn(`${styles.indent}${styles.warning("⚠ " + w)}`);
+        console.warn(`${styles.indent}${styles.warning(`⚠ ${w}`)}`);
       });
 
     if (error.length)
       error.forEach((e) => {
-        console.error(`${styles.indent}${styles.error("✖ " + e)}`);
+        console.error(`${styles.indent}${styles.error(`✖ ${e}`)}`);
       });
   }
 }
@@ -70,12 +72,12 @@ function logByRule(data: TGroupedByRule) {
     console.log(`\n${styles.rule(rule)}`);
     if (data[rule].error.size) {
       data[rule].error.forEach((e) =>
-        console.log(`${styles.indent}${styles.error("✖ " + createPath(e))}`),
+        console.log(`${styles.indent}${styles.error(`✖ ${createPath(e)}`)}`),
       );
     }
     if (data[rule].warning.size) {
       data[rule].warning.forEach((e) =>
-        console.log(`${styles.indent}${styles.warning("⚠ " + createPath(e))}`),
+        console.log(`${styles.indent}${styles.warning(`⚠ ${createPath(e)}`)}`),
       );
     }
   }
@@ -90,8 +92,9 @@ export function validationLogger(log: TValidationStats) {
       logBySeverity(log.grouped);
       break;
     case "path":
-    default:
       logByPath(log.grouped);
+      break;
+    default:
       break;
   }
 

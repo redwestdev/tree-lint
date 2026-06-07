@@ -1,6 +1,7 @@
-import { performance } from "perf_hooks";
-import { TAnyNode } from "@/types/nodes.js";
+import { performance } from "node:perf_hooks";
+
 import { DirNode } from "@/core/nodes/index.js";
+import type { TAnyNode } from "@/types/nodes.js";
 
 export const countNodes = (node: TAnyNode): number => {
   let count = 1;

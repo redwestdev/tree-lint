@@ -22,36 +22,28 @@
     "node": ">=18.0.0"
   },
   "type": "module",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "bin": {
     "tree-lint": "./dist/cli.js"
   },
   "scripts": {
-    "build": "tsc && tsc-alias --resolve-full-paths && cpx \"templates/**/*\" dist/templates",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo dist/*.tsbuildinfo",
+    "build": "yarn clean && tsc && tsc-alias --resolve-full-paths && cpx \"templates/**/*\" dist/templates",
     "dev": "concurrently \"tsc --watch\" \"tsc-alias --watch\" \"cpx \"templates/**/*\" dist/templates --watch\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint . --fix",
-    "format": "prettier --write .",
+    "lint": "biome check --reporter=summary --write .",
+    "lint:check": "biome check --reporter=summary .",
     "type-check": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
     "scan": "node ./dist/cli.js scan",
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.{js,ts}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,yml}": [
-      "prettier --write"
-    ]
+    "*.{js,ts,json}": ["biome check --write"],
+    "*.{md,yml}": ["prettier --write"]
   },
   "dependencies": {
-    "@typescript-eslint/parser": "^8.55.0",
-    "@typescript-eslint/types": "^8.55.0",
     "chalk": "^5.6.2",
     "commander": "^14.0.3",
     "jiti": "^2.6.1",
@@ -63,7 +55,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@biomejs/biome": "2.4.16",
     "@types/js-yaml": "^4.0.9",
     "@types/micromatch": "^4.0.10",
     "@types/node": "^25.2.3",
@@ -71,16 +63,11 @@
     "@vitest/coverage-v8": "4.0.18",
     "concurrently": "^9.2.1",
     "cpx2": "^9.0.0",
-    "eslint": "^10.0.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.5",
-    "globals": "^17.3.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "3.8.1",
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.55.0",
     "vitest": "^4.0.18"
   }
 }

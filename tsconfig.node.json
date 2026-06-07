@@ -8,10 +8,5 @@
     "types": ["node", "vitest/globals"]
   },
   "references": [{ "path": "./tsconfig.json" }],
-  "include": [
-    "eslint.config.ts",
-    "vitest.config.ts",
-    "tree-lint.config.ts",
-    "tests/**/*.ts"
-  ]
+  "include": ["vitest.config.ts", "tests/**/*.ts"]
 }

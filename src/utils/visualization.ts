@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { TAnyNode } from "@/types/nodes.js";
+
 import {
   DirEntity,
   DirNode,
@@ -8,6 +8,7 @@ import {
   GroupNode,
   LayerNode,
 } from "@/core/nodes/index.js";
+import type { TAnyNode } from "@/types/nodes.js";
 
 const colors = {
   marker: chalk.gray,

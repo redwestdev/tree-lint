@@ -1,6 +1,6 @@
-import path from "path";
-import fs from "fs/promises";
-import { constants } from "node:fs/promises";
+import fs, { constants } from "node:fs/promises";
+import path from "node:path";
+
 import chalk from "chalk";
 
 export type TConfFormat = "ts" | "js" | "json" | "yaml";
