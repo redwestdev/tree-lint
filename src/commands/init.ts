@@ -1,3 +1,6 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+
 import chalk from "chalk";
 import { Command, Option } from "commander";
 import prompts, { type PromptObject } from "prompts";
@@ -120,11 +123,19 @@ export const initCommand = new Command("init")
         });
 
         finalOptions = { type, format, ...answers };
+        const configPath = path.join(
+          process.cwd(),
+          `tree-lint.config.${finalOptions.format}`,
+        );
+        const fileExists = await fs
+          .access(configPath)
+          .then(() => true)
+          .catch(() => false);
 
-        const confirmation = await prompts([
+        const flow = await prompts([
           {
             type: "confirm",
-            name: "confirm",
+            name: "proceed",
             message: `You are about to create a configuration file with the following settings:
   ${finalOptions.format ? `• Format: ${OPTION_LABELS[finalOptions.format] || finalOptions.format}` : ""}
   ${finalOptions.type ? `• Type: ${OPTION_LABELS[finalOptions.type] || finalOptions.type}` : ""}
@@ -132,13 +143,23 @@ export const initCommand = new Command("init")
 Do you want to proceed?`,
             initial: true,
           },
+          {
+            type: (prev) => (prev && fileExists ? "confirm" : null),
+            name: "overwrite",
+            message: "A configuration file already exists. Overwrite it?",
+            initial: false,
+          },
         ]);
 
-        if (confirmation.confirm) {
+        const shouldCreate = flow.proceed && (!fileExists || flow.overwrite);
+
+        if (shouldCreate) {
           isConfirmed = true;
         } else {
           type = undefined;
           format = undefined;
+
+          console.log(chalk.yellow("\nAction cancelled. Let's try again!\n"));
         }
       }
 

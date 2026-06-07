@@ -1,4 +1,4 @@
-import fs, { constants } from "node:fs/promises";
+import fs from "node:fs/promises";
 import path from "node:path";
 
 import chalk from "chalk";
@@ -20,7 +20,7 @@ function getTemplatePath(type: string, format: string): string {
     "templates",
     "config",
     type,
-    `tree-lint.${format}`,
+    `tree-lint.${format}.template`,
   );
 }
 
@@ -46,18 +46,12 @@ export async function createConfig(options?: IInitOptions) {
   }
 
   try {
-    await fs.copyFile(templatePath, configPath, constants.COPYFILE_EXCL);
+    const templateContent = await fs.readFile(templatePath, "utf-8");
+    await fs.writeFile(configPath, templateContent, "utf-8");
   } catch (error) {
-    if (error && typeof error === "object" && "code" in error) {
-      if (error.code === "EEXIST") {
-        console.error(
-          chalk.red(
-            `Configuration file tree-lint.config.${format} already exists.`,
-          ),
-        );
-        process.exit(1);
-      }
-    }
-    throw error;
+    console.error(
+      chalk.red(`[Init error]: Failed to write configuration file.\n${error}`),
+    );
+    process.exit(1);
   }
 }
