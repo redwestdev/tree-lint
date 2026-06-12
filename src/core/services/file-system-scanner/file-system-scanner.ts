@@ -1,0 +1,109 @@
+import fs from "fs/promises";
+import path from "path";
+import { Dirent } from "node:fs";
+import pLimit from "p-limit";
+
+import { TProjectNode } from "@/types/nodes.js";
+import { IProjectTree } from "@/types/trees.js";
+import { DirNode, FileNode, Node } from "@/core/nodes/index.js";
+import {
+  countLines,
+  getNodeMetadata,
+} from "@/core/services/file-system-scanner/utils.js";
+
+const CONCURRENCY_LIMIT = 50;
+const limit = pLimit(CONCURRENCY_LIMIT);
+
+export async function createFileNode(
+  dirPath: string,
+  ignore: string[],
+  name: string,
+  size: number,
+): Promise<FileNode> {
+  const analyze = await Node.check(dirPath, ignore);
+
+  let lines = 0;
+
+  try {
+    lines = await countLines(dirPath);
+  } catch (_e) {
+    analyze.unreadable = true;
+  }
+
+  return new FileNode({ name, path: dirPath, size }, lines, analyze);
+}
+
+export async function createDirNode(
+  dirPath: string,
+  ignore: string[],
+  name: string,
+): Promise<DirNode> {
+  const analyze = await Node.check(dirPath, ignore);
+  const dir = new DirNode({ name, path: dirPath, size: 0 }, [], analyze);
+
+  if (dir.isExcluded) return dir;
+
+  const entries = await fs
+    .readdir(dirPath, { withFileTypes: true })
+    .catch(() => []);
+
+  const children = entries.map((entry) => {
+    const childPath = path.join(dirPath, entry.name);
+    return limit(() => buildTree(childPath, ignore, entry));
+  });
+
+  const results = await Promise.allSettled(children);
+
+  dir.children = results
+    .filter(
+      (r): r is PromiseFulfilledResult<TProjectNode> =>
+        r.status === "fulfilled",
+    )
+    .map((r) => r.value);
+
+  dir.size = dir.children.reduce((s, node) => s + node.size, 0);
+
+  return dir;
+}
+
+async function buildTree(
+  dirPath: string,
+  ignore: string[],
+  dirent?: Dirent,
+): Promise<TProjectNode> {
+  const metadata = await getNodeMetadata(dirPath, dirent);
+
+  if (!metadata)
+    return new FileNode(
+      { name: path.basename(dirPath), path: dirPath, size: 0 },
+      0,
+    );
+
+  try {
+    await Node.isSymbolicLink(dirent ?? dirPath);
+
+    if (metadata.isDirectory) {
+      return await createDirNode(dirPath, ignore, metadata.name);
+    }
+
+    return await createFileNode(dirPath, ignore, metadata.name, metadata.size);
+  } catch (_e) {
+    return new FileNode({ name: "", path: dirPath, size: 0 }, 0);
+  }
+}
+
+export async function buildProjectTree(
+  roots: string[],
+  ignore?: string[],
+): Promise<IProjectTree> {
+  const trees: TProjectNode[] = [];
+
+  for (const root of roots) {
+    trees.push(await buildTree(root, ignore ?? []));
+  }
+
+  return {
+    generatedAt: new Date().toISOString(),
+    trees,
+  };
+}

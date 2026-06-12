@@ -1,45 +1,81 @@
 {
-  "name": "structure-lint",
+  "name": "@redwestdev/tree-lint",
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "description": "A file structure linter that helps maintain architectural order and prevents chaos in projects.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "license": "MIT",
+  "author": "redwestdev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redwestdev/tree-lint.git"
+  },
+  "keywords": [
+    "linter",
+    "architecture",
+    "cli",
+    "fsd",
+    "deep-tree",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
   "bin": {
-    "structure-lint": "./dist/cli.js"
+    "tree-lint": "./dist/cli.js"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "vitest",
-    "test:coverage": "vitest --coverage",
-    "lint": "eslint src --ext .ts",
+    "build": "tsc && tsc-alias --resolve-full-paths",
+    "dev": "concurrently \"tsc --watch\" \"tsc-alias --watch\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint . --fix",
     "format": "prettier --write .",
-    "scan": "node dist/cli.js scan"
+    "type-check": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "scan": "node ./dist/cli.js scan",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@typescript-eslint/parser": "^8.55.0",
     "@typescript-eslint/types": "^8.55.0",
-    "boxen": "^8.0.1",
     "chalk": "^5.6.2",
-    "chokidar": "^5.0.0",
-    "cli-table3": "^0.6.5",
     "commander": "^14.0.3",
-    "cosmiconfig": "^9.0.0",
-    "fast-glob": "^3.3.3",
-    "filesize": "^11.0.13",
-    "lodash.merge": "^4.6.2",
+    "jiti": "^2.6.1",
+    "js-yaml": "^4.1.1",
     "micromatch": "^4.0.8",
     "ora": "^9.3.0",
-    "yup": "^1.7.1"
+    "p-limit": "^7.3.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/lodash.merge": "^4.6.9",
+    "@types/js-yaml": "^4.0.9",
+    "@types/micromatch": "^4.0.10",
     "@types/node": "^25.2.3",
+    "@vitest/coverage-v8": "4.0.18",
+    "concurrently": "^9.2.1",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^17.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "3.8.1",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.55.0",
     "vitest": "^4.0.18"
