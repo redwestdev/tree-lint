@@ -40,7 +40,20 @@ In the project root, run the command to create a config template:
 tree-lint init
 ```
 
-This will create a `tree-lint.config.ts` file with a basic structure. Edit it to describe your architecture.
+The command creates a `tree-lint.config` file in the current directory. Both interactive and non-interactive modes are supported.
+
+**Interactive mode** (TTY terminal outside CI) — the command will prompt for any missing parameters and ask for confirmation before creating the file. If the selection is not satisfactory, you can go back and specify the parameters again.
+
+**Non-interactive mode** (CI) — all parameters must be provided explicitly via flags:
+
+```bash
+tree-lint init --format ts --type deep-tree
+```
+
+| Flag         | Values             | Description               |
+| ------------ | ------------------ | ------------------------- |
+| -f, --format | ts, js, json, yaml | Configuration file format |
+| -t, --type   | default, deep-tree | Configuration template    |
 
 Example project structure:
 
@@ -86,6 +99,8 @@ export default createConfig({
   },
 });
 ```
+
+[More details about the validation rules](./docs/en/rules.md)
 
 Supported configuration file formats:
 
@@ -245,4 +260,4 @@ roots: ["packages/ui", "packages/core", "packages/api"],
 
 ## License
 
-MIT
+[MIT](./LICENSE)

@@ -1,6 +1,6 @@
-import { IValidationResult } from "@/types/validation.js";
-import { TAnyNode } from "@/types/nodes.js";
-import { IAnnotatedProjectTree } from "@/types/trees.js";
+import type { TAnyNode } from "@/types/nodes.js";
+import type { IAnnotatedProjectTree } from "@/types/trees.js";
+import type { IValidationResult } from "@/types/validation.js";
 
 function updateNodeValidity(node: TAnyNode, paths: Set<string>) {
   if (paths.has(node.path)) {

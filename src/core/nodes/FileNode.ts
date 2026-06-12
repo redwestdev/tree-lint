@@ -1,6 +1,6 @@
-import { IFileNode, INode } from "@/types/nodes.js";
-import { INodeAnalyze, Node } from "@/core/nodes/Node.js";
-import {
+import { type INodeAnalyze, Node } from "@/core/nodes/Node.js";
+import type { IFileNode, INode } from "@/types/nodes.js";
+import type {
   ICustomFileRule,
   IFileRule,
   IFileRuleBase,

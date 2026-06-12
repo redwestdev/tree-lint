@@ -1,45 +1,57 @@
-import path from "path";
-import fs from "fs/promises";
-import { constants } from "node:fs/promises";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-const baseTemplate = `
-import { createConfig } from "tree-lint";
+import chalk from "chalk";
 
-export default createConfig({
-  roots: ["src"],
-  ignore: ["node_modules", "dist", "build"],
-  groups: {},
-  entities: {},
-  layers: {},
-});
-`;
+export type TConfFormat = "ts" | "js" | "json" | "yaml";
+export type TConfType = "default" | "deep-tree";
 
-// TODO: create default configs for different architectures
+export interface IInitOptions {
+  format?: TConfFormat;
+  type?: TConfType;
+}
 
-export async function createDefaultConfig(type = "default") {
+function getTemplatePath(type: string, format: string): string {
+  return path.join(
+    import.meta.dirname,
+    "..",
+    "..",
+    "..",
+    "templates",
+    "config",
+    type,
+    `tree-lint.${format}.template`,
+  );
+}
+
+export async function createConfig(options?: IInitOptions) {
+  if (!options?.type || !options?.format) return;
+
+  const { type, format } = options;
+
   const rootDir = process.cwd();
-  const configPath = path.join(rootDir, "tree-lint.config.ts");
-  let template;
+  const templatePath = getTemplatePath(type, format);
 
-  switch (type) {
-    case "default":
-    default:
-      template = baseTemplate;
-      break;
-  }
-
-  let isConfigExists;
+  const configPath = path.join(rootDir, `tree-lint.config.${format}`);
 
   try {
-    await fs.access(configPath, constants.F_OK);
-    isConfigExists = true;
-  } catch (_e) {
-    isConfigExists = false;
+    await fs.access(templatePath);
+  } catch {
+    console.error(
+      chalk.red(
+        `[Init error]: Invalid configuration type "${type}" or format "${format}". Please check your options.`,
+      ),
+    );
+    process.exit(1);
   }
 
-  if (isConfigExists) {
-    throw new Error("Configuration file already exists.");
+  try {
+    const templateContent = await fs.readFile(templatePath, "utf-8");
+    await fs.writeFile(configPath, templateContent, "utf-8");
+  } catch (error) {
+    console.error(
+      chalk.red(`[Init error]: Failed to write configuration file.\n${error}`),
+    );
+    process.exit(1);
   }
-
-  await fs.writeFile(configPath, template, "utf-8");
 }

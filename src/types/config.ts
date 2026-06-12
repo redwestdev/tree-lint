@@ -1,10 +1,10 @@
-import { TAnyNode } from "./nodes.js";
-import {
+import type {
   IDirEntityRule,
   IFileEntityRule,
   IGroupRule,
   ILayerRule,
 } from "@/types/validation.js";
+import type { TAnyNode } from "./nodes.js";
 
 export type TCustomMatch = (node: TAnyNode) => boolean;
 

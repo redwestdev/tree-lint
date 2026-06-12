@@ -1,8 +1,8 @@
 import mm from "micromatch";
 
-import { TMatches } from "@/types/config.js";
-import { TAnyNode, TNodeType } from "@/types/nodes.js";
 import { DirNode, FileNode } from "@/core/nodes/index.js";
+import type { TMatches } from "@/types/config.js";
+import type { TAnyNode, TNodeType } from "@/types/nodes.js";
 
 export const matchName = (name: string, match: string): boolean => {
   if (!match.length) return true;

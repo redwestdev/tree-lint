@@ -1,5 +1,13 @@
-import { ITreeLintConfig } from "@/types/config.js";
-import {
+import type {
+  DirEntity,
+  DirNode,
+  FileEntity,
+  FileNode,
+  GroupNode,
+  LayerNode,
+} from "@/core/nodes/index.js";
+import type { ITreeLintConfig } from "@/types/config.js";
+import type {
   IDirEntityRule,
   IDirRule,
   IDirRuleBase,
@@ -11,14 +19,6 @@ import {
   INodeRule,
   IValidationResult,
 } from "@/types/validation.js";
-import {
-  DirEntity,
-  DirNode,
-  FileEntity,
-  FileNode,
-  GroupNode,
-  LayerNode,
-} from "@/core/nodes/index.js";
 
 export interface INode<TRule extends object = INodeRule> {
   name: string;
@@ -33,16 +33,14 @@ export interface INode<TRule extends object = INodeRule> {
   validate?: (rules?: TRule) => Partial<Record<string, IValidationResult>>[];
 }
 
-export interface IFileNode<
-  TRule extends IFileRuleBase = IFileRule,
-> extends INode<TRule> {
+export interface IFileNode<TRule extends IFileRuleBase = IFileRule>
+  extends INode<TRule> {
   extension: string;
   lines: number;
 }
 
-export interface IDirNode<
-  TRule extends IDirRuleBase = IDirRule,
-> extends INode<TRule> {
+export interface IDirNode<TRule extends IDirRuleBase = IDirRule>
+  extends INode<TRule> {
   children: TAnyNode[];
 }
 

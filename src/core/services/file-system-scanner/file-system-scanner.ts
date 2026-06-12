@@ -1,15 +1,16 @@
-import fs from "fs/promises";
-import path from "path";
-import { Dirent } from "node:fs";
+import type { Dirent } from "node:fs";
+import fs from "node:fs/promises";
+import path from "node:path";
+
 import pLimit from "p-limit";
 
-import { TProjectNode } from "@/types/nodes.js";
-import { IProjectTree } from "@/types/trees.js";
 import { DirNode, FileNode, Node } from "@/core/nodes/index.js";
 import {
   countLines,
   getNodeMetadata,
 } from "@/core/services/file-system-scanner/utils.js";
+import type { TProjectNode } from "@/types/nodes.js";
+import type { IProjectTree } from "@/types/trees.js";
 
 const CONCURRENCY_LIMIT = 50;
 const limit = pLimit(CONCURRENCY_LIMIT);

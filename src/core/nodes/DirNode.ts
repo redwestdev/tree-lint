@@ -1,6 +1,6 @@
-import { INodeAnalyze, Node } from "@/core/nodes/Node.js";
-import { IDirNode, INode, TAnyNode } from "@/types/nodes.js";
-import {
+import { type INodeAnalyze, Node } from "@/core/nodes/Node.js";
+import type { IDirNode, INode, TAnyNode } from "@/types/nodes.js";
+import type {
   IChildrenAmountRule,
   ICustomDirRule,
   IDirRule,

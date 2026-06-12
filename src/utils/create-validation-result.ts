@@ -1,5 +1,5 @@
-import { IValidationResult, IBaseRule } from "@/types/validation.js";
 import { VIOLATION_MESSAGES } from "@/core/services/validation/constants.js";
+import type { IBaseRule, IValidationResult } from "@/types/validation.js";
 
 export function createValidationResult(
   result: boolean,

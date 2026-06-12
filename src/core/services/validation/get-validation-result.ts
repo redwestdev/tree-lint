@@ -1,4 +1,4 @@
-import {
+import type {
   IValidationResult,
   IViolation,
   TGroupedByPath,
@@ -102,7 +102,6 @@ export function getValidationResult(
     case "severity":
       return groupBySeverity(violations);
     case "path":
-    default:
       return groupByPath(violations);
   }
 }

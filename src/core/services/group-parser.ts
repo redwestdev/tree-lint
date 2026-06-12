@@ -1,8 +1,11 @@
-import { IAnnotatedProjectTree, IEntityProjectTree } from "@/types/trees.js";
-import { TAnyNode, TProjectNode } from "@/types/nodes.js";
 import { DirNode, GroupNode } from "@/core/nodes/index.js";
-import { ITreeLintConfig } from "@/types/config.js";
-import { IValidationResult } from "@/types/validation.js";
+import type { ITreeLintConfig } from "@/types/config.js";
+import type { TAnyNode, TProjectNode } from "@/types/nodes.js";
+import type {
+  IAnnotatedProjectTree,
+  IEntityProjectTree,
+} from "@/types/trees.js";
+import type { IValidationResult } from "@/types/validation.js";
 
 const matchesLog: IValidationResult[] = [];
 

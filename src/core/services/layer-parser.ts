@@ -1,7 +1,7 @@
-import { ITreeLintConfig } from "@/types/config.js";
-import { ILayeredProjectTree, IProjectTree } from "@/types/trees.js";
-import { TLayeredProjectNode, TProjectNode } from "@/types/nodes.js";
 import { DirNode, LayerNode } from "@/core/nodes/index.js";
+import type { ITreeLintConfig } from "@/types/config.js";
+import type { TLayeredProjectNode, TProjectNode } from "@/types/nodes.js";
+import type { ILayeredProjectTree, IProjectTree } from "@/types/trees.js";
 
 function annotateNode(
   node: TProjectNode,

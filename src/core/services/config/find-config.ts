@@ -1,8 +1,9 @@
-import { createJiti } from "jiti";
-import path from "path";
-import yaml from "js-yaml";
 import { existsSync } from "node:fs";
-import fs from "fs/promises";
+import fs from "node:fs/promises";
+import path from "node:path";
+
+import { createJiti } from "jiti";
+import yaml from "js-yaml";
 
 export interface IGetConfig {
   config: unknown;
@@ -18,6 +19,7 @@ async function attempt<T = unknown>(
   try {
     return await fn();
   } catch (e) {
+    console.log(e);
     throw new Error(message, { cause: e });
   }
 }

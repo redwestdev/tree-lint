@@ -1,10 +1,9 @@
 import { FileNode } from "@/core/nodes/FileNode.js";
-import { IFileEntity } from "@/types/nodes.js";
-import { IMatchFile, ITreeLintConfig } from "@/types/config.js";
-import { matchName } from "@/core/services/matcher/utils.js";
 import { MATCHING_ENTITY_ERRORS } from "@/core/services/matcher/constants.js";
-import { replacePlaceholders } from "@/utils/replace-placeholders.js";
-import {
+import { matchName } from "@/core/services/matcher/utils.js";
+import type { IMatchFile, ITreeLintConfig } from "@/types/config.js";
+import type { IFileEntity } from "@/types/nodes.js";
+import type {
   ICustomFileEntityRule,
   IFileEntityRule,
   IFileRuleBase,
@@ -13,6 +12,7 @@ import {
 } from "@/types/validation.js";
 import { createValidationResult } from "@/utils/create-validation-result.js";
 import { formatCustomError } from "@/utils/format-custom-error.js";
+import { replacePlaceholders } from "@/utils/replace-placeholders.js";
 
 export class FileEntity
   extends FileNode<IFileEntityRule>
