@@ -1,14 +1,17 @@
 {
   "name": "@redwestdev/tree-lint",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A file structure linter that helps maintain architectural order and prevents chaos in projects.",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "author": "redwestdev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/redwestdev/tree-lint.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "linter",
@@ -26,10 +29,10 @@
     "dist"
   ],
   "bin": {
-    "tree-lint": "./dist/cli.js"
+    "tree-lint": "dist/cli.js"
   },
   "scripts": {
-    "build": "tsc && tsc-alias --resolve-full-paths",
+    "build": "tsc --build --force && tsc-alias --resolve-full-paths",
     "dev": "concurrently \"tsc --watch\" \"tsc-alias --watch\"",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -38,6 +41,7 @@
     "format": "prettier --write .",
     "type-check": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
     "scan": "node ./dist/cli.js scan",
+    "prepublishOnly": "npm run build",
     "prepare": "husky"
   },
   "lint-staged": {
