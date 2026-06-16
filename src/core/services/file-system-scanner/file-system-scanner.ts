@@ -21,12 +21,12 @@ export async function createFileNode(
   name: string,
   size: number,
 ): Promise<FileNode> {
-  const analyze = await Node.check(dirPath, ignore);
+  const analyze = await limit(() => Node.check(dirPath, ignore));
 
   let lines = 0;
 
   try {
-    lines = await countLines(dirPath);
+    lines = await limit(() => countLines(dirPath));
   } catch (_e) {
     analyze.unreadable = true;
   }
@@ -39,7 +39,7 @@ export async function createDirNode(
   ignore: string[],
   name: string,
 ): Promise<DirNode> {
-  const analyze = await Node.check(dirPath, ignore);
+  const analyze = await limit(() => Node.check(dirPath, ignore));
   const dir = new DirNode({ name, path: dirPath, size: 0 }, [], analyze);
 
   if (dir.isExcluded) return dir;
@@ -50,7 +50,7 @@ export async function createDirNode(
 
   const children = entries.map((entry) => {
     const childPath = path.join(dirPath, entry.name);
-    return limit(() => buildTree(childPath, ignore, entry));
+    return buildTree(childPath, ignore, entry);
   });
 
   const results = await Promise.allSettled(children);
