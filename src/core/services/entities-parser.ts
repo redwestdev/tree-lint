@@ -10,7 +10,11 @@ import {
   matchName,
   matchType,
 } from "@/core/services/matcher/utils.js";
-import type { ITreeLintConfig } from "@/types/config.js";
+import type {
+  IDirEntityConf,
+  IEntity,
+  ITreeLintConfig,
+} from "@/types/config.js";
 import type { TAnyNode } from "@/types/nodes.js";
 import type { IEntityProjectTree, ILayeredProjectTree } from "@/types/trees.js";
 import type {
@@ -21,15 +25,21 @@ import type {
 
 export interface IEntityContext {
   layer: keyof ITreeLintConfig["layers"] | null;
+  entity: keyof ITreeLintConfig["entities"] | null;
   depth: number;
 }
 
 const initialContext: IEntityContext = {
   layer: null,
+  entity: null,
   depth: 0,
 };
 
 const matchesLog: IValidationResult[] = [];
+
+function allowNestedEntities(config: IEntity): config is IDirEntityConf {
+  return config && "entities" in config;
+}
 
 function annotateNode(
   node: TAnyNode,
@@ -43,13 +53,24 @@ function annotateNode(
       : currentContext;
 
   if (node instanceof DirNode && !node.isExcluded) {
+    context.depth++;
+
     node.children = node.children.map((child) =>
       annotateNode(child, context, config),
     );
   }
 
-  if (context.layer && !(node instanceof LayerNode)) {
-    const allowedEntities = layers[context.layer].entities;
+  if ((context.layer || context.entity) && !(node instanceof LayerNode)) {
+    let allowedEntities: Array<string>;
+
+    if (context.entity) {
+      const currentConfig = entities[context.entity];
+      const allow = currentConfig && allowNestedEntities(currentConfig);
+      allowedEntities =
+        allow && currentConfig.entities ? currentConfig.entities : [];
+    } else {
+      allowedEntities = context.layer ? layers[context.layer].entities : [];
+    }
 
     for (const entity of allowedEntities) {
       const entityConfig = entities[entity];
@@ -70,6 +91,14 @@ function annotateNode(
         if (matchResult.every((r) => Boolean(r.result))) {
           const dirRules = rules as IDirEntityRule | undefined;
           const dirEntity = new DirEntity(node, entity, dirRules);
+
+          if (allowNestedEntities(entityConfig)) {
+            context.entity = entity;
+
+            dirEntity.children = dirEntity.children.map((child) =>
+              annotateNode(child, context, config),
+            );
+          }
 
           if (dirEntity.children.length > 0 && dirRules?.children?.length) {
             for (const child of dirEntity.children) {

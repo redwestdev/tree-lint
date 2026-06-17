@@ -30,8 +30,9 @@ export interface IFileEntityConf {
   matches: IMatchFile;
   rules?: IFileEntityRule;
 }
-export interface IDirEntityConf {
+export interface IDirEntityConf<E = string> {
   matches: IMatchDirectory;
+  entities?: Array<E>;
   rules?: IDirEntityRule;
 }
 
