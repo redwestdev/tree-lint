@@ -1,14 +1,17 @@
 {
   "name": "@redwestdev/tree-lint",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A file structure linter that helps maintain architectural order and prevents chaos in projects.",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "author": "redwestdev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/redwestdev/tree-lint.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "linter",
@@ -24,11 +27,10 @@
   "type": "module",
   "files": ["dist"],
   "bin": {
-    "tree-lint": "./dist/cli.js"
+    "tree-lint": "dist/cli.js"
   },
   "scripts": {
-    "clean": "rm -rf dist tsconfig.tsbuildinfo dist/*.tsbuildinfo",
-    "build": "yarn clean && tsc && tsc-alias --resolve-full-paths && cpx \"templates/**/*\" dist/templates",
+    "build": "tsc --build --force && tsc-alias --resolve-full-paths && cpx \"templates/**/*\" dist/templates",
     "dev": "concurrently \"tsc --watch\" \"tsc-alias --watch\" \"cpx \"templates/**/*\" dist/templates --watch\"",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -37,6 +39,7 @@
     "lint:check": "biome check --reporter=summary .",
     "type-check": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
     "scan": "node ./dist/cli.js scan",
+    "prepublishOnly": "npm run build",
     "prepare": "husky"
   },
   "lint-staged": {
