@@ -93,10 +93,10 @@ function annotateNode(
           const dirEntity = new DirEntity(node, entity, dirRules);
 
           if (allowNestedEntities(entityConfig)) {
-            context.entity = entity;
+            const nestedContext: IEntityContext = { ...context, entity };
 
             dirEntity.children = dirEntity.children.map((child) =>
-              annotateNode(child, context, config),
+              annotateNode(child, nestedContext, config),
             );
           }
 
@@ -162,7 +162,7 @@ export function annotateEntities(
     tree: {
       generatedAt: tree.generatedAt,
       trees: tree.trees.map((node) =>
-        annotateNode(node, initialContext, config),
+        annotateNode(node, { ...initialContext }, config),
       ),
     },
     log: matchesLog,

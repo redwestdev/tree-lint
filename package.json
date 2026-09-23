@@ -1,6 +1,6 @@
 {
   "name": "@redwestdev/tree-lint",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "A file structure linter that helps maintain architectural order and prevents chaos in projects.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
