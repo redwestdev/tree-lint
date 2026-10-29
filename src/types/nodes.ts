@@ -37,6 +37,8 @@ export interface IFileNode<TRule extends IFileRuleBase = IFileRule>
   extends INode<TRule> {
   extension: string;
   lines: number;
+  comments?: Array<string>;
+  relations?: Array<string>;
 }
 
 export interface IDirNode<TRule extends IDirRuleBase = IDirRule>
@@ -74,3 +76,8 @@ export type TAnyNode =
   | FileEntity
   | DirEntity
   | GroupNode;
+
+export interface IASTData {
+  imports: Array<string>;
+  comments: Array<string>;
+}

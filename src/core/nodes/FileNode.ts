@@ -1,5 +1,5 @@
 import { type INodeAnalyze, Node } from "@/core/nodes/Node.js";
-import type { IFileNode, INode } from "@/types/nodes.js";
+import type { IFileNode, INode, TAnyNode } from "@/types/nodes.js";
 import type {
   ICustomFileRule,
   IFileRule,
@@ -16,17 +16,22 @@ export class FileNode<TRule extends IFileRuleBase = IFileRule>
 {
   public extension: string;
   public lines: number;
-
+  public comments: Array<string> | undefined;
+  public relations: Array<string> | undefined;
   constructor(
     { name, path, size }: INode,
     lines: number = 0,
     analyze?: INodeAnalyze,
+    comments?: Array<string>,
+    relations?: Array<string>,
     rules?: TRule,
   ) {
     super(name, path, size);
     Object.assign(this, analyze);
     this.lines = lines;
     this.extension = path.split(".").pop() || "";
+    this.comments = comments;
+    this.relations = relations;
     this._rules = rules;
   }
 
