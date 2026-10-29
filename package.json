@@ -53,6 +53,8 @@
     "js-yaml": "^4.1.1",
     "micromatch": "^4.0.8",
     "ora": "^9.3.0",
+    "oxc-parser": "^0.140.0",
+    "oxc-resolver": "^11.24.2",
     "p-limit": "^7.3.0",
     "prompts": "^2.4.2",
     "zod": "^4.4.3"

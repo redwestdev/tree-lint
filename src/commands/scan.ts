@@ -11,6 +11,7 @@ import {
   annotateGroups,
   annotateLayers,
   buildProjectTree,
+  buildTreeMap,
 } from "@/core/services/index.js";
 import { getValidationResult } from "@/core/services/validation/get-validation-result.js";
 import { validateTree } from "@/core/services/validation/validator.js";
@@ -50,11 +51,16 @@ const resolveOutPath = (
 };
 
 /**
+ * Map of the project
+ */
+export const PROJECT_MAP = new Map<string, TAnyNode>();
+
+/**
  * 'scan' command: The core functionality.
  * 1. Loads and parse configuration.
  * 2. Validate paths.
  * 3. Builds a raw tree structure from the filesystem.
- * 4. Annotates the tree (layers, entities, groups).
+ * 4. Annotates the tree (layers, entities, groups), build Project map.
  * 5. Validates the annotated tree based on rules.
  * 6. Logs results, optionally exports JSON, or displays performance metrics.
  */
@@ -110,7 +116,7 @@ export const scanCommand = new Command()
       // 3 - Build base project tree
       const tree = await buildProjectTree(roots, internalConfig.ignore);
 
-      // 4 - Tree annotation (layers -> entities -> groups)
+      // 4 - Tree annotation (layers -> entities -> groups -> project map)
       const layeredTree = annotateLayers(tree, internalConfig);
       const { tree: entitiesTree, log: entitiesLog } = annotateEntities(
         layeredTree,
@@ -120,6 +126,10 @@ export const scanCommand = new Command()
         entitiesTree,
         internalConfig,
       );
+
+      for (const tree of annotatedTree.trees) {
+        buildTreeMap(tree);
+      }
 
       // 5 - Validation
       const validationLog = validateTree(annotatedTree);

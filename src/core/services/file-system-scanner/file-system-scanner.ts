@@ -7,6 +7,7 @@ import pLimit from "p-limit";
 import { DirNode, FileNode, Node } from "@/core/nodes/index.js";
 import {
   countLines,
+  getASTData,
   getNodeMetadata,
 } from "@/core/services/file-system-scanner/utils.js";
 import type { TProjectNode } from "@/types/nodes.js";
@@ -31,7 +32,15 @@ export async function createFileNode(
     analyze.unreadable = true;
   }
 
-  return new FileNode({ name, path: dirPath, size }, lines, analyze);
+  const relationsData = await getASTData(dirPath);
+
+  return new FileNode(
+    { name, path: dirPath, size },
+    lines,
+    analyze,
+    relationsData?.comments,
+    relationsData?.imports,
+  );
 }
 
 export async function createDirNode(
