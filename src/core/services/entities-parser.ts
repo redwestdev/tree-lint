@@ -103,21 +103,21 @@ function annotateNode(
           if (dirEntity.children.length > 0 && dirRules?.children?.length) {
             for (const child of dirEntity.children) {
               for (const rule of dirRules.children) {
-                if (!rule._matches) continue;
+                if (!rule.matches) continue;
 
                 const childMatches: Record<string, boolean> = {
-                  type: matchType(child, rule._matches.type),
-                  name: matchName(child.name, rule._matches.name || ""),
+                  type: matchType(child, rule.matches.type),
+                  name: matchName(child.name, rule.matches.name || ""),
                 };
 
                 if (
                   child instanceof DirNode &&
                   child.children.length &&
-                  "children" in rule._matches
+                  "children" in rule.matches
                 )
                   childMatches.children = matchChildren(
                     child.children,
-                    rule._matches.children,
+                    rule.matches.children,
                   );
 
                 if (Object.values(childMatches).every(Boolean)) {

@@ -103,7 +103,7 @@ export interface ICustomGroupRule extends IBaseRule {
 }
 
 export interface INodeRule {
-  _matches?: TMatches;
+  matches?: TMatches;
   nameLength?: INameLengthRule;
   name?: INameRule;
   size?: ISizeRule;

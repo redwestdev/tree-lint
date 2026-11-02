@@ -23,7 +23,7 @@ entities:
         type: warning
         max: 6
       children:
-      - _matches:
+      - matches:
           type: file
           name: "*.tsx"
         lineCount:

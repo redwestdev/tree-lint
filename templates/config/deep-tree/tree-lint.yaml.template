@@ -37,7 +37,7 @@ entities:
         message: Page must contain a view file matching the folder name (e.g. HomePage.tsx)
           and index.ts
       children:
-      - _matches:
+      - matches:
           type: file
           name: "*.tsx"
         lineCount:
@@ -65,7 +65,7 @@ entities:
         message: Section must contain a view file matching the folder name (e.g. HeroSct.tsx)
           and index.ts
       children:
-      - _matches:
+      - matches:
           type: file
           name: "*.tsx"
         lineCount:
@@ -96,7 +96,7 @@ entities:
         message: Component must contain a view file matching the folder name (e.g.
           Button.tsx) and index.ts
       children:
-      - _matches:
+      - matches:
           type: file
           name: "*.tsx"
         lineCount:

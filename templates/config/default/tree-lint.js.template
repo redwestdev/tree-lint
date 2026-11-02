@@ -19,7 +19,7 @@ export default createConfig({
         childrenAmount: { type: "warning", max: 6 },
         children: [
           {
-            _matches: { type: "file", name: "*.tsx" },
+            matches: { type: "file", name: "*.tsx" },
             lineCount: { type: "warning", max: 200 },
           },
         ],

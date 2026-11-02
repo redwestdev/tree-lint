@@ -36,7 +36,7 @@ export default createConfig({
         },
         children: [
           {
-            _matches: { type: "file", name: "*.tsx" },
+            matches: { type: "file", name: "*.tsx" },
             lineCount: { type: "warning", max: 100 },
           },
         ],
@@ -66,7 +66,7 @@ export default createConfig({
         },
         children: [
           {
-            _matches: { type: "file", name: "*.tsx" },
+            matches: { type: "file", name: "*.tsx" },
             lineCount: { type: "warning", max: 150 },
           },
         ],
@@ -97,7 +97,7 @@ export default createConfig({
         },
         children: [
           {
-            _matches: { type: "file", name: "*.tsx" },
+            matches: { type: "file", name: "*.tsx" },
             lineCount: { type: "warning", max: 200 },
           },
         ],

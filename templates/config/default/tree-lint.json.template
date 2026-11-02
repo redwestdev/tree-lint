@@ -28,7 +28,7 @@
         },
         "children": [
           {
-            "_matches": {
+            "matches": {
               "type": "file",
               "name": "*.tsx"
             },

@@ -28,5 +28,12 @@ export const ConfigSchema: z.ZodType<ITreeLintConfig> = z.looseObject({
       entities: z.array(z.string()),
     }),
   ),
-  groups: z.looseObject({}).optional(),
+  groups: z
+    .object({
+      matches: z.looseObject({
+        type: z.literal("directory"),
+        name: z.string(),
+      }),
+    })
+    .optional(),
 });
