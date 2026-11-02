@@ -8,13 +8,6 @@ import type { TAnyNode } from "./nodes.js";
 
 export type TCustomMatch = (node: TAnyNode) => boolean;
 
-export type TNaming =
-  | "camelCase"
-  | "PascalCase"
-  | "kebab-case"
-  | "snake_case"
-  | "other";
-
 export interface ITreeLintConfig<
   L extends string = string,
   E extends string = string,

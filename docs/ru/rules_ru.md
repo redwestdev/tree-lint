@@ -9,7 +9,6 @@
 | `size`           | Размер                | `min`, `max` (number) | Все         |
 | `lineCount`      | Кол-во строк          | `min`, `max` (number) | Файлы       |
 | `childrenAmount` | Кол-во дочерних узлов | `min`, `max` (number) | Папки       |
-| `isEmpty`        | Проверка пустоты      | —                     | Все         |
 | `custom()`       | Произвольная проверка | `callback` (function) | Все         |
 
 Произвольная проверка доступна только в конфигах формата `.ts` и `.js`. В конфигах формата `.json` и `.yaml` можно использовать только предопределенные правила (напр., `name`, `size`, `lineCount` и т.д.) с их параметрами.
@@ -43,9 +42,6 @@
     "min": 1,
     "max": 10,
     "type": "error"
-  },
-  "isEmpty": {
-    "type": "error"
   }
 }
 ```
@@ -62,7 +58,7 @@
 {
   name: string;        // Имя файла или папки
   path: string;        // Полный путь к узлу
-  size: number;        // Размер в байтах
+  size: number;        // Размер в KB
   ignored: boolean;    // Игнорируется ли файлом конфигурации
   unreadable: boolean; // Ошибка чтения
   hidden: boolean;     // Является ли скрытым (имя начинается с ".")

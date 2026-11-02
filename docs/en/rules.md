@@ -9,7 +9,6 @@
 | `size`           | Size                  | `min`, `max` (number) | All           |
 | `lineCount`      | Number of lines       | `min`, `max` (number) | Files         |
 | `childrenAmount` | Number of child nodes | `min`, `max` (number) | Folders       |
-| `isEmpty`        | Emptiness check       | —                     | All           |
 | `custom()`       | Custom check          | `callback` (function) | All           |
 
 Custom check is only available in `.ts` and `.js` format configs. In `.json` and `.yaml` format configs, only predefined rules (e.g., `name`, `size`, `lineCount`, etc.) can be used with their parameters.
@@ -43,9 +42,6 @@ Custom check is only available in `.ts` and `.js` format configs. In `.json` and
     "min": 1,
     "max": 10,
     "type": "error"
-  },
-  "isEmpty": {
-    "type": "error"
   }
 }
 ```
@@ -62,7 +58,7 @@ The callback function `callback(node)` receives an object, the structure of whic
 {
   name: string;        // Name of the file or folder
   path: string;        // Full path to the node
-  size: number;        // Size in bytes
+  size: number;        // Size in KB
   ignored: boolean;    // Is ignored by the configuration file
   unreadable: boolean; // Reading error
   hidden: boolean;     // Is hidden (name starts with ".")
