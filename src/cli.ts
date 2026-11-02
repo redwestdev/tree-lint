@@ -4,10 +4,13 @@ import { Command } from "commander";
 
 import { initCommand } from "@/commands/init.js";
 import { scanCommand } from "@/commands/scan.js";
+import pkg from "../package.json" with { type: "json" };
+
+const { version } = pkg;
 
 const program = new Command();
 
-program.name("tree-lint").description("Project tree linter").version("0.1.0");
+program.name("tree-lint").description("Project tree linter").version(version);
 
 /**
  * 'init' command: Sets up a configuration file in the current project.
