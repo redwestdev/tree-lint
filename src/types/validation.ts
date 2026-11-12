@@ -111,6 +111,7 @@ export interface INodeRule {
 
 export interface IFileRuleBase extends INodeRule {
   lineCount?: ILineCountRule;
+  isEmpty?: IBaseRule;
 }
 
 export interface IDirRuleBase extends INodeRule {
