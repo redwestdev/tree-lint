@@ -9,7 +9,7 @@ import type {
 } from "@/core/nodes/index.js";
 import type { TMatches } from "@/types/config.js";
 
-export type TSeverity = "error" | "warning" | (string & {});
+export type TSeverity = "error" | "warning" | "off";
 
 export interface IBaseRule {
   type: TSeverity;

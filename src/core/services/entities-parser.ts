@@ -5,16 +5,13 @@ import {
   FileNode,
   LayerNode,
 } from "@/core/nodes/index.js";
+import type { TInternalConfig } from "@/core/schema/config.js";
 import {
   matchChildren,
   matchName,
   matchType,
 } from "@/core/services/matcher/utils.js";
-import type {
-  IDirEntityConf,
-  IEntity,
-  ITreeLintConfig,
-} from "@/types/config.js";
+import type { IDirEntityConf, IEntity } from "@/types/config.js";
 import type { TAnyNode } from "@/types/nodes.js";
 import type { IEntityProjectTree, ILayeredProjectTree } from "@/types/trees.js";
 import type {
@@ -24,8 +21,8 @@ import type {
 } from "@/types/validation.js";
 
 export interface IEntityContext {
-  layer: keyof ITreeLintConfig["layers"] | null;
-  entity: keyof ITreeLintConfig["entities"] | null;
+  layer: keyof TInternalConfig["layers"] | null;
+  entity: keyof TInternalConfig["entities"] | null;
   depth: number;
 }
 
@@ -44,7 +41,7 @@ function allowNestedEntities(config: IEntity): config is IDirEntityConf {
 function annotateNode(
   node: TAnyNode,
   currentContext: IEntityContext,
-  config: ITreeLintConfig,
+  config: TInternalConfig,
 ): TAnyNode {
   const { entities, layers } = config;
   const context =
@@ -154,7 +151,7 @@ function annotateNode(
 
 export function annotateEntities(
   tree: ILayeredProjectTree,
-  config: ITreeLintConfig,
+  config: TInternalConfig,
 ): { tree: IEntityProjectTree; log: IValidationResult[] } {
   matchesLog.length = 0;
 
