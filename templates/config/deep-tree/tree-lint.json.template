@@ -8,7 +8,10 @@
     "build"
   ],
   "groups": {
-    "name": "[a-z]*",
+    "matches": {
+      "type": "directory",
+      "name": "[a-z]*"
+    },
     "rules": {
       "nameLength": {
         "type": "warning",
@@ -45,10 +48,6 @@
         "childrenAmount": {
           "type": "warning",
           "max": 12
-        },
-        "custom": {
-          "type": "error",
-          "message": "Page must contain a view file matching the folder name (e.g. HomePage.tsx) and index.ts"
         },
         "children": [
           {
@@ -88,10 +87,6 @@
           "type": "warning",
           "min": 5,
           "max": 20
-        },
-        "custom": {
-          "type": "error",
-          "message": "Section must contain a view file matching the folder name (e.g. HeroSct.tsx) and index.ts"
         },
         "children": [
           {
@@ -136,10 +131,6 @@
           "type": "warning",
           "max": 8
         },
-        "custom": {
-          "type": "error",
-          "message": "Component must contain a view file matching the folder name (e.g. Button.tsx) and index.ts"
-        },
         "children": [
           {
             "matches": {
@@ -178,10 +169,6 @@
           "type": "warning",
           "min": 5,
           "max": 20
-        },
-        "custom": {
-          "type": "error",
-          "message": "Manager must contain index.ts, and a main file (e.g. ThemeMng.tsx)"
         }
       }
     },

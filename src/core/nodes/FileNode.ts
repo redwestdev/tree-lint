@@ -62,7 +62,6 @@ export class FileNode<TRule extends IFileRuleBase = IFileRule>
   }
 
   validateEmpty(rule: IBaseRule) {
-    console.log(this._size);
     const res = this._size !== 0;
     return createValidationResult(res, this.path, rule, "isEmpty");
   }

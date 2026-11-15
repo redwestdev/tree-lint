@@ -5,7 +5,10 @@ export default createConfig({
   ignore: ["node_modules", "dist", "build"],
 
   groups: {
-    name: "[a-z]*",
+    matches: {
+      type: "directory",
+      name: "[a-z]*",
+    },
     rules: {
       nameLength: { type: "warning", max: 20 },
     },

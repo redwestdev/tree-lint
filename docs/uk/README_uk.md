@@ -23,11 +23,11 @@ Tree-lint - це лінтер для файлової структури, яки
 ## Встановлення
 
 ```bash
-npm install -D tree-lint
+npm install -D @redwestdev/tree-lint
 # або
-yarn add -D tree-lint
+yarn add -D @redwestdev/tree-lint
 # або
-pnpm add -D tree-lint
+pnpm add -D @redwestdev/tree-lint
 ```
 
 ## Швидкий старт
@@ -40,7 +40,7 @@ pnpm add -D tree-lint
 tree-lint init
 ```
 
-Команда створює файл `tree-lint.config` у поточному каталозі. Підтримується інтерактивний та неінтерактивний режим.
+Команда створює файл `tree-lint.config.<формат>` (наприклад, `tree-lint.config.ts`) у поточному каталозі. Підтримується інтерактивний та неінтерактивний режим.
 
 **Інтерактивний режим** (TTY-термінал поза CI) — команда запитає відсутні параметри через prompt і запропонує підтвердження перед створенням файлу. Якщо вибір не влаштовує, можна повернутися й вказати параметри знову.
 
@@ -70,7 +70,7 @@ src/
 та файлу конфігурації:
 
 ```typescript
-import { createConfig } from "tree-lint";
+import { createConfig } from "@redwestdev/tree-lint";
 
 export default createConfig({
   roots: ["src"], // директорії для сканування
@@ -100,14 +100,36 @@ export default createConfig({
 });
 ```
 
+Поля `roots` та `ignore` необов'язкові: за замовчуванням сканується поточний каталог (`roots: ["."]`), а `ignore` дорівнює `["node_modules"]`. Обов'язкові поля конфігу — `entities` та `layers`.
+
+#### Вимкнення правил
+
+Правило вимикається рядком `"off"`:
+
+```typescript
+rules: {
+  nameLength: "off",
+  isEmpty: "off",
+}
+```
+
+Об'єктна форма теж працює, але в правил із параметрами обов'язкові поля все одно потрібно вказати (`{ type: "off", max: 20 }`), тому рядком простіше.
+
+Рядок `"error"` без параметрів для правил із параметрами (`nameLength`, `size`, `lineCount` тощо) не приймається — потрібен об'єкт. Виняток — флагові правила на кшталт `isEmpty`, у яких немає параметрів.
+
 [Детальніше о правилах перевірки](./rules_uk.md)
 
 Підтримувані формати файлів конфігурації:
 
 - `tree-lint.config.ts` (рекомендовано)
 - `tree-lint.config.js`
+- `tree-lint.config.mjs`
+- `tree-lint.config.mts`
 - `tree-lint.config.json`
 - `tree-lint.config.yaml`
+- `tree-lint.config.yml`
+
+`tree-lint init` створює конфіги форматів `ts`, `js`, `json` та `yaml`. Інші формати (`mjs`, `mts`, `yml`) можна додати вручну — `scan` їх знайде.
 
 При використанні конфігурацій у форматі `json` або `yaml` функціональність буде обмежена (немає підтримки кастомних правил через callback).
 
@@ -216,7 +238,7 @@ Errors: 1, warnings: 2.
 
 ### Deep Tree
 
-```bash
+```typescript
 entities: {
   component: { /* ... */ },
   section: { /* ... */ },
@@ -234,22 +256,27 @@ layers: {
 
 ### Feature-Sliced Design (FSD)
 
-```bash
+```typescript
 entities: {
-  feature: { /* ... */ },
+  layout: { /* ... */ },
+  page: { /* ... */ },
   widget: { /* ... */ },
+  feature: { /* ... */ },
   entity: { /* ... */ },
+  shared: { /* ... */ },
 },
 
 layers: {
-  app: { /* ... */ },
-  pages: { /* ... */ },
+  app: { entities: ["layout"] },
+  pages: { entities: ["page"] },
   widgets: { entities: ["widget"] },
   features: { entities: ["feature"] },
   entities: { entities: ["entity"] },
-  shared: { /* ... */ },
+  shared: { entities: ["shared"] },
 }
 ```
+
+Шар зобов'язаний перелічувати хоча б одну сутність: `layers.app: { /* ... */ }` без `entities` невалідний.
 
 ### Монорепо
 
@@ -257,6 +284,25 @@ layers: {
 roots: ["packages/ui", "packages/core", "packages/api"],
 // кожен корінь сканується незалежно
 ```
+
+## Групи
+
+`groups` задає правила для папок, які не описані сутностями. Група вибирається за `matches` (ті самі поля, що й у сутності: `type: "directory"` та `name`), а `rules` застосовуються до кожної відповідної папки:
+
+```typescript
+groups: {
+  matches: {
+    type: "directory",
+    name: "[a-z]*",
+  },
+  rules: {
+    nameLength: { type: "warning", max: 20 },
+    childrenAmount: { type: "warning", max: 20 },
+  },
+}
+```
+
+Матчинг груп відбувається після розмітки сутностей: папка, яка стала сутністю, групою вже не стане. Зараз конфіг описує одну групу — `groups` це об'єкт, а не словник.
 
 ## Ліцензія
 
