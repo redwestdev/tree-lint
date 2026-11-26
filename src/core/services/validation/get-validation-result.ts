@@ -86,19 +86,15 @@ function groupByRule(violations: IViolation[]): TValidationStats {
   return stats;
 }
 
-export function getViolations(log: IValidationResult[]): IViolation[] {
-  return log
-    .map((item) => {
-      if (!item.result) return item.violation;
-    })
-    .filter((v): v is IViolation => v !== undefined);
-}
-
 export function getValidationResult(
   log: IValidationResult[],
   groupBy: TGroupOptions = "path",
 ): TValidationStats {
-  const violations = getViolations(log);
+  const violations: IViolation[] = log
+    .map((item) => {
+      if (!item.result) return item.violation;
+    })
+    .filter((v) => v !== undefined);
 
   switch (groupBy) {
     case "rule":

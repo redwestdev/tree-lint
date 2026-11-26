@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import path from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
@@ -16,24 +17,29 @@ interface ITree {
   }>;
 }
 
+const cwd = path.resolve("usr/bin/path");
+
 const tree = {
   generatedAt: "2026-05-01T00:00:00Z",
   trees: [
     {
       name: "file",
-      path: "usr/bin/path/file.txt",
+      path: path.join(cwd, "file.txt"),
     },
     {
       name: "directory",
-      path: "usr/bin/path/directory",
-      children: [{ name: "file2", path: "usr/bin/path/directory/file2.txt" }],
+      path: path.join(cwd, "directory"),
+      children: [
+        {
+          name: "file2",
+          path: path.join(cwd, "directory", "file2.txt"),
+        },
+      ],
     },
   ],
 };
 
 const outputPath = "./tree.json";
-
-const cwd = "usr/bin/path";
 
 describe("file utils", () => {
   it("saveToJson should transform paths and save to file", async () => {
@@ -59,5 +65,34 @@ describe("file utils", () => {
       : "";
 
     expect(childPath).toBe("directory/file2.txt");
+  });
+
+  it("saveToJson should normalize absolute values and object keys", async () => {
+    const root = path.join(path.sep, "project");
+    const groupedPath = path.join(root, "src", "pages", "HomePage");
+    const report = {
+      root,
+      grouped: {
+        [groupedPath]: { error: [], warning: [] },
+        "Name does not match": {
+          error: [path.join(root, "src", "pages", "HomePage", "index.ts")],
+          warning: [],
+        },
+      },
+    };
+
+    await saveToJson(report, outputPath, root);
+
+    const jsonString = vi.mocked(fs.writeFile).mock.calls.at(-1)?.[1] as string;
+    const savedData = JSON.parse(jsonString);
+
+    expect(savedData.root).toBe(".");
+    expect(savedData.grouped[path.join("src", "pages", "HomePage")]).toEqual({
+      error: [],
+      warning: [],
+    });
+    expect(savedData.grouped["Name does not match"].error).toEqual([
+      path.join("src", "pages", "HomePage", "index.ts"),
+    ]);
   });
 });

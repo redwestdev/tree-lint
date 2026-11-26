@@ -1,5 +1,4 @@
 import { writeSync } from "node:fs";
-import fs from "node:fs/promises";
 import path from "node:path";
 
 import chalk from "chalk";
@@ -14,13 +13,10 @@ import {
   annotateLayers,
   buildProjectTree,
 } from "@/core/services/index.js";
-import {
-  getValidationResult,
-  getViolations,
-} from "@/core/services/validation/get-validation-result.js";
+import { getValidationResult } from "@/core/services/validation/get-validation-result.js";
 import { validateTree } from "@/core/services/validation/validator.js";
 import type { TAnyNode } from "@/types/nodes.js";
-import type { TGroupOptions } from "@/types/validation.js";
+import type { IValidationReport, TGroupOptions } from "@/types/validation.js";
 import {
   buildValidationReport,
   logScanPlan,
@@ -41,7 +37,7 @@ interface IScanOptions {
   printTree?: boolean;
   groupBy?: TGroupOptions;
   configPath?: string;
-  json?: string | boolean;
+  report?: string | boolean;
   failOnError?: boolean;
 }
 
@@ -55,6 +51,20 @@ const resolveOutPath = (
 ) => {
   const fileName = typeof val === "string" && val.length ? val : defaultName;
   return path.resolve(root, fileName);
+};
+
+const writeValidationReport = async (
+  report: IValidationReport,
+  reportOutput: string,
+  root: string,
+) => {
+  if (!reportOutput) {
+    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+    return;
+  }
+
+  const out = resolveOutPath(reportOutput, "tree-lint-report.json", root);
+  await saveToJson(report, out, root);
 };
 
 /**
@@ -92,18 +102,21 @@ export const scanCommand = new Command()
     "Render the analyzed project structure directly in the terminal",
   )
   .option(
-    "--json [file]",
-    "Write a machine-readable validation report to stdout or a file (suppresses human-readable output)",
+    "--report [file]",
+    "Write the JSON validation report to stdout or a file (suppresses human-readable output)",
   )
   .option(
     "--no-fail-on-error",
     "Exit with code 0 even when validation errors are found",
   )
   .action(async (projectPath: string = ".", options: IScanOptions) => {
-    const jsonMode = options.json !== undefined;
+    const reportOutput =
+      typeof options.report === "string" ? options.report : "";
+    const reportMode = options.report !== undefined;
+
     const spinner = ora({
       text: "Scanning...",
-      isSilent: jsonMode,
+      isSilent: reportMode,
     }).start();
 
     try {
@@ -125,7 +138,7 @@ export const scanCommand = new Command()
         internalConfig.ignore,
       );
 
-      if (!jsonMode) logScanPlan(roots, internalConfig.ignore);
+      if (!reportMode) logScanPlan(roots, internalConfig.ignore);
 
       // 3 - Build base project tree
       const tree = await buildProjectTree(roots, internalConfig.ignore);
@@ -147,24 +160,15 @@ export const scanCommand = new Command()
       const workLog = [...entitiesLog, ...groupLog, ...validationLog];
 
       // Groups validation violations
-      const violations = getViolations(workLog);
       const validationResult = getValidationResult(workLog, options.groupBy);
 
       // 6 - Shows results
-      if (jsonMode) {
-        const report = buildValidationReport(violations, resolvedPath);
-        const payload = JSON.stringify(report, null, 2);
-
-        if (typeof options.json === "string" && options.json.length) {
-          const out = resolveOutPath(
-            options.json,
-            "tree-lint-report.json",
-            resolvedPath,
-          );
-          await fs.writeFile(out, payload, "utf-8");
-        } else {
-          writeSync(1, `${payload}\n`);
-        }
+      if (reportMode) {
+        const report = buildValidationReport(
+          validationResult,
+          internalConfig.roots ?? ["."],
+        );
+        await writeValidationReport(report, reportOutput, resolvedPath);
       } else {
         // Optionally shows project tree in console
         if (options.printTree !== undefined)
@@ -196,7 +200,7 @@ export const scanCommand = new Command()
       }
 
       // Performance reporting
-      if (!jsonMode && options.vitals !== undefined) {
+      if (!reportMode && options.vitals !== undefined) {
         const totalNodes = tree.trees.reduce(
           (acc, t) => acc + countNodes(t),
           0,
@@ -224,7 +228,7 @@ export const scanCommand = new Command()
       spinner.fail("Error");
 
       if (error instanceof Error) {
-        if (jsonMode) {
+        if (reportMode) {
           writeSync(2, `${JSON.stringify({ error: error.message })}\n`);
         } else {
           console.error(chalk.red(error.message));

@@ -32,6 +32,7 @@ const config = {
 let dir: string;
 let cwd: string;
 let exitCodes: (number | undefined)[];
+let stdoutChunks: string[];
 
 /** Runs the command and returns the first exit code requested via process.exit. */
 const run = async (...args: string[]) => {
@@ -40,8 +41,8 @@ const run = async (...args: string[]) => {
 };
 
 const stdoutJson = () => {
-  const call = writeSyncMock.mock.calls.find(([fd]) => fd === 1);
-  return call ? JSON.parse(String(call[1])) : undefined;
+  const output = stdoutChunks.join("");
+  return output ? JSON.parse(output) : undefined;
 };
 
 beforeEach(() => {
@@ -56,6 +57,13 @@ beforeEach(() => {
   process.chdir(dir);
 
   exitCodes = [];
+  stdoutChunks = [];
+  vi.spyOn(process.stdout, "write").mockImplementation(((
+    chunk: string | Uint8Array,
+  ) => {
+    stdoutChunks.push(String(chunk));
+    return true;
+  }) as never);
   vi.spyOn(process, "exit").mockImplementation(((code?: number) => {
     exitCodes.push(code);
   }) as never);
@@ -72,28 +80,32 @@ afterEach(() => {
     scanCommand.setOptionValue(opt.attributeName(), undefined);
 });
 
-describe("scan --json", () => {
+describe("scan --report", () => {
   it("prints a JSON report to stdout and exits with 1 on errors", async () => {
-    const code = await run(".", "--json");
+    const code = await run(".", "--report");
     const report = stdoutJson();
 
     expect(code).toBe(1);
     expect(report.errors).toBe(1);
-    expect(report.violations[0]).toMatchObject({ type: "error" });
-    expect(report.violations[0].path).toContain("Bad.ts");
+    expect(report.root).toEqual(["src"]);
+    const [violationPath] = Object.keys(report.grouped);
+    expect(violationPath).toContain("Bad.ts");
+    expect(report.grouped[violationPath].error).toHaveLength(1);
     expect(console.log).not.toHaveBeenCalled();
   });
 
   it("writes the report to a file relative to the project root", async () => {
-    await run(".", "--json", "report.json");
+    await run(".", "--report", "report.json");
 
     const file = path.join(dir, "report.json");
-    expect(JSON.parse(fs.readFileSync(file, "utf-8")).errors).toBe(1);
+    const report = JSON.parse(fs.readFileSync(file, "utf-8"));
+    expect(report.errors).toBe(1);
+    expect(report.root).toEqual(["src"]);
     expect(stdoutJson()).toBeUndefined();
   });
 
   it("exits with 0 and keeps the report with --no-fail-on-error", async () => {
-    const code = await run(".", "--json", "--no-fail-on-error");
+    const code = await run(".", "--report", "--no-fail-on-error");
 
     expect(code).toBe(0);
     expect(stdoutJson().errors).toBe(1);

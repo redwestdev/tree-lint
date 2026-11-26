@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getViolations } from "@/core/services/validation/get-validation-result.js";
+import { getValidationResult } from "@/core/services/validation/get-validation-result.js";
 import type { IValidationResult } from "@/types/validation.js";
 
 const log: IValidationResult[] = [
@@ -23,11 +23,16 @@ const log: IValidationResult[] = [
   },
 ];
 
-describe("getViolations", () => {
-  it("returns only failed validation results", () => {
-    expect(getViolations(log)).toEqual([
-      { type: "error", path: "/project/src/a.ts", message: "Bad name" },
-      { type: "warning", path: "/project/src/b.ts", message: "Too large" },
-    ]);
+describe("getValidationResult", () => {
+  it("groups violations from failed validation results by path", () => {
+    expect(getValidationResult(log)).toEqual({
+      type: "path",
+      errors: 1,
+      warnings: 1,
+      grouped: {
+        "/project/src/a.ts": { error: ["Bad name"], warning: [] },
+        "/project/src/b.ts": { error: [], warning: ["Too large"] },
+      },
+    });
   });
 });
