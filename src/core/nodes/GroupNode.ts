@@ -48,9 +48,10 @@ export class GroupNode extends DirNode<IGroupRule> implements IGroupNode {
       hasValidChildren: children.size >= 1,
     };
 
-    if (config?.name) result.name = matchName(node.name, config.name);
-    if (config?.children)
-      result.children = matchChildren(node.children, config.children);
+    if (config?.matches.name)
+      result.name = matchName(node.name, config.matches.name);
+    if (config?.matches.children)
+      result.children = matchChildren(node.children, config.matches.children);
 
     const isMatch = Object.values(result).every(Boolean);
 

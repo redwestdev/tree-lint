@@ -1,6 +1,7 @@
 import { type INodeAnalyze, Node } from "@/core/nodes/Node.js";
 import type { IFileNode, INode } from "@/types/nodes.js";
 import type {
+  IBaseRule,
   ICustomFileRule,
   IFileRule,
   IFileRuleBase,
@@ -60,6 +61,11 @@ export class FileNode<TRule extends IFileRuleBase = IFileRule>
     }
   }
 
+  validateEmpty(rule: IBaseRule) {
+    const res = this._size !== 0;
+    return createValidationResult(res, this.path, rule, "isEmpty");
+  }
+
   validate(
     rules: TRule | undefined = this.rules,
   ): Partial<Record<string, IValidationResult>>[] {
@@ -74,6 +80,9 @@ export class FileNode<TRule extends IFileRuleBase = IFileRule>
         case "lineCount":
           if (r.lineCount)
             selfResult.lineCount = this.validateLinesCount(r.lineCount);
+          break;
+        case "isEmpty":
+          if (r.isEmpty) selfResult.isEmpty = this.validateEmpty(r.isEmpty);
           break;
         case "custom":
           if (r.custom)

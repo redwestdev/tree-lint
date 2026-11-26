@@ -10,6 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/redwestdev/tree-lint.git"
   },
+  "homepage": "https://github.com/redwestdev/tree-lint#readme",
   "publishConfig": {
     "access": "public"
   },
@@ -38,7 +39,6 @@
     "lint": "biome check --reporter=summary --write .",
     "lint:check": "biome check --reporter=summary .",
     "type-check": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
-    "scan": "node ./dist/cli.js scan",
     "prepublishOnly": "npm run build",
     "prepare": "husky"
   },

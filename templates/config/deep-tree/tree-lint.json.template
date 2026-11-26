@@ -8,11 +8,11 @@
     "build"
   ],
   "groups": {
-    "name": "[a-z]*",
+    "matches": {
+      "type": "directory",
+      "name": "[a-z]*"
+    },
     "rules": {
-      "isEmpty": {
-        "type": "warning"
-      },
       "nameLength": {
         "type": "warning",
         "max": 20
@@ -45,20 +45,13 @@
           "min": 6,
           "max": 20
         },
-        "isEmpty": {
-          "type": "error"
-        },
         "childrenAmount": {
           "type": "warning",
           "max": 12
         },
-        "custom": {
-          "type": "error",
-          "message": "Page must contain a view file matching the folder name (e.g. HomePage.tsx) and index.ts"
-        },
         "children": [
           {
-            "_matches": {
+            "matches": {
               "type": "file",
               "name": "*.tsx"
             },
@@ -95,16 +88,9 @@
           "min": 5,
           "max": 20
         },
-        "isEmpty": {
-          "type": "error"
-        },
-        "custom": {
-          "type": "error",
-          "message": "Section must contain a view file matching the folder name (e.g. HeroSct.tsx) and index.ts"
-        },
         "children": [
           {
-            "_matches": {
+            "matches": {
               "type": "file",
               "name": "*.tsx"
             },
@@ -141,20 +127,13 @@
           "min": 3,
           "max": 20
         },
-        "isEmpty": {
-          "type": "error"
-        },
         "childrenAmount": {
           "type": "warning",
           "max": 8
         },
-        "custom": {
-          "type": "error",
-          "message": "Component must contain a view file matching the folder name (e.g. Button.tsx) and index.ts"
-        },
         "children": [
           {
-            "_matches": {
+            "matches": {
               "type": "file",
               "name": "*.tsx"
             },
@@ -190,13 +169,6 @@
           "type": "warning",
           "min": 5,
           "max": 20
-        },
-        "isEmpty": {
-          "type": "error"
-        },
-        "custom": {
-          "type": "error",
-          "message": "Manager must contain index.ts, and a main file (e.g. ThemeMng.tsx)"
         }
       }
     },
@@ -237,31 +209,18 @@
     "pages": {
       "entities": [
         "page"
-      ],
-      "rules": {
-        "isEmpty": {
-          "type": "warning"
-        }
-      }
+      ]
     },
     "sections": {
       "entities": [
         "section"
-      ],
-      "rules": {
-        "isEmpty": {
-          "type": "warning"
-        }
-      }
+      ]
     },
     "components": {
       "entities": [
         "component"
       ],
       "rules": {
-        "isEmpty": {
-          "type": "warning"
-        },
         "childrenAmount": {
           "type": "warning",
           "max": 20
@@ -271,31 +230,18 @@
     "hooks": {
       "entities": [
         "hook"
-      ],
-      "rules": {
-        "isEmpty": {
-          "type": "warning"
-        }
-      }
+      ]
     },
     "utils": {
       "entities": [
         "util"
-      ],
-      "rules": {
-        "isEmpty": {
-          "type": "warning"
-        }
-      }
+      ]
     },
     "managers": {
       "entities": [
         "manager"
       ],
       "rules": {
-        "isEmpty": {
-          "type": "warning"
-        },
         "childrenAmount": {
           "type": "warning",
           "max": 10

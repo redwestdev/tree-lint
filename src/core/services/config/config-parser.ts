@@ -1,38 +1,25 @@
 import * as z from "zod";
 
-import { ConfigSchema } from "@/core/services/config/schema.js";
-import type { ITreeLintConfig } from "@/types/config.js";
+import type { TInternalConfig } from "@/core/schema/config.js";
+import { ConfigSchema } from "@/core/schema/config.js";
 
-export type IInternalConfig = ITreeLintConfig;
+const DOCS_URL = "https://github.com/redwestdev/tree-lint#readme";
 
-function checkEntities(config: IInternalConfig) {
-  const { layers, entities } = config;
-  const entityKeys = new Set(Object.keys(entities));
-
-  for (const layer in layers) {
-    for (const entityRef of layers[layer].entities) {
-      if (!entityKeys.has(entityRef)) {
-        throw new Error(
-          `[Config Error]: Entity "${entityRef}" does not exist, please define it in "entities"`,
-        );
-      }
-    }
-  }
-}
-
-export function parseConfig(config: unknown): IInternalConfig {
+export function parseConfig(config: unknown): TInternalConfig {
   const { data, success, error } = ConfigSchema.safeParse(config);
 
   if (!success) {
     const pretty = z.prettifyError(error);
+
     throw new Error(
       `[Config Error]:
-      \n${pretty}
-      \nPlease fix the configuration file.
-      \n [link to documentation will be here]`,
+
+${pretty}
+
+Please fix the configuration file.
+Docs: ${DOCS_URL}\n`,
     );
-  } else {
-    checkEntities(data);
-    return data;
   }
+
+  return data;
 }

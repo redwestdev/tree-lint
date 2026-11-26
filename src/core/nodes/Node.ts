@@ -6,7 +6,6 @@ import mm from "micromatch";
 
 import type { INode } from "@/types/nodes.js";
 import type {
-  IBaseRule,
   INameLengthRule,
   INameRule,
   INodeRule,
@@ -127,15 +126,19 @@ export class Node<TRule extends INodeRule = INodeRule> implements INode<TRule> {
   }
 
   validateSize(rule: ISizeRule): IValidationResult {
-    const fileSize = this._size / 1024;
-    const res = fileSize >= (rule?.min || 1) && fileSize <= rule.max;
+    const nodeSize = this._size / 1024;
+    const min = rule.min ?? 0;
+    const max = rule.max;
+
+    let res: boolean;
+
+    if (typeof max === "undefined") {
+      res = nodeSize >= min;
+    } else {
+      res = nodeSize >= min && nodeSize <= max;
+    }
 
     return createValidationResult(res, this.path, rule, "size");
-  }
-
-  validateEmpty(rule: IBaseRule) {
-    const res = this._size !== 0;
-    return createValidationResult(res, this.path, rule, "isEmpty");
   }
 
   validate(rules?: TRule): Partial<Record<string, IValidationResult>>[] {
@@ -154,9 +157,6 @@ export class Node<TRule extends INodeRule = INodeRule> implements INode<TRule> {
           break;
         case "size":
           if (rules.size) result.size = this.validateSize(rules.size);
-          break;
-        case "isEmpty":
-          if (rules.isEmpty) result.isEmpty = this.validateEmpty(rules.isEmpty);
           break;
         default:
           break;

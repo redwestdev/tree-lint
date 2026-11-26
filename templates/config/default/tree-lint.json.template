@@ -22,16 +22,13 @@
           "type": "error",
           "pattern": "[A-Z]*"
         },
-        "isEmpty": {
-          "type": "error"
-        },
         "childrenAmount": {
           "type": "warning",
           "max": 6
         },
         "children": [
           {
-            "_matches": {
+            "matches": {
               "type": "file",
               "name": "*.tsx"
             },
@@ -74,9 +71,6 @@
         "name": {
           "type": "error",
           "pattern": "[A-Z]*"
-        },
-        "isEmpty": {
-          "type": "error"
         },
         "childrenAmount": {
           "type": "warning",
@@ -153,9 +147,6 @@
     "components": {
       "entities": ["component"],
       "rules": {
-        "isEmpty": {
-          "type": "warning"
-        },
         "childrenAmount": {
           "type": "warning",
           "max": 20
@@ -163,52 +154,22 @@
       }
     },
     "hooks": {
-      "entities": ["hook"],
-      "rules": {
-        "isEmpty": {
-          "type": "warning"
-        }
-      }
+      "entities": ["hook"]
     },
     "pages": {
-      "entities": ["page"],
-      "rules": {
-        "isEmpty": {
-          "type": "warning"
-        }
-      }
+      "entities": ["page"]
     },
     "utils": {
-      "entities": ["util"],
-      "rules": {
-        "isEmpty": {
-          "type": "warning"
-        }
-      }
+      "entities": ["util"]
     },
     "services": {
-      "entities": ["service"],
-      "rules": {
-        "isEmpty": {
-          "type": "warning"
-        }
-      }
+      "entities": ["service"]
     },
     "context": {
-      "entities": ["context"],
-      "rules": {
-        "isEmpty": {
-          "type": "warning"
-        }
-      }
+      "entities": ["context"]
     },
     "types": {
-      "entities": ["typeFile"],
-      "rules": {
-        "isEmpty": {
-          "type": "warning"
-        }
-      }
+      "entities": ["typeFile"]
     }
   }
 }

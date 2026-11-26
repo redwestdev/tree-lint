@@ -1,11 +1,11 @@
 import { DirNode, LayerNode } from "@/core/nodes/index.js";
-import type { ITreeLintConfig } from "@/types/config.js";
+import type { TInternalConfig } from "@/core/schema/config.js";
 import type { TLayeredProjectNode, TProjectNode } from "@/types/nodes.js";
 import type { ILayeredProjectTree, IProjectTree } from "@/types/trees.js";
 
 function annotateNode(
   node: TProjectNode,
-  config: ITreeLintConfig,
+  config: TInternalConfig,
 ): TLayeredProjectNode {
   const layers: Set<string> = new Set(Object.keys(config.layers || {}));
 
@@ -27,7 +27,7 @@ function annotateNode(
 
 export function annotateLayers(
   tree: IProjectTree,
-  config: ITreeLintConfig,
+  config: TInternalConfig,
 ): ILayeredProjectTree {
   return {
     generatedAt: tree.generatedAt,

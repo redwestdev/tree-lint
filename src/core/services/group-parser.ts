@@ -1,5 +1,5 @@
 import { DirNode, GroupNode } from "@/core/nodes/index.js";
-import type { ITreeLintConfig } from "@/types/config.js";
+import type { TInternalConfig } from "@/core/schema/config.js";
 import type { TAnyNode, TProjectNode } from "@/types/nodes.js";
 import type {
   IAnnotatedProjectTree,
@@ -11,7 +11,7 @@ const matchesLog: IValidationResult[] = [];
 
 function annotateNode(
   node: TProjectNode,
-  config?: ITreeLintConfig["groups"],
+  config?: TInternalConfig["groups"],
 ): TAnyNode {
   if (node instanceof DirNode && !node.isExcluded) {
     node.children = node.children.map((child: TProjectNode) =>
@@ -34,7 +34,7 @@ function annotateNode(
 
 export function annotateGroups(
   tree: IEntityProjectTree,
-  config: ITreeLintConfig,
+  config: TInternalConfig,
 ): { tree: IAnnotatedProjectTree; log: IValidationResult[] } {
   const groupsConfig = config.groups;
   return {
