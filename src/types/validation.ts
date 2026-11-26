@@ -185,4 +185,12 @@ export type TValidationStats =
   | IValidationStatsSeverity
   | IValidationStatsRule;
 
+export interface IValidationReport {
+  generatedAt: string;
+  projectRoot: string;
+  errors: number;
+  warnings: number;
+  violations: IViolation[];
+}
+
 export type TGroupOptions = "path" | "severity" | "rule";

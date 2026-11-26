@@ -19,7 +19,7 @@ async function attempt<T = unknown>(
   try {
     return await fn();
   } catch (e) {
-    console.log(e);
+    console.error(e);
     throw new Error(message, { cause: e });
   }
 }

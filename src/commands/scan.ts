@@ -1,3 +1,5 @@
+import { writeSync } from "node:fs";
+import fs from "node:fs/promises";
 import path from "node:path";
 
 import chalk from "chalk";
@@ -12,11 +14,15 @@ import {
   annotateLayers,
   buildProjectTree,
 } from "@/core/services/index.js";
-import { getValidationResult } from "@/core/services/validation/get-validation-result.js";
+import {
+  getValidationResult,
+  getViolations,
+} from "@/core/services/validation/get-validation-result.js";
 import { validateTree } from "@/core/services/validation/validator.js";
 import type { TAnyNode } from "@/types/nodes.js";
 import type { TGroupOptions } from "@/types/validation.js";
 import {
+  buildValidationReport,
   logScanPlan,
   printProjectTree,
   saveToJson,
@@ -35,6 +41,8 @@ interface IScanOptions {
   printTree?: boolean;
   groupBy?: TGroupOptions;
   configPath?: string;
+  json?: string | boolean;
+  failOnError?: boolean;
 }
 
 /**
@@ -83,8 +91,20 @@ export const scanCommand = new Command()
     "-p, --print-tree",
     "Render the analyzed project structure directly in the terminal",
   )
+  .option(
+    "--json [file]",
+    "Write a machine-readable validation report to stdout or a file (suppresses human-readable output)",
+  )
+  .option(
+    "--no-fail-on-error",
+    "Exit with code 0 even when validation errors are found",
+  )
   .action(async (projectPath: string = ".", options: IScanOptions) => {
-    const spinner = ora("Scanning...").start();
+    const jsonMode = options.json !== undefined;
+    const spinner = ora({
+      text: "Scanning...",
+      isSilent: jsonMode,
+    }).start();
 
     try {
       const start = getVitals();
@@ -105,7 +125,7 @@ export const scanCommand = new Command()
         internalConfig.ignore,
       );
 
-      logScanPlan(roots, internalConfig.ignore);
+      if (!jsonMode) logScanPlan(roots, internalConfig.ignore);
 
       // 3 - Build base project tree
       const tree = await buildProjectTree(roots, internalConfig.ignore);
@@ -127,14 +147,33 @@ export const scanCommand = new Command()
       const workLog = [...entitiesLog, ...groupLog, ...validationLog];
 
       // Groups validation violations
+      const violations = getViolations(workLog);
       const validationResult = getValidationResult(workLog, options.groupBy);
 
       // 6 - Shows results
-      // Optionally shows project tree in console
-      if (options.printTree !== undefined)
-        annotatedTree.trees.forEach((node: TAnyNode) => printProjectTree(node));
+      if (jsonMode) {
+        const report = buildValidationReport(violations, resolvedPath);
+        const payload = JSON.stringify(report, null, 2);
 
-      validationLogger(validationResult);
+        if (typeof options.json === "string" && options.json.length) {
+          const out = resolveOutPath(
+            options.json,
+            "tree-lint-report.json",
+            resolvedPath,
+          );
+          await fs.writeFile(out, payload, "utf-8");
+        } else {
+          writeSync(1, `${payload}\n`);
+        }
+      } else {
+        // Optionally shows project tree in console
+        if (options.printTree !== undefined)
+          annotatedTree.trees.forEach((node: TAnyNode) =>
+            printProjectTree(node),
+          );
+
+        validationLogger(validationResult);
+      }
 
       // Exporting base tree output
       if (options.treeOutput !== undefined) {
@@ -157,7 +196,7 @@ export const scanCommand = new Command()
       }
 
       // Performance reporting
-      if (options.vitals !== undefined) {
+      if (!jsonMode && options.vitals !== undefined) {
         const totalNodes = tree.trees.reduce(
           (acc, t) => acc + countNodes(t),
           0,
@@ -165,7 +204,7 @@ export const scanCommand = new Command()
         printReport(start, totalNodes);
       }
 
-      if (validationResult.errors > 0) {
+      if (validationResult.errors > 0 && options.failOnError !== false) {
         spinner.fail(chalk.red(`Validation failed.\n`));
         process.exit(1);
       }
@@ -176,7 +215,11 @@ export const scanCommand = new Command()
       spinner.fail("Error");
 
       if (error instanceof Error) {
-        console.error(chalk.red(error.message));
+        if (jsonMode) {
+          writeSync(2, `${JSON.stringify({ error: error.message })}\n`);
+        } else {
+          console.error(chalk.red(error.message));
+        }
       }
 
       process.exit(1);

@@ -135,6 +135,26 @@ Supported flags for the `scan` command:
 | `-p`, `--print-tree`              | Print tree to the terminal                                              |
 | `-c`, `--config-path [path]`      | Specify the path to the configuration (searches in the root by default) |
 | `-g`, `--group-by <type>`         | Change the grouping of scan results (default is "path")                 |
+| `--json [file]`                   | Write a machine-readable report to stdout or a file                     |
+| `--no-fail-on-error`              | Exit with code 0 even when validation errors are found                  |
+
+`--json` suppresses the human-readable output and is intended for IDE and CI integrations:
+
+```json
+{
+  "generatedAt": "2026-01-01T00:00:00.000Z",
+  "projectRoot": "/project",
+  "errors": 1,
+  "warnings": 0,
+  "violations": [
+    {
+      "type": "error",
+      "path": "/project/src/components/Ui",
+      "message": "Name length is outside the allowed character limits"
+    }
+  ]
+}
+```
 
 Possible values for `--group-by`:
 
