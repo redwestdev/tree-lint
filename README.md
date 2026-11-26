@@ -135,6 +135,27 @@ Supported flags for the `scan` command:
 | `-p`, `--print-tree`              | Print tree to the terminal                                              |
 | `-c`, `--config-path [path]`      | Specify the path to the configuration (searches in the root by default) |
 | `-g`, `--group-by <type>`         | Change the grouping of scan results (default is "path")                 |
+| `--report [file]`                 | Write the JSON validation report to stdout or a file                    |
+| `--no-fail-on-error`              | Exit with code 0 even when validation errors are found                  |
+
+`--report` suppresses the human-readable output (spinner, scan plan, `--print-tree` and `--vitals`) and is intended for IDE and CI integrations. Without a file name, the report is written to stdout. When a file name is given, it is resolved relative to the scanned project root, like `--tree-output`.
+
+> `--report`, `-t` and `-a` take an optional value, so a bare positional argument right after them is treated as the file name. Put the project path first: `tree-lint scan ./src --report`.
+
+```json
+{
+  "generatedAt": "2026-01-01T00:00:00.000Z",
+  "root": ["src/pages"],
+  "errors": 1,
+  "warnings": 0,
+  "grouped": {
+    "src/pages/components/Ui": {
+      "error": ["Name length is outside the allowed character limits"],
+      "warning": []
+    }
+  }
+}
+```
 
 Possible values for `--group-by`:
 

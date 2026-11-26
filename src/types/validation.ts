@@ -162,6 +162,11 @@ export type TGroupedByRule = Record<
   { error: Set<string>; warning: Set<string> }
 >;
 
+export type TGroupedByRuleReport = Record<
+  string,
+  { error: string[]; warning: string[] }
+>;
+
 export interface IValidationStatsPath {
   type: "path";
   errors: number;
@@ -184,5 +189,11 @@ export type TValidationStats =
   | IValidationStatsPath
   | IValidationStatsSeverity
   | IValidationStatsRule;
+
+export type IValidationReport = Omit<TValidationStats, "type" | "grouped"> & {
+  generatedAt: string;
+  root: string[];
+  grouped: TGroupedByPath | TGroupedBySeverity | TGroupedByRuleReport;
+};
 
 export type TGroupOptions = "path" | "severity" | "rule";

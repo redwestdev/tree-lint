@@ -1,3 +1,4 @@
+import { writeSync } from "node:fs";
 import path from "node:path";
 
 import chalk from "chalk";
@@ -15,8 +16,9 @@ import {
 import { getValidationResult } from "@/core/services/validation/get-validation-result.js";
 import { validateTree } from "@/core/services/validation/validator.js";
 import type { TAnyNode } from "@/types/nodes.js";
-import type { TGroupOptions } from "@/types/validation.js";
+import type { IValidationReport, TGroupOptions } from "@/types/validation.js";
 import {
+  buildValidationReport,
   logScanPlan,
   printProjectTree,
   saveToJson,
@@ -35,6 +37,8 @@ interface IScanOptions {
   printTree?: boolean;
   groupBy?: TGroupOptions;
   configPath?: string;
+  report?: string | boolean;
+  failOnError?: boolean;
 }
 
 /**
@@ -47,6 +51,20 @@ const resolveOutPath = (
 ) => {
   const fileName = typeof val === "string" && val.length ? val : defaultName;
   return path.resolve(root, fileName);
+};
+
+const writeValidationReport = async (
+  report: IValidationReport,
+  reportOutput: string,
+  root: string,
+) => {
+  if (!reportOutput) {
+    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+    return;
+  }
+
+  const out = resolveOutPath(reportOutput, "tree-lint-report.json", root);
+  await saveToJson(report, out, root);
 };
 
 /**
@@ -83,8 +101,23 @@ export const scanCommand = new Command()
     "-p, --print-tree",
     "Render the analyzed project structure directly in the terminal",
   )
+  .option(
+    "--report [file]",
+    "Write the JSON validation report to stdout or a file (suppresses human-readable output)",
+  )
+  .option(
+    "--no-fail-on-error",
+    "Exit with code 0 even when validation errors are found",
+  )
   .action(async (projectPath: string = ".", options: IScanOptions) => {
-    const spinner = ora("Scanning...").start();
+    const reportOutput =
+      typeof options.report === "string" ? options.report : "";
+    const reportMode = options.report !== undefined;
+
+    const spinner = ora({
+      text: "Scanning...",
+      isSilent: reportMode,
+    }).start();
 
     try {
       const start = getVitals();
@@ -105,7 +138,7 @@ export const scanCommand = new Command()
         internalConfig.ignore,
       );
 
-      logScanPlan(roots, internalConfig.ignore);
+      if (!reportMode) logScanPlan(roots, internalConfig.ignore);
 
       // 3 - Build base project tree
       const tree = await buildProjectTree(roots, internalConfig.ignore);
@@ -130,11 +163,21 @@ export const scanCommand = new Command()
       const validationResult = getValidationResult(workLog, options.groupBy);
 
       // 6 - Shows results
-      // Optionally shows project tree in console
-      if (options.printTree !== undefined)
-        annotatedTree.trees.forEach((node: TAnyNode) => printProjectTree(node));
+      if (reportMode) {
+        const report = buildValidationReport(
+          validationResult,
+          internalConfig.roots ?? ["."],
+        );
+        await writeValidationReport(report, reportOutput, resolvedPath);
+      } else {
+        // Optionally shows project tree in console
+        if (options.printTree !== undefined)
+          annotatedTree.trees.forEach((node: TAnyNode) =>
+            printProjectTree(node),
+          );
 
-      validationLogger(validationResult);
+        validationLogger(validationResult);
+      }
 
       // Exporting base tree output
       if (options.treeOutput !== undefined) {
@@ -157,7 +200,7 @@ export const scanCommand = new Command()
       }
 
       // Performance reporting
-      if (options.vitals !== undefined) {
+      if (!reportMode && options.vitals !== undefined) {
         const totalNodes = tree.trees.reduce(
           (acc, t) => acc + countNodes(t),
           0,
@@ -166,8 +209,17 @@ export const scanCommand = new Command()
       }
 
       if (validationResult.errors > 0) {
-        spinner.fail(chalk.red(`Validation failed.\n`));
-        process.exit(1);
+        if (options.failOnError !== false) {
+          spinner.fail(chalk.red(`Validation failed.\n`));
+          process.exit(1);
+        }
+
+        spinner.warn(
+          chalk.yellow(
+            `Validation finished with ${validationResult.errors} error(s) (exit code forced to 0).`,
+          ),
+        );
+        process.exit(0);
       }
 
       spinner.succeed("Validation complete successfully!");
@@ -176,7 +228,11 @@ export const scanCommand = new Command()
       spinner.fail("Error");
 
       if (error instanceof Error) {
-        console.error(chalk.red(error.message));
+        if (reportMode) {
+          writeSync(2, `${JSON.stringify({ error: error.message })}\n`);
+        } else {
+          console.error(chalk.red(error.message));
+        }
       }
 
       process.exit(1);
