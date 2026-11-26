@@ -23,11 +23,11 @@ The main tasks the linter covers are:
 ## Installation
 
 ```bash
-npm install -D tree-lint
+npm install -D @redwestdev/tree-lint
 # or
-yarn add -D tree-lint
+yarn add -D @redwestdev/tree-lint
 # or
-pnpm add -D tree-lint
+pnpm add -D @redwestdev/tree-lint
 ```
 
 ## Quick Start
@@ -70,7 +70,7 @@ src/
 and configuration file:
 
 ```typescript
-import { createConfig } from "tree-lint";
+import { createConfig } from "@redwestdev/tree-lint";
 
 export default createConfig({
   roots: ["src"], // directories to scan

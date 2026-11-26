@@ -16,11 +16,10 @@ export default createConfig({
       },
       rules: {
         name: { type: "error", pattern: "[A-Z]*" },
-        isEmpty: { type: "error" },
         childrenAmount: { type: "warning", max: 6 },
         children: [
           {
-            _matches: { type: "file", name: "*.tsx" },
+            matches: { type: "file", name: "*.tsx" },
             lineCount: { type: "warning", max: 200 },
           },
         ],
@@ -46,7 +45,6 @@ export default createConfig({
       },
       rules: {
         name: { type: "error", pattern: "[A-Z]*" },
-        isEmpty: { type: "error" },
         childrenAmount: { type: "warning", max: 8 },
       },
     },
@@ -100,51 +98,32 @@ export default createConfig({
     components: {
       entities: ["component"],
       rules: {
-        isEmpty: { type: "warning" },
         childrenAmount: { type: "warning", max: 20 },
       },
     },
 
     hooks: {
       entities: ["hook"],
-      rules: {
-        isEmpty: { type: "warning" },
-      },
     },
 
     pages: {
       entities: ["page"],
-      rules: {
-        isEmpty: { type: "warning" },
-      },
     },
 
     utils: {
       entities: ["util"],
-      rules: {
-        isEmpty: { type: "warning" },
-      },
     },
 
     services: {
       entities: ["service"],
-      rules: {
-        isEmpty: { type: "warning" },
-      },
     },
 
     context: {
       entities: ["context"],
-      rules: {
-        isEmpty: { type: "warning" },
-      },
     },
 
     types: {
       entities: ["typeFile"],
-      rules: {
-        isEmpty: { type: "warning" },
-      },
     },
   },
 });

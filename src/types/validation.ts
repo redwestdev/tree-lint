@@ -7,9 +7,9 @@ import type {
   LayerNode,
   Node,
 } from "@/core/nodes/index.js";
-import type { TMatches, TNaming } from "@/types/config.js";
+import type { TMatches } from "@/types/config.js";
 
-export type TSeverity = "error" | "warning" | (string & {});
+export type TSeverity = "error" | "warning" | "off";
 
 export interface IBaseRule {
   type: TSeverity;
@@ -33,13 +33,20 @@ export interface INameLengthRule extends IBaseRule {
 }
 
 export interface INameRule extends IBaseRule {
-  pattern: TNaming | (string & {});
+  pattern: string;
 }
 
-export interface ISizeRule extends IBaseRule {
-  min?: number;
-  max: number;
-}
+export type ISizeRule = IBaseRule &
+  (
+    | {
+        min?: number;
+        max: number;
+      }
+    | {
+        min: number;
+        max?: number;
+      }
+  );
 
 export interface ILineCountRule extends IBaseRule {
   min?: number;
@@ -96,21 +103,19 @@ export interface ICustomGroupRule extends IBaseRule {
 }
 
 export interface INodeRule {
-  _matches?: TMatches;
+  matches?: TMatches;
   nameLength?: INameLengthRule;
   name?: INameRule;
   size?: ISizeRule;
-  isEmpty?: IBaseRule;
 }
 
 export interface IFileRuleBase extends INodeRule {
   lineCount?: ILineCountRule;
+  isEmpty?: IBaseRule;
 }
 
 export interface IDirRuleBase extends INodeRule {
   childrenAmount?: IChildrenAmountRule;
-  includes?: Array<TMatches>;
-  excludes?: Array<TMatches>;
   children?: Array<TAnyRule>;
 }
 

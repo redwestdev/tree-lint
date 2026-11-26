@@ -5,9 +5,11 @@ export default createConfig({
   ignore: ["node_modules", "dist", "build"],
 
   groups: {
-    name: "[a-z]*",
+    matches: {
+      type: "directory",
+      name: "[a-z]*",
+    },
     rules: {
-      isEmpty: { type: "warning" },
       nameLength: { type: "warning", max: 20 },
     },
   },
@@ -25,7 +27,6 @@ export default createConfig({
       rules: {
         name: { type: "error", pattern: "[A-Z]*{Pg,Page}" },
         nameLength: { type: "warning", min: 6, max: 20 },
-        isEmpty: { type: "error" },
         childrenAmount: { type: "warning", max: 12 },
         custom: {
           type: "error",
@@ -38,7 +39,7 @@ export default createConfig({
         },
         children: [
           {
-            _matches: { type: "file", name: "*.tsx" },
+            matches: { type: "file", name: "*.tsx" },
             lineCount: { type: "warning", max: 100 },
           },
         ],
@@ -57,7 +58,6 @@ export default createConfig({
       rules: {
         name: { type: "error", pattern: "[A-Z]*{Sct,Section}" },
         nameLength: { type: "warning", min: 5, max: 20 },
-        isEmpty: { type: "error" },
         custom: {
           type: "error",
           message:
@@ -69,7 +69,7 @@ export default createConfig({
         },
         children: [
           {
-            _matches: { type: "file", name: "*.tsx" },
+            matches: { type: "file", name: "*.tsx" },
             lineCount: { type: "warning", max: 150 },
           },
         ],
@@ -88,7 +88,6 @@ export default createConfig({
       rules: {
         name: { type: "error", pattern: "[A-Z]*" },
         nameLength: { type: "warning", min: 3, max: 20 },
-        isEmpty: { type: "error" },
         childrenAmount: { type: "warning", max: 8 },
         custom: {
           type: "error",
@@ -101,7 +100,7 @@ export default createConfig({
         },
         children: [
           {
-            _matches: { type: "file", name: "*.tsx" },
+            matches: { type: "file", name: "*.tsx" },
             lineCount: { type: "warning", max: 200 },
           },
         ],
@@ -120,7 +119,6 @@ export default createConfig({
       rules: {
         name: { type: "error", pattern: "[A-Z]*{Mng,Manager}" },
         nameLength: { type: "warning", min: 5, max: 20 },
-        isEmpty: { type: "error" },
         custom: {
           type: "error",
           message:
@@ -160,39 +158,25 @@ export default createConfig({
   layers: {
     pages: {
       entities: ["page"],
-      rules: {
-        isEmpty: { type: "warning" },
-      },
     },
     sections: {
       entities: ["section"],
-      rules: {
-        isEmpty: { type: "warning" },
-      },
     },
     components: {
       entities: ["component"],
       rules: {
-        isEmpty: { type: "warning" },
         childrenAmount: { type: "warning", max: 20 },
       },
     },
     hooks: {
       entities: ["hook"],
-      rules: {
-        isEmpty: { type: "warning" },
-      },
     },
     utils: {
       entities: ["util"],
-      rules: {
-        isEmpty: { type: "warning" },
-      },
     },
     managers: {
       entities: ["manager"],
       rules: {
-        isEmpty: { type: "warning" },
         childrenAmount: { type: "warning", max: 10 },
       },
     },

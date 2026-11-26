@@ -12,5 +12,4 @@ export function logScanPlan(roots: string[], ignore?: string[]) {
   } else {
     console.log(chalk.bold.yellow("No ignored paths."));
   }
-  console.log("\n");
 }
