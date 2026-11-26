@@ -204,9 +204,18 @@ export const scanCommand = new Command()
         printReport(start, totalNodes);
       }
 
-      if (validationResult.errors > 0 && options.failOnError !== false) {
-        spinner.fail(chalk.red(`Validation failed.\n`));
-        process.exit(1);
+      if (validationResult.errors > 0) {
+        if (options.failOnError !== false) {
+          spinner.fail(chalk.red(`Validation failed.\n`));
+          process.exit(1);
+        }
+
+        spinner.warn(
+          chalk.yellow(
+            `Validation finished with ${validationResult.errors} error(s) (exit code forced to 0).`,
+          ),
+        );
+        process.exit(0);
       }
 
       spinner.succeed("Validation complete successfully!");

@@ -138,7 +138,9 @@ Supported flags for the `scan` command:
 | `--json [file]`                   | Write a machine-readable report to stdout or a file                     |
 | `--no-fail-on-error`              | Exit with code 0 even when validation errors are found                  |
 
-`--json` suppresses the human-readable output and is intended for IDE and CI integrations:
+`--json` suppresses the human-readable output (spinner, scan plan, `--print-tree` and `--vitals`) and is intended for IDE and CI integrations. When a file name is given, it is resolved relative to the scanned project root, like `--tree-output`.
+
+> `--json`, `-t` and `-a` take an optional value, so a bare positional argument right after them is treated as the file name. Put the project path first: `tree-lint scan ./src --json`.
 
 ```json
 {
